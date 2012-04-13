@@ -106,7 +106,7 @@ class Projects_Menu {
 			'edit_item' => __('Edit Project', 'projects'),
 			'new_item' => __('New Project', 'projects'),
 			'all_items' => __('All Projects', 'projects'),
-			'view_item' => __('View Projects', 'projects'),
+			'view_item' => __('View Project', 'projects'),
 			'search_items' => __('Search Projects', 'projects'),
 			'not_found' =>  __('No Projects found', 'projects'),
 			'not_found_in_trash' => __('No Projects found in Trash', 'projects'), 
@@ -131,12 +131,13 @@ class Projects_Menu {
 	 * Register the taxonomies
 	 */
 	public function register_taxonomies() {		
+		$this->add_taxonomy(__('Tags', 'projects'), __('Tag', 'projects'), array('herarchical' => false));
 		$this->add_taxonomy(__('Types', 'projects'), __('Type', 'projects'));
 		$this->add_taxonomy(__('Techniques', 'projects'), __('Technique', 'projects'));
 		$this->add_taxonomy(__('Tasks', 'projects'), __('Task', 'projects'));
 		$this->add_taxonomy(__('Agencies', 'projects'), __('Agency', 'projects'));
 		$this->add_taxonomy(__('Clients', 'projects'), __('Client', 'projects'));
-		$this->add_taxonomy(__('Tags', 'projects'), __('Tag', 'projects'), array('herarchical' => false));
+		$this->add_taxonomy(__('Awards', 'projects'), __('Award', 'projects'));
 	}
 	
 	/**

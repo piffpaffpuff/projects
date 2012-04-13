@@ -281,12 +281,12 @@ class Projects_Writepanel {
 						<span class="media-options"></span>
 						<span class="media-content">
 						<?php if($mime[0] == 'image') : ?>
-							
 							<?php $src = wp_get_attachment_image_src($attachment->ID, array(200, 200)); ?>  		   
 							<img id="projects-media-<?php echo $attachment->ID; ?>" alt="<?php echo $attachment->ID; ?>" src="<?php echo $src[0]; ?>" width="<?php echo $src[1]; ?>" height="<?php echo $src[2]; ?>" />
+						<?php else : ?>
+							<span class="media-type"><span class="media-name"><?php echo $attachment->post_title; ?></span><span class="media-suffix"><?php echo $mime[1]; ?></span></span>
 						<?php endif; ?>
 						</span>
-						<span class="media-type"><span class="media-name"><?php echo $attachment->post_title; ?></span><span class="media-suffix"><?php echo $mime[1]; ?></span></span>
 					</li>
 					<?php
 				}
