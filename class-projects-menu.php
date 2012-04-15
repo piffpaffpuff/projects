@@ -35,39 +35,7 @@ class Projects_Menu {
 		// flush the permalinks to make the custom 
 		// post type rewrite rule work correctly
 		$this->register_types();
-		$this->register_taxonomies();
 		flush_rewrite_rules();
-				
-		// prefill the year taxonomy
-		$taxonomy = Projects::$post_type . '_year';
-		$index = date_i18n('Y');
-		$count = 0;
-		
-		while($count <= 100) {
-			$term = $index-$count;
-			if(!term_exists($term, $taxonomy)) {
-				wp_insert_term($term, $taxonomy);
-			}
-			$count++;
- 		}
-		
-		// prefill the month taxonomy
-		$taxonomy = Projects::$post_type . '_month';
-		$index = 1;
-				
-		while($index <= 12) {
-			if($index < 10) {
-				$term = '0' . $index;
-			} else {
-				$term = $index;
-			}
-			
-			if(!term_exists($term, $taxonomy)) {
-				wp_insert_term($term, $taxonomy);
-			}
-			$index++;
- 		}		
-
 	}
 	
 	/**
@@ -163,8 +131,6 @@ class Projects_Menu {
 	 * Register the taxonomies
 	 */
 	public function register_taxonomies() {		
-		$this->add_taxonomy('Years', 'Year', array('herarchical' => false, 'show_ui' => false, 'public' => false));
-		$this->add_taxonomy('Months', 'Month', array('herarchical' => false, 'show_ui' => false, 'public' => false));
 		$this->add_taxonomy(__('Types', 'projects'), __('Type', 'projects'));
 		$this->add_taxonomy(__('Techniques', 'projects'), __('Technique', 'projects'));
 		$this->add_taxonomy(__('Tasks', 'projects'), __('Task', 'projects'));
