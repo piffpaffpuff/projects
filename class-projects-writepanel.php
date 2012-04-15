@@ -204,28 +204,22 @@ class Projects_Writepanel {
 			</label>
 		</p>
 		<p class="box-field"><label><span><?php _e('Reference No.:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[reference]" value="<?php echo $this->get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></label></p>
-		<?php 
-		$year = date_i18n('Y') + 3;
-		$year_count = 0;
-		$month_count = 1;
-		?>
-		<p class="box-field">
+	<?php $terms = get_terms(Projects::$post_type . '_year', array('orderby' => 'DESC')); 
+												print_r($terms);
+
+						?>	<p class="box-field">
 			<label>
 				<span><?php _e('Date:', 'projects'); ?></span>
 				<span class="date-select">
 					<select name="projects[month]">
-						<option value="" <?php selected('', $this->get_meta_value('month')); ?>><?php _e('Month', 'projects'); ?></option>
-						<?php while($month_count <= 12) : ?>
-						<option value="<?php echo $month_count; ?>" <?php selected($month_count, $this->get_meta_value('month')); ?>><?php echo date_i18n('m', mktime(0, 0, 0, $month_count, 1)); ?> - <?php echo date_i18n('M', mktime(0, 0, 0, $month_count, 1)); ?></option>						
-						<?php $month_count++; ?>
-						<?php endwhile; ?>
+					
 					</select>
 					<select name="projects[year]">
-						<option value="" <?php selected('', $this->get_meta_value('year')); ?>><?php _e('Year', 'projects'); ?></option>
-						<?php while($year_count <= 110) : ?>
-						<option value="<?php echo $year - $year_count; ?>" <?php selected($year - $year_count, $this->get_meta_value('year')); ?>><?php echo $year-$year_count; ?></option>						
-						<?php $year_count++; ?>
-						<?php endwhile; ?>
+						
+						<?php 
+						foreach($terms as $term) : ?>
+						<option value="<?php echo $term->name; ?>"><?php echo $term->name; ?></option>						
+						<?php endforeach; ?>
 					</select>
 				</span>
 			</label>
