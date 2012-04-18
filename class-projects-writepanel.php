@@ -28,17 +28,32 @@ class Projects_Writepanel {
 		add_action('add_meta_boxes', array($this, 'add_boxes'));
 		add_filter('attachment_fields_to_edit', array($this, 'edit_media_options'), 15, 2);
 		add_filter('attachment_fields_to_save', array($this, 'save_media_options'), 15, 2);
+		add_filter('media_upload_tabs', array($this, 'remove_media_tabs'));
 		add_action('wp_ajax_add_media_list', array($this, 'add_media_list_ajax'));
 		add_filter('upload_mimes', array($this, 'add_mime_types'));
 
-		add_action('save_post', array($this, 'save_box_data'));
+		add_action('save_post', array($this, 'save_box_data'), 8);
 	}
-	
+		
 	/**
 	 * Remove the media buttons
 	 */
 	public function remove_insert_media_buttons() {
 		remove_action('media_buttons', 'media_buttons');
+	}
+
+	/**
+	 * Remove the media uploader tabs
+	 */
+	public function remove_media_tabs($tabs) {
+	    if(isset($_REQUEST['post_id'])) {
+	        $post_type = get_post_type($_REQUEST['post_id']);
+	        if($post_type == Projects::$post_type) {
+      			unset($tabs['library']);
+	            unset($tabs['type_url']);
+	        }
+	    }
+	    return $tabs;
 	}
 
 	/**
@@ -204,27 +219,28 @@ class Projects_Writepanel {
 			</label>
 		</p>
 		<p class="box-field"><label><span><?php _e('Reference No.:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[reference]" value="<?php echo $this->get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></label></p>
-		<?php 
-		$year = date_i18n('Y') + 3;
-		$year_count = 0;
-		$month_count = 1;
-		?>
+		
 		<p class="box-field">
 			<label>
 				<span><?php _e('Date:', 'projects'); ?></span>
 				<span class="date-select">
 					<select name="projects[month]">
+						<?php $count = 1; ?>
 						<option value="" <?php selected('', $this->get_meta_value('month')); ?>><?php _e('Month', 'projects'); ?></option>
-						<?php while($month_count <= 12) : ?>
-						<option value="<?php echo $month_count; ?>" <?php selected($month_count, $this->get_meta_value('month')); ?>><?php echo date_i18n('m', mktime(0, 0, 0, $month_count, 1)); ?> - <?php echo date_i18n('M', mktime(0, 0, 0, $month_count, 1)); ?></option>						
-						<?php $month_count++; ?>
+						<?php while($count <= 12) : ?>
+						<option value="<?php echo $count; ?>" <?php selected($count, $this->get_meta_value('month')); ?>><?php echo date_i18n('M', mktime(0, 0, 0, $count, 1)); ?></option>						
+						<?php $count++; ?>
 						<?php endwhile; ?>
 					</select>
 					<select name="projects[year]">
+						<?php 
+						$year = date_i18n('Y');
+						$count = 0;
+						?>
 						<option value="" <?php selected('', $this->get_meta_value('year')); ?>><?php _e('Year', 'projects'); ?></option>
-						<?php while($year_count <= 110) : ?>
-						<option value="<?php echo $year - $year_count; ?>" <?php selected($year - $year_count, $this->get_meta_value('year')); ?>><?php echo $year-$year_count; ?></option>						
-						<?php $year_count++; ?>
+						<?php while($count <= 100) : ?>
+						<option value="<?php echo $year - $count; ?>" <?php selected($year - $count, $this->get_meta_value('year')); ?>><?php echo $year - $count; ?></option>						
+						<?php $count++; ?>
 						<?php endwhile; ?>
 					</select>
 				</span>
@@ -402,17 +418,15 @@ class Projects_Writepanel {
 		
 		// we're authenticated: Now we need to find and 
 		// save the data.
-		
+
 		// save, update or delete the custom field of the post.
 		// split all array keys and save them as unique 
 		// meta to make them queryable by wordpress.
 		if(isset($_POST['projects'])) {
 			foreach($_POST['projects'] as $key => $value) {
-				if(empty($value)) {		
-					delete_post_meta($post_id, '_projects_' . $key);
-				} else {
-					update_post_meta($post_id, '_projects_' . $key, $value);
-	  			}
+				// save the key, including empty keys too, 
+				// otherwise wordpres won't query them.
+				update_post_meta($post_id, '_projects_' . $key, $value);
 			}
 		}
 	}

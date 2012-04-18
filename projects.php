@@ -85,7 +85,10 @@ class Projects {
 	 */
 	public function query_projects($args = null) {
 		$args = is_array($args) ? $args : array();
-		$args['post_type'] = self::$post_type;	
+		$args['post_type'] = self::$post_type;
+		$args['orderby'] = 'meta_value_num';
+		$args['meta_key'] = '_projects_year';
+		//'&meta_key=_projects_year&orderby=meta_value_num'
 		return query_posts($args);
 	}
 		

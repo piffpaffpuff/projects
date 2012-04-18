@@ -29,6 +29,15 @@ table.wp-list-table .column-title {
    Meta Boxes
 */
 
+
+/*
+#misc-publishing-actions .curtime {
+	display: none;
+}
+#misc-publishing-actions #visibility {
+	border-bottom-width: 0;
+}
+*/
 .box-field {
 	display: block;
 	overflow: hidden;

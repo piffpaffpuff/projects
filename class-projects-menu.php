@@ -68,6 +68,7 @@ class Projects_Menu {
 		add_filter('manage_edit-' . Projects::$post_type . '_columns', array($this, 'add_columns'));
 		add_action('manage_posts_custom_column', array($this, 'create_column_content'), 10, 2);
 		add_filter('manage_edit-' . Projects::$post_type . '_sortable_columns', array($this, 'add_sorting_columns'));	
+		add_filter('request', array($this, 'default_column_orderby'));
 		
 		add_action('admin_print_styles', array($this, 'add_styles'));
 		add_action('admin_print_scripts-post.php', array($this, 'add_scripts'));
@@ -231,7 +232,7 @@ class Projects_Menu {
 		unset($columns['date']);
 		unset($columns['title']);
 		
-		// default columns
+		// default columns before taxonomies 
 		$columns['thumbnail'] = __('Thumbnail', 'projects');
 		$columns['title'] = __('Title', 'projects');
 		
@@ -241,7 +242,10 @@ class Projects_Menu {
 		foreach($taxonomies as $taxonomy) {
 			$columns[$taxonomy->query_var] = __($taxonomy->labels->name, 'projects');
 		}
-
+		
+		// default columns after taxonomies 
+		$columns['year'] = __('Year', 'projects');
+		
 		return $columns;
 	}
 
@@ -249,6 +253,9 @@ class Projects_Menu {
 	 * Add custom columns that can be sorted
 	 */
 	public function add_sorting_columns($columns) {
+		// default columns
+		$columns['year'] = 'year';
+		
 		// registered taxonomies
 		$taxonomies = $this->get_added_taxonomies(null, 'names');
 		
@@ -257,6 +264,19 @@ class Projects_Menu {
 		}
 		
 		return $columns;
+	}
+	
+	/**
+	 * Order columns by a default column
+	 */
+	public function default_column_orderby($args) {
+		if(isset($args['post_type']) && $args['post_type'] == Projects::$post_type) {
+			if(!isset($args['orderby']) || (isset($args['orderby']) && $args['orderby'] == 'year')) {
+				$args['orderby'] = 'meta_value_num';
+				$args['meta_key'] = '_projects_year';
+			}
+		}
+		return $args;
 	}
 	
 	/**
@@ -270,29 +290,37 @@ class Projects_Menu {
 			// registered taxonomies
 			$taxonomies = $this->get_added_taxonomies(null, 'names');
 			
-			// column content
-			if($column == 'thumbnail') {
-				$thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
+			// default column content
+			switch ($column) {
+				case 'thumbnail':
+					$thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
 					
-				if($thumbnail_id) {
-					$thumbnail = wp_get_attachment_image($thumbnail_id, array(36, 36), true );
-				}
-				
-				if(isset($thumbnail)) {
-					echo $thumbnail;
-				} else {
-					echo __('None', 'projects');
-				}
+					if($thumbnail_id) {
+						$thumbnail = wp_get_attachment_image($thumbnail_id, array(36, 36), true );
+					}
+					
+					if(isset($thumbnail)) {
+						echo $thumbnail;
+					} else {
+						echo __('None', 'projects');
+					}
+					break;
+					
+				case 'year':
+					echo get_post_meta($post_id, '_projects_year', true);
+					break;
 			}
 			
 			// taxonomy content
 			if(in_array($column, $taxonomies)) {
-				if($list = get_the_term_list($post_id, $taxonomies[$column], '', ', ', '')) {
+				$taxonomy_name = $taxonomies[$column];
+				if($list = get_the_term_list($post_id, $taxonomy_name, '', ', ', '')) {
 					echo $list;
 				} else {
-					echo __('None', 'projects');
+					$taxonomy = get_taxonomy($taxonomy_name);
+					echo __('No ', 'projects') . __($taxonomy->labels->name, 'projects');
 				}
-			}
+			}			
 		}	
 	}
 				
