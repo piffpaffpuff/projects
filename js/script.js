@@ -2,6 +2,11 @@ jQuery(document).ready(function($) {
 	// make the media gallery sortable
 	//$('#projects-media-list').sortable();
 	//$('#projects-media-list').disableSelection();
+
+	// Writepanel -------------------------
+	
+	// color picker
+	$('#projects-general-box input.minicolors').miniColors();
 	
 	// make the images clickable. maybe this will be later replaced. 
 	$('#projects-media-list').on('click', function(event) {
@@ -30,6 +35,8 @@ jQuery(document).ready(function($) {
 			$('#projects-media-list').empty().append(response);
 		});
 	}
+	
+	// Settings -------------------------
 	
 	// add image size to settings
 	$('#projects-add-image-size').click(function(event) {

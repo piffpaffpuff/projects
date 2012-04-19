@@ -85,6 +85,7 @@ class Projects_Menu {
 	 * Add the styles
 	 */
 	public function add_styles() {
+		wp_enqueue_style('minicolors', Projects::$plugin_directory_url . 'css/jquery.miniColors.css');
 		wp_enqueue_style('projects', Projects::$plugin_directory_url . 'css/style.css');
 	}
 
@@ -92,7 +93,8 @@ class Projects_Menu {
 	 * Add the scripts
 	 */
 	public function add_scripts() {
-		wp_enqueue_script('projects', Projects::$plugin_directory_url . 'js/script.js', array('jquery', 'jquery-ui-core'), '1.0');
+		wp_enqueue_script('minicolors', Projects::$plugin_directory_url . 'js/jquery.miniColors.min.js', array('jquery'));
+		wp_enqueue_script('projects', Projects::$plugin_directory_url . 'js/script.js', array('jquery'));
 	}
 
 	/**
@@ -148,20 +150,20 @@ class Projects_Menu {
 		$taxonomy_name = Projects::$post_type . '_' . sanitize_key($singular_name);
 	
 		$labels = array(
-		    'name' => __($name, 'projects'),
-		    'singular_name' => __($singular_name, 'projects'),
-		    'search_items' =>  __('Search ' . $name, 'projects'),
-		    'all_items' => __('All ' . $name, 'projects'),
-		    'parent_item' => __( 'Parent ' . $name, 'projects'),
-    		'parent_item_colon' => __( 'Parent ' . $name . ':', 'projects'),
-		    'edit_item' => __('Edit ' . $singular_name, 'projects'),
-		    'update_item' => __('Update ' . $singular_name, 'projects'),
-		    'add_new_item' => __('Add New ' . $singular_name, 'projects'),
-		    'new_item_name' => __('New ' . $singular_name . ' Name', 'projects'),
-		    'separate_items_with_commas' => __('Separate ' . $name . ' with commas', 'projects'),
-		    'add_or_remove_items' => __('Add or remove ' . $name, 'projects'),
-		    'choose_from_most_used' => __('Choose from the most used ' . $name, 'projects'),
-		    'menu_name' => __($name, 'projects')
+		    'name' => $name, 'projects',
+		    'singular_name' => $singular_name, 'projects',
+		    'search_items' =>  sprintf(__('Search %s', 'projects'), $name),
+		    'all_items' => sprintf(__('All %s', 'projects'), $name),
+		    'parent_item' => sprintf(__( 'Parent %s', 'projects'), $name),
+    		'parent_item_colon' => sprintf(__( 'Parent %s:', 'projects'), $name),
+		    'edit_item' => sprintf(__('Edit %s', 'projects'), $singular_name),
+		    'update_item' => sprintf(__('Update %s', 'projects'), $singular_name),
+		    'add_new_item' => sprintf(__('Add New %s', 'projects'), $singular_name),
+		    'new_item_name' => sprintf(__('New %s Name', 'projects'), $singular_name),
+		    'separate_items_with_commas' => sprintf(__('Separate %s with commas', 'projects'), $name),
+		    'add_or_remove_items' => sprintf(__('Add or remove %s', 'projects'), $name),
+		    'choose_from_most_used' => sprintf(__('Choose from the most used %s', 'projects'), $name),
+		    'menu_name' => $name
 		);
 		
 		$args = is_array($args) ? $args : array();	
@@ -207,9 +209,9 @@ class Projects_Menu {
 	 * Register the post status
 	 */
 	public function register_status() {	
-		$this->add_status(__('Planned', 'projects'));
+		$this->add_status(__('Completed', 'projects'));
 		$this->add_status(__('In Progress', 'projects'));
-		$this->add_status(__('Finished', 'projects'));
+		$this->add_status(__('Planned', 'projects'));
 	}
 	
 	/**
@@ -244,7 +246,7 @@ class Projects_Menu {
 		}
 		
 		// default columns after taxonomies 
-		$columns['year'] = __('Year', 'projects');
+		$columns['year'] = __('Date', 'projects');
 		
 		return $columns;
 	}
@@ -273,7 +275,7 @@ class Projects_Menu {
 		if(isset($args['post_type']) && $args['post_type'] == Projects::$post_type) {
 			if(!isset($args['orderby']) || (isset($args['orderby']) && $args['orderby'] == 'year')) {
 				$args['orderby'] = 'meta_value_num';
-				$args['meta_key'] = '_projects_year';
+				$args['meta_key'] = '_projects_date';
 			}
 		}
 		return $args;
@@ -283,10 +285,7 @@ class Projects_Menu {
 	 * Create column content
 	 */
 	public function create_column_content($column, $post_id) {		
-		if(isset($_GET['post_type']) && $_GET['post_type'] == Projects::$post_type) { 
-			// meta data
-			$meta = get_post_meta($post_id, '_projects', true);
-			
+		if(isset($_GET['post_type']) && $_GET['post_type'] == Projects::$post_type) { 			
 			// registered taxonomies
 			$taxonomies = $this->get_added_taxonomies(null, 'names');
 			
@@ -307,7 +306,7 @@ class Projects_Menu {
 					break;
 					
 				case 'year':
-					echo get_post_meta($post_id, '_projects_year', true);
+					echo date_i18n('M', Projects::get_meta_value('date', $post_id)) . ', ' . Projects::get_meta_value('year', $post_id);
 					break;
 			}
 			
@@ -318,7 +317,7 @@ class Projects_Menu {
 					echo $list;
 				} else {
 					$taxonomy = get_taxonomy($taxonomy_name);
-					echo __('No ', 'projects') . __($taxonomy->labels->name, 'projects');
+					printf(__('No %s', 'projects'), $taxonomy->labels->name);
 				}
 			}			
 		}	

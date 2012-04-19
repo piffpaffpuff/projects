@@ -39,7 +39,7 @@ class Projects {
 	public static $post_type;
 	public static $slug;
 	
-	public $load;
+	public $installation;
 	public $menu;
 	public $writepanel;
 	public $settings;
@@ -60,35 +60,44 @@ class Projects {
 	 */
 	public function load() {	
 		$this->includes();
-		$this->load = new Projects_Load();
-		$this->load->load();
+		$this->installation = new Projects_Installation();
+		$this->installation->load();
 		$this->menu = new Projects_Menu();
 		$this->menu->load();
 		$this->writepanel = new Projects_Writepanel();
 		$this->writepanel->load();
 		$this->settings = new Projects_Settings();
 		$this->settings->load();
+		
+		// load hooks
+		add_action('init', array($this, 'load_hooks'));
 	}
 	
 	/**
 	 * Include the classes
 	 */
 	public function includes() {
-		require_once('class-projects-load.php');	
+		require_once('class-projects-installation.php');	
 		require_once('class-projects-menu.php');	
 		require_once('class-projects-writepanel.php');	
 		require_once('class-projects-settings.php');	
 	}
-	
+
+	/**
+	 * Load the main hooks
+	 */
+	public function load_hooks() {
+   		add_theme_support('post-thumbnails', array(Projects::$post_type));
+	}
+
 	/**
 	 * Query projects
 	 */
 	public function query_projects($args = null) {
 		$args = is_array($args) ? $args : array();
 		$args['post_type'] = self::$post_type;
-		$args['orderby'] = 'meta_value_num';
-		$args['meta_key'] = '_projects_year';
-		//'&meta_key=_projects_year&orderby=meta_value_num'
+		$args['orderby'] = isset($args['orderby']) ? $args['orderby'] : 'meta_value_num';
+		$args['meta_key'] = isset($args['meta_key']) ? $args['meta_key'] : '_projects_date';
 		return query_posts($args);
 	}
 		
@@ -122,6 +131,16 @@ class Projects {
 		return is_tax($taxonomy);
 	}
 	
+	/**
+	 * Get the meta value from a key
+	 */
+	public static function get_meta_value($key, $post_id = null) {
+		if(empty($post_id)) {
+			global $post;
+			$post_id = $post->ID;
+		}
+		return get_post_meta($post_id, '_projects_' . $key, true);
+	}
 }
 }
 
@@ -252,7 +271,7 @@ function project_taxonomies($name, $args = null) {
  */
 function get_project_meta($key) {
 	global $projects;
-	return $projects->writepanel->get_meta_value($key);
+	return Projects::get_meta_value($key);
 }
 
 /**

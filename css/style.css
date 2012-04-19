@@ -29,39 +29,30 @@ table.wp-list-table .column-title {
    Meta Boxes
 */
 
-
-/*
-#misc-publishing-actions .curtime {
-	display: none;
-}
-#misc-publishing-actions #visibility {
-	border-bottom-width: 0;
-}
-*/
 .box-field {
 	display: block;
 	overflow: hidden;
 	margin: 0.3em 0;
+	text-align: left;
+	vertical-align: middle;
 }
 .box-field input,
 .box-field select,
-.box-field .date-select {
+.box-field .input-group {
 	display: block;
 	float: right;
 	width: 60%;
 }
-.box-field span {
-	display: block;
-	float: left;
-	padding-top: 0.3em;
+.box-field .input-group input,
+.box-field .input-group select {
+	float: none;
+	display: inline;
 }
-.box-field .date-select {
-	
-}
-.box-field .date-select select {
-	display: inherit;
-	float: left;
+.box-field .input-group .select-date {
 	width: 48%;
+}
+.box-field .input-group .minicolors {
+	width: 81%;
 }
 
 /*

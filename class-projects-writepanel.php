@@ -84,7 +84,7 @@ class Projects_Writepanel {
 		// add a custom image size field
 		if(strpos($post->post_mime_type, 'image') !== false) {
 			$html = '';
-			$meta_size = get_post_meta($post->ID, '_projects_default_image_size', true);
+			$meta_size = Projects::get_meta_value('default_image_size', $post->ID);
 			$image_sizes = get_intermediate_image_sizes();
 			$image_sizes[] = 'full';
 			
@@ -171,22 +171,19 @@ class Projects_Writepanel {
 	public function create_box_location() {
 		global $post;
 		
-		// Get the meta information	
-		$meta = get_post_meta($post->ID, '_projects', true);
-		
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		?>
-		<p class="box-field"><label><span><?php _e('Name:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[name]" value="<?php echo $this->get_meta_value('name'); ?>" title="<?php _e('Name', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('Address:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[address]" value="<?php echo $this->get_meta_value('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('Postal Code:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[postalcode]" value="<?php echo $this->get_meta_value('postalcode'); ?>" title="<?php _e('Code', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('City:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[city]" value="<?php echo $this->get_meta_value('city'); ?>" title="<?php _e('City', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('State:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[state]" value="<?php echo $this->get_meta_value('state'); ?>" title="<?php _e('State', 'projects'); ?>"></label></p>
+		<p class="box-field"><label><span><?php _e('Name:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[name]" value="<?php echo Projects::get_meta_value('name'); ?>" title="<?php _e('Name', 'projects'); ?>"></label></p>
+		<p class="box-field"><label><span><?php _e('Address:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[address]" value="<?php echo Projects::get_meta_value('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></label></p>
+		<p class="box-field"><label><span><?php _e('Postal Code:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[postalcode]" value="<?php echo Projects::get_meta_value('postalcode'); ?>" title="<?php _e('Code', 'projects'); ?>"></label></p>
+		<p class="box-field"><label><span><?php _e('City:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[city]" value="<?php echo Projects::get_meta_value('city'); ?>" title="<?php _e('City', 'projects'); ?>"></label></p>
+		<p class="box-field"><label><span><?php _e('State:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[state]" value="<?php echo Projects::get_meta_value('state'); ?>" title="<?php _e('State', 'projects'); ?>"></label></p>
 		<p class="box-field"><label><span><?php _e('Country:', 'projects'); ?></span><select name="projects[country]">
-			<option value="CH" <?php selected('CH', $this->get_meta_value('country')); ?>><?php _e('Switzerland', 'projects'); ?></option>
-			<option value="LI" <?php selected('LI', $this->get_meta_value('country')); ?>><?php _e('Liechtenstein', 'projects'); ?></option>
-			<option value="D" <?php selected('D', $this->get_meta_value('country')); ?>><?php _e('Germany', 'projects'); ?></option>
-			<option value="A" <?php selected('A', $this->get_meta_value('country')); ?>><?php _e('Austria', 'projects'); ?></option>
+			<option value="CH" <?php selected('CH', Projects::get_meta_value('country')); ?>><?php _e('Switzerland', 'projects'); ?></option>
+			<option value="LI" <?php selected('LI', Projects::get_meta_value('country')); ?>><?php _e('Liechtenstein', 'projects'); ?></option>
+			<option value="D" <?php selected('D', Projects::get_meta_value('country')); ?>><?php _e('Germany', 'projects'); ?></option>
+			<option value="A" <?php selected('A', Projects::get_meta_value('country')); ?>><?php _e('Austria', 'projects'); ?></option>
 		</select></label></p>
 		<?php
 	}
@@ -200,6 +197,39 @@ class Projects_Writepanel {
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		
+		?>
+		<p class="box-field">
+			<label>
+				<span><?php _e('Date:', 'projects'); ?></span>
+				<span class="input-group">
+					<select class="select-date" name="projects[month]">
+						<?php 
+						$count = 1;
+						$month_meta = Projects::get_meta_value('month');
+						if(empty($month_meta)) {
+							$month_meta = date_i18n('n');
+						}
+						?>
+						<?php while($count <= 12) : ?>
+						<option value="<?php echo $count; ?>" <?php selected($count, $month_meta); ?>><?php echo date_i18n('m', mktime(0, 0, 0, $count, 1)); ?>-<?php echo date_i18n('M', mktime(0, 0, 0, $count, 1)); ?></option>						
+						<?php $count++; ?>
+						<?php endwhile; ?>
+					</select>
+					<select class="select-date" name="projects[year]">
+						<?php 
+						$count = 0;
+						$year = date_i18n('Y');
+						$year_meta = Projects::get_meta_value('year');
+						?>
+						<?php while($count <= 100) : ?>
+						<option value="<?php echo $year - $count; ?>" <?php selected($year - $count, $year_meta); ?>><?php echo $year - $count; ?></option>						
+						<?php $count++; ?>
+						<?php endwhile; ?>
+					</select>
+				</span>
+			</label>
+		</p>
+		<?php
 		$args = array(
 			'_builtin' => false
 		);
@@ -209,44 +239,17 @@ class Projects_Writepanel {
 			<label>
 				<span><?php _e('Status:', 'projects'); ?></span>
 				<select name="projects[status]">
-					<option value="" <?php selected('', $this->get_meta_value('status')); ?>><?php _e('None', 'projects'); ?></option>
 					<?php foreach($stati as $status) : ?>
 						<?php if(strrpos($status->name, Projects::$post_type . '_') !== false) : ?>
-					<option value="<?php echo $status->name; ?>" <?php selected($status->name, $this->get_meta_value('status')); ?>><?php echo $status->label; ?></option>
+					<option value="<?php echo $status->name; ?>" <?php selected($status->name, Projects::get_meta_value('status')); ?>><?php echo $status->label; ?></option>
 						<?php endif; ?>
 					<?php endforeach; ?>
 				</select>
 			</label>
 		</p>
-		<p class="box-field"><label><span><?php _e('Reference No.:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[reference]" value="<?php echo $this->get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></label></p>
-		
-		<p class="box-field">
-			<label>
-				<span><?php _e('Date:', 'projects'); ?></span>
-				<span class="date-select">
-					<select name="projects[month]">
-						<?php $count = 1; ?>
-						<option value="" <?php selected('', $this->get_meta_value('month')); ?>><?php _e('Month', 'projects'); ?></option>
-						<?php while($count <= 12) : ?>
-						<option value="<?php echo $count; ?>" <?php selected($count, $this->get_meta_value('month')); ?>><?php echo date_i18n('M', mktime(0, 0, 0, $count, 1)); ?></option>						
-						<?php $count++; ?>
-						<?php endwhile; ?>
-					</select>
-					<select name="projects[year]">
-						<?php 
-						$year = date_i18n('Y');
-						$count = 0;
-						?>
-						<option value="" <?php selected('', $this->get_meta_value('year')); ?>><?php _e('Year', 'projects'); ?></option>
-						<?php while($count <= 100) : ?>
-						<option value="<?php echo $year - $count; ?>" <?php selected($year - $count, $this->get_meta_value('year')); ?>><?php echo $year - $count; ?></option>						
-						<?php $count++; ?>
-						<?php endwhile; ?>
-					</select>
-				</span>
-			</label>
-		</p>
-		<p class="box-field"><label><span><?php _e('Website:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[website]" value="<?php echo $this->get_meta_value('website'); ?>" title="<?php _e('Address', 'projects'); ?>"></label></p>
+		<p class="box-field"><label><span><?php _e('Reference No.:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[reference]" value="<?php echo Projects::get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></label></p>
+		<p class="box-field"><label><span><?php _e('Website:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[website]" value="<?php echo Projects::get_meta_value('website'); ?>" title="<?php _e('Address', 'projects'); ?>"></label></p>
+		<p class="box-field"><label><span><?php _e('Color:', 'projects'); ?></span><span class="input-group"><input type="text" class="regular-text minicolors" name="projects[color]" value="<?php echo Projects::get_meta_value('color'); ?>" title="<?php _e('Color', 'projects'); ?>"></span></label></p>
 		<?php
 	}
 	
@@ -370,8 +373,8 @@ class Projects_Writepanel {
 			$size = null;
 			
 			if($this->is_web_image($attachment->post_mime_type)) {		
-				$size = get_post_meta($attachment->ID, '_projects_default_image_size', true);
-				
+				$size = Projects::get_meta_value('default_image_size', $attachment->ID);
+			
 				// fall back to options setting
 				if(empty($size)) {
 					$size = get_option('projects_default_image_size');
@@ -423,20 +426,24 @@ class Projects_Writepanel {
 		// split all array keys and save them as unique 
 		// meta to make them queryable by wordpress.
 		if(isset($_POST['projects'])) {
+			// create a date entry to make querying by month or year easy 
+			$_POST['projects']['date'] = mktime(0, 0, 0, $_POST['projects']['month'], 1, $_POST['projects']['year']);
+			
+			// save the meta
 			foreach($_POST['projects'] as $key => $value) {
 				// save the key, including empty keys too, 
 				// otherwise wordpres won't query them.
+				// this is probably fixed in wordpress 3.4
 				update_post_meta($post_id, '_projects_' . $key, $value);
+				/*
+				if(empty($value)) {		
+					delete_post_meta($post_id, '_projects_' . $key);
+				} else {
+					update_post_meta($post_id, '_projects_' . $key, $value);
+				}
+				*/
 			}
 		}
-	}
-	
-	/**
-	 * Get the meta value from a key
-	 */
-	public function get_meta_value($key) {
-		global $post;
-		return get_post_meta($post->ID, '_projects_' . $key, true);
 	}
 	
 }
