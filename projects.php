@@ -39,6 +39,9 @@ class Projects {
 	public static $post_type;
 	public static $slug;
 	
+	public $order_by; 
+	public $meta_key;
+
 	public $installation;
 	public $menu;
 	public $writepanel;
@@ -58,8 +61,12 @@ class Projects {
 	/**
 	 * Load the code
 	 */
-	public function load() {	
+	public function load() {
 		$this->includes();
+		
+		$this->order_by = 'meta_value_num';
+		$this->meta_key = '_projects_date';
+		
 		$this->installation = new Projects_Installation();
 		$this->installation->load();
 		$this->menu = new Projects_Menu();
@@ -87,18 +94,53 @@ class Projects {
 	 * Load the main hooks
 	 */
 	public function load_hooks() {
+		add_filter('get_previous_post_sort', array($this, 'adjacent_post_sort'));
+		add_filter('get_next_post_sort', array($this, 'adjacent_post_sort'));
+
    		add_theme_support('post-thumbnails', array(Projects::$post_type));
 	}
-
+	
 	/**
 	 * Query projects
 	 */
 	public function query_projects($args = null) {
+		global $projects, $paged;
+	
+		// pagination support when the projects 
+		// page is the frontpage and for all other
+		// cases too.
+		if(get_query_var('paged')) {
+		    $paged = get_query_var('paged');
+		} else if(get_query_var('page')) {
+		    $paged = get_query_var('page');
+		} else {
+		    $paged = 1;
+		}
+	
+		// default args
 		$args = is_array($args) ? $args : array();
-		$args['post_type'] = self::$post_type;
-		$args['orderby'] = isset($args['orderby']) ? $args['orderby'] : 'meta_value_num';
-		$args['meta_key'] = isset($args['meta_key']) ? $args['meta_key'] : '_projects_date';
+		$args['post_type'] = Projects::$post_type;
+		$args['orderby'] = isset($args['orderby']) ? $args['orderby'] : $this->order_by;
+		$args['meta_key'] = isset($args['meta_key']) ? $args['meta_key'] : $this->meta_key;
+		$args['paged'] = $paged;
+		
 		return query_posts($args);
+	}
+	
+	/**
+	 * Set the sort for post navigation to be the
+	 */
+	public function adjacent_post_sort() {
+		/*
+			TODO: make order by work with meta value
+			
+			"ORDER BY p.post_date $order LIMIT 1"
+		*/
+		global $wp_query;
+		
+		if($wp_query->get('post_type') == Projects::$post_type) {
+		}
+		return;
 	}
 		
 	/**
@@ -165,27 +207,25 @@ function query_projects($args = null) {
 /**
  * Get the media
  */
-function get_project_media($mime = null) {
+function project_media($size = null, $post_id = null, $mime = null) {
 	global $projects;
-	return $projects->writepanel->get_media(null, $mime);
-}
-
-/**
- * Get the media
- */
-function project_media($mime = null) {
-	global $projects;
-	$post_thumbnail_id = get_post_thumbnail_id();
+	$post_thumbnail_id = get_post_thumbnail_id($post_id);
 
 	?>
 	<ul class="project-media">
-		<?php foreach($projects->writepanel->get_media(null, $mime) as $attachment) : ?>
+		<?php foreach($projects->writepanel->get_media($post_id, $mime) as $attachment) : ?>
 			<?php if($post_thumbnail_id != $attachment->ID) : ?>
 		<li>
 			<a href="<?php echo get_attachment_link($attachment->ID); ?>">
 			<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
-				<?php $size = 'thumbnail'; ?>
-				<?php echo wp_get_attachment_image($attachment->ID, $attachment->default_size); ?>
+				<?php 
+				$media_size = $size;
+				
+				if(empty($size)) {
+					$media_size = $attachment->default_size;
+				} 
+				?>
+				<?php echo wp_get_attachment_image($attachment->ID, $media_size); ?>
 			<?php else : ?>
 				
 			<?php endif; ?>
@@ -200,11 +240,12 @@ function project_media($mime = null) {
 /**
  * Thumbnail
  */
-function project_thumbnail($size = 'thumbnail') {	
+function project_thumbnail($size = 'thumbnail', $post_id = null) {	
 	global $projects;
-	$attachment_id = get_post_thumbnail_id();
+	$attachment_id = get_post_thumbnail_id($post_id);
 
 	// load the first image attachment id when no thumbnail
+	/*
 	if(empty($attachment_id)) {
 		foreach($projects->writepanel->get_media() as $attachment) {
 			if($projects->writepanel->is_web_image($attachment->post_mime_type)) {
@@ -213,6 +254,7 @@ function project_thumbnail($size = 'thumbnail') {
 			}
 		}
 	} 
+	*/
 	
 	echo wp_get_attachment_image($attachment_id, $size);
 }
@@ -228,15 +270,7 @@ function get_registered_projects_taxonomies() {
 /**
  * Get terms
  */
-function get_project_taxonomies($taxonomy, $args = null) {
-	global $post;
-	return wp_get_post_terms($post->ID, $taxonomy, $args);
-}
-
-/**
- * List terms
- */
-function project_taxonomies($name, $args = null) {
+function get_project_taxonomy($name, $args = null) {
 	global $projects, $post;
 	
 	// find the taxonomy
@@ -251,10 +285,19 @@ function project_taxonomies($name, $args = null) {
 		$taxonomy = key($taxonomies);
 	}
 	
+	return wp_get_post_terms($post->ID, $taxonomy, $args);
+}
+
+/**
+ * List terms
+ */
+function project_taxonomy($name, $args = null) {
+	global $projects;
+		
 	// output the list
-	$terms = get_project_taxonomies($taxonomy, $args); 
+	$terms = get_project_taxonomy($name, $args); 
 	?>
-	<ul class="project-taxonomies">
+	<ul class="project-taxonomy project-taxonomy-<?php echo sanitize_key($name); ?>">
 	<?php if(!isset($terms->errors)) : ?>
 		<?php foreach($terms as $term) : ?>
 		<li>
@@ -277,15 +320,19 @@ function get_project_meta($key) {
 /**
  * Show project website
  */
-function project_website($name = null) {
+function project_website($name = null, $target = '_blank') {
 	$url = get_project_meta('website');
+	$url_target = 'target="' . $target . '"';
 	
 	if(!empty($url)) {
 		if(empty($name)) {
-			$name = $url;
+			$name = preg_replace('/(?<!href=["\'])http:\/\//', '', $url);
+		}
+		if(empty($target)) {
+			$url_target = '';
 		}
 		?>
-		<a href="<?php echo $url; ?>" title="<?php esc_attr($name); ?>"><?php echo $name; ?></a>
+		<a href="<?php echo $url; ?>" title="<?php esc_attr($name); ?>" <?php echo $url_target; ?>><?php echo $name; ?></a>
 		<?
 	}
 }

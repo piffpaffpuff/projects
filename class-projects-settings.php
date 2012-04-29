@@ -87,46 +87,15 @@ class Projects_Settings {
 								<label for="projects_default_image_size"><?php _e('Default Image Size', 'projects'); ?></label>
 							</th>
 							<td>
-								<input name="projects_default_image_size" disabled="disabled" type="text" value="<?php echo get_option('projects_default_image_size'); ?>" class="regular-text">
-							</td>
-						</tr>
-						<tr>
-							<th>
-								<label><?php _e('Image Sizes', 'projects'); ?></label>
-							</th>
-							<td>
-								<div class="image-sizes">
+								<select name="projects_default_image_size">
 									<?php 
-										$index = 0;
-										$name = '';
-										$width = '';
-										$height = '';
-										$checked = '';
-										$template = '<div class="image-set">
-										<label>' . __('Name', 'projects') . '</label> <input name="projects_image_sizes[item' . $index . '][name]" type="text" value="' . $name . '" class="regular-text">
-										<label>' . __('Width', 'projects') . '</label> <input name="projects_image_sizes[item' . $index . '][width]" type="text" value="' . $width . '" class="small-text">
-										<label>' . __('Height', 'projects') . '</label> <input name="projects_image_sizes[item' . $index . '][height]" type="text" value="' . $height . '" class="small-text">
-										<input name="projects_image_sizes[item' . $index . '][crop]" type="checkbox" value="1" ' . $checked . '> <label>' . __('Crop', 'projects') . '</label>
-										<a href="#" class="remove-image-size">' . __('Delete', 'projects') . '</a>
-										</div>';
+									$sizes = get_intermediate_image_sizes();
+									$sizes[] = 'full';
 									?>
-									<?php 
-										$sizes = get_option('projects_image_sizes'); 
-										if(is_array($sizes)) {
-											foreach($sizes as $size) {
-												$name = isset($size['name']) ? $size['name'] : '';
-												if(!empty($name)) {
-													$width = isset($size['width']) ? $size['width'] : '';
-													$height = isset($size['height']) ? $size['height'] : '';
-													$checked = checked(isset($size['crop']) ? $size['crop'] : '', 1, false);
-													echo $template;
-													$index++;
-												}
-											}
-										}
-									?>
-								</div>
-								<a href="#" id="projects-add-image-size" class="add-image-size"><?php _e('Add new Image Size', 'projects'); ?></a>
+									<?php foreach($sizes as $size) : ?>
+										<option value="<?php echo $size; ?>" <?php selected($size, get_option('projects_default_image_size')); ?>><?php echo ucfirst($size); ?></option>
+									<?php endforeach; ?>
+								</select>
 							</td>
 						</tr>
 					</tbody>

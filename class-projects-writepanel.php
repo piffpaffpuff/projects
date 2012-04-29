@@ -32,7 +32,7 @@ class Projects_Writepanel {
 		add_action('wp_ajax_add_media_list', array($this, 'add_media_list_ajax'));
 		add_filter('upload_mimes', array($this, 'add_mime_types'));
 
-		add_action('save_post', array($this, 'save_box_data'), 8);
+		add_action('save_post', array($this, 'save_box_data'));
 	}
 		
 	/**
@@ -248,8 +248,9 @@ class Projects_Writepanel {
 			</label>
 		</p>
 		<p class="box-field"><label><span><?php _e('Reference No.:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[reference]" value="<?php echo Projects::get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('Website:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[website]" value="<?php echo Projects::get_meta_value('website'); ?>" title="<?php _e('Address', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('Color:', 'projects'); ?></span><span class="input-group"><input type="text" class="regular-text minicolors" name="projects[color]" value="<?php echo Projects::get_meta_value('color'); ?>" title="<?php _e('Color', 'projects'); ?>"></span></label></p>
+		<p class="box-field"><label><span><?php _e('Website:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[website]" value="<?php echo esc_url(Projects::get_meta_value('website')); ?>" title="<?php _e('Address', 'projects'); ?>"></label></p>
+		<p class="box-field"><label><span><?php _e('Background:', 'projects'); ?></span><span class="input-group"><input type="text" class="regular-text minicolors" name="projects[background_color]" value="<?php echo Projects::get_meta_value('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></label></p>
+		<p class="box-field"><label><span><?php _e('Text:', 'projects'); ?></span><span class="input-group"><input type="text" class="regular-text minicolors" name="projects[text_color]" value="<?php echo Projects::get_meta_value('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></label></p>
 		<?php
 	}
 	
@@ -374,7 +375,7 @@ class Projects_Writepanel {
 			
 			if($this->is_web_image($attachment->post_mime_type)) {		
 				$size = Projects::get_meta_value('default_image_size', $attachment->ID);
-			
+
 				// fall back to options setting
 				if(empty($size)) {
 					$size = get_option('projects_default_image_size');
