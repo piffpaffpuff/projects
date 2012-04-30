@@ -174,23 +174,34 @@ class Projects_Writepanel {
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		?>
-		<div id="projects-location-map-wrap">
-			<div id="projects-location-map"></div>
+		<?php 
+			$lat = Projects::get_meta_value('lat');
+			$lng = Projects::get_meta_value('lng');
+			$zoom = 15;
+		?>
+		<?php if(!empty($lat) && !empty($lng)) : ?>
+		<div class="map">
+			<a href="http://maps.google.com/maps?hl=de&z=<?php echo $zoom; ?>&q=<?php echo $lat; ?>,<?php echo $lng; ?>&sll=<?php echo $lat; ?>,<?php echo $lng; ?>" target="_blank" title="<?php _e('View on Google Maps', 'toolbox-vernissage'); ?>">
+				<img src="http://maps.google.com/maps/api/staticmap?sensor=false&size=320x320&zoom=<?php echo $zoom; ?>&markers=<?php echo $lat; ?>,<?php echo $lng; ?>" />
+			</a>
 		</div>
-		<p class="form-field"><label><span><?php _e('First Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo Projects::get_meta_value('first_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
-		<p class="form-field"><label><span><?php _e('Last Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo Projects::get_meta_value('last_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
-		<p class="form-field"><label><span><?php _e('Address:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo Projects::get_meta_value('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
-		<p class="form-field"><label><span><?php _e('Postal Code:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo Projects::get_meta_value('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
-		<p class="form-field"><label><span><?php _e('City:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo Projects::get_meta_value('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
-		<p class="form-field"><label><span><?php _e('Country:', 'projects'); ?></span></label><select name="projects[country]">
-			<?php $country = Projects::get_meta_value('country'); ?>
-			<option value="CH" <?php selected('CH', $country); ?>><?php _e('Switzerland', 'projects'); ?></option>
-			<option value="LI" <?php selected('LI', $country); ?>><?php _e('Liechtenstein', 'projects'); ?></option>
-			<option value="DE" <?php selected('DE', $country); ?>><?php _e('Germany', 'projects'); ?></option>
-			<option value="AT" <?php selected('AT', $country); ?>><?php _e('Austria', 'projects'); ?></option>
-		</select></p>
-		<input type="hidden" name="projects[lat]" value="<?php echo Projects::get_meta_value('lat'); ?>">
-		<input type="hidden" name="projects[lon]" value="<?php echo Projects::get_meta_value('lon'); ?>">
+		<?php endif; ?>
+		<div class="location">
+			<p class="form-field"><label><span><?php _e('First Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo Projects::get_meta_value('first_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
+			<p class="form-field"><label><span><?php _e('Last Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo Projects::get_meta_value('last_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
+			<p class="form-field"><label><span><?php _e('Address:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo Projects::get_meta_value('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
+			<p class="form-field"><label><span><?php _e('Postal Code:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo Projects::get_meta_value('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
+			<p class="form-field"><label><span><?php _e('City:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo Projects::get_meta_value('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
+			<p class="form-field"><label><span><?php _e('Country:', 'projects'); ?></span></label><select name="projects[country]">
+				<?php $country = Projects::get_meta_value('country'); ?>
+				<option value="CH" <?php selected('CH', $country); ?>><?php _e('Switzerland', 'projects'); ?></option>
+				<option value="LI" <?php selected('LI', $country); ?>><?php _e('Liechtenstein', 'projects'); ?></option>
+				<option value="DE" <?php selected('DE', $country); ?>><?php _e('Germany', 'projects'); ?></option>
+				<option value="AT" <?php selected('AT', $country); ?>><?php _e('Austria', 'projects'); ?></option>
+			</select></p>
+			<input type="hidden" name="projects[lat]" value="<?php echo $lat; ?>">
+			<input type="hidden" name="projects[lng]" value="<?php echo $lng; ?>">
+		</div>
 		<?php
 	}
 	
@@ -245,10 +256,10 @@ class Projects_Writepanel {
 				<?php endif; ?>
 			<?php endforeach; ?>
 		</select></p>
-		<p class="form-field"><label><span><?php _e('Reference No.:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[reference]" value="<?php echo Projects::get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
-		<p class="form-field"><label><span><?php _e('Website:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[website]" value="<?php echo esc_url(Projects::get_meta_value('website')); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
-		<p class="form-field"><label><span><?php _e('Background:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors" name="projects[background_color]" value="<?php echo Projects::get_meta_value('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
-		<p class="form-field"><label><span><?php _e('Text:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors" name="projects[text_color]" value="<?php echo Projects::get_meta_value('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
+		<p class="form-field"><label><span><?php _e('Reference No.:', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo Projects::get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
+		<p class="form-field"><label><span><?php _e('Website:', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo esc_url(Projects::get_meta_value('website')); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
+		<p class="form-field"><label><span><?php _e('Background:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo Projects::get_meta_value('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
+		<p class="form-field"><label><span><?php _e('Text:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo Projects::get_meta_value('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
 		<?php
 	}
 	
@@ -422,12 +433,10 @@ class Projects_Writepanel {
 			// create a date entry to make querying by month or year easy 
 			$_POST['projects']['date'] = mktime(0, 0, 0, $_POST['projects']['month'], 1, $_POST['projects']['year']);
 			
-			// query map service to geocode the location
-			$_POST['projects']['lat_lng'] = '';
-			
+			// query map service to geocode the location			
 			if(!empty($_POST['projects']['address']) && !empty($_POST['projects']['postal_code']) && !empty($_POST['projects']['city'])) {
 				$address = urlencode($_POST['projects']['address'] . ', ' . $_POST['projects']['postal_code'] . ' ' . $_POST['projects']['city']);
-				$url = 'http://nominatim.openstreetmap.org/search?format=json&limit=1&q=' . $address;
+				$url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=' . $address;
 				$curl = curl_init();
 				
 				// query the api and read the json file
@@ -440,9 +449,9 @@ class Projects_Writepanel {
 				$json = json_decode($json);
 				
 				// set lat lng
-				if(!empty($json)) {
-					$_POST['projects']['lat'] = $json[0]->lat;
-					$_POST['projects']['lon'] = $json[0]->lon;
+				if(!empty($json->results)) {
+					$_POST['projects']['lat'] = $json->results[0]->geometry->location->lat;
+					$_POST['projects']['lng'] = $json->results[0]->geometry->location->lng;
 				}
 			} 
 			
