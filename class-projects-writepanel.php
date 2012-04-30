@@ -174,17 +174,23 @@ class Projects_Writepanel {
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		?>
-		<p class="box-field"><label><span><?php _e('Name:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[name]" value="<?php echo Projects::get_meta_value('name'); ?>" title="<?php _e('Name', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('Address:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[address]" value="<?php echo Projects::get_meta_value('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('Postal Code:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[postalcode]" value="<?php echo Projects::get_meta_value('postalcode'); ?>" title="<?php _e('Code', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('City:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[city]" value="<?php echo Projects::get_meta_value('city'); ?>" title="<?php _e('City', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('State:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[state]" value="<?php echo Projects::get_meta_value('state'); ?>" title="<?php _e('State', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('Country:', 'projects'); ?></span><select name="projects[country]">
-			<option value="CH" <?php selected('CH', Projects::get_meta_value('country')); ?>><?php _e('Switzerland', 'projects'); ?></option>
-			<option value="LI" <?php selected('LI', Projects::get_meta_value('country')); ?>><?php _e('Liechtenstein', 'projects'); ?></option>
-			<option value="D" <?php selected('D', Projects::get_meta_value('country')); ?>><?php _e('Germany', 'projects'); ?></option>
-			<option value="A" <?php selected('A', Projects::get_meta_value('country')); ?>><?php _e('Austria', 'projects'); ?></option>
-		</select></label></p>
+		<div id="projects-location-map-wrap">
+			<div id="projects-location-map"></div>
+		</div>
+		<p class="form-field"><label><span><?php _e('First Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo Projects::get_meta_value('first_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
+		<p class="form-field"><label><span><?php _e('Last Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo Projects::get_meta_value('last_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
+		<p class="form-field"><label><span><?php _e('Address:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo Projects::get_meta_value('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
+		<p class="form-field"><label><span><?php _e('Postal Code:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo Projects::get_meta_value('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
+		<p class="form-field"><label><span><?php _e('City:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo Projects::get_meta_value('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
+		<p class="form-field"><label><span><?php _e('Country:', 'projects'); ?></span></label><select name="projects[country]">
+			<?php $country = Projects::get_meta_value('country'); ?>
+			<option value="CH" <?php selected('CH', $country); ?>><?php _e('Switzerland', 'projects'); ?></option>
+			<option value="LI" <?php selected('LI', $country); ?>><?php _e('Liechtenstein', 'projects'); ?></option>
+			<option value="DE" <?php selected('DE', $country); ?>><?php _e('Germany', 'projects'); ?></option>
+			<option value="AT" <?php selected('AT', $country); ?>><?php _e('Austria', 'projects'); ?></option>
+		</select></p>
+		<input type="hidden" name="projects[lat]" value="<?php echo Projects::get_meta_value('lat'); ?>">
+		<input type="hidden" name="projects[lon]" value="<?php echo Projects::get_meta_value('lon'); ?>">
 		<?php
 	}
 	
@@ -198,36 +204,33 @@ class Projects_Writepanel {
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		
 		?>
-		<p class="box-field">
-			<label>
-				<span><?php _e('Date:', 'projects'); ?></span>
-				<span class="input-group">
-					<select class="select-date" name="projects[month]">
-						<?php 
-						$count = 1;
-						$month_meta = Projects::get_meta_value('month');
-						if(empty($month_meta)) {
-							$month_meta = date_i18n('n');
-						}
-						?>
-						<?php while($count <= 12) : ?>
-						<option value="<?php echo $count; ?>" <?php selected($count, $month_meta); ?>><?php echo date_i18n('m', mktime(0, 0, 0, $count, 1)); ?>-<?php echo date_i18n('M', mktime(0, 0, 0, $count, 1)); ?></option>						
-						<?php $count++; ?>
-						<?php endwhile; ?>
-					</select>
-					<select class="select-date" name="projects[year]">
-						<?php 
-						$count = 0;
-						$year = date_i18n('Y');
-						$year_meta = Projects::get_meta_value('year');
-						?>
-						<?php while($count <= 100) : ?>
-						<option value="<?php echo $year - $count; ?>" <?php selected($year - $count, $year_meta); ?>><?php echo $year - $count; ?></option>						
-						<?php $count++; ?>
-						<?php endwhile; ?>
-					</select>
-				</span>
-			</label>
+		<p class="form-field"><label><span><?php _e('Date:', 'projects'); ?></span></label>
+			<span class="input-group">
+				<select class="select-date" name="projects[month]">
+					<?php 
+					$count = 1;
+					$month_meta = Projects::get_meta_value('month');
+					if(empty($month_meta)) {
+						$month_meta = date_i18n('n');
+					}
+					?>
+					<?php while($count <= 12) : ?>
+					<option value="<?php echo $count; ?>" <?php selected($count, $month_meta); ?>><?php echo date_i18n('m', mktime(0, 0, 0, $count, 1)); ?>-<?php echo date_i18n('M', mktime(0, 0, 0, $count, 1)); ?></option>						
+					<?php $count++; ?>
+					<?php endwhile; ?>
+				</select>
+				<select class="select-date" name="projects[year]">
+					<?php 
+					$count = 0;
+					$year = date_i18n('Y');
+					$year_meta = Projects::get_meta_value('year');
+					?>
+					<?php while($count <= 100) : ?>
+					<option value="<?php echo $year - $count; ?>" <?php selected($year - $count, $year_meta); ?>><?php echo $year - $count; ?></option>						
+					<?php $count++; ?>
+					<?php endwhile; ?>
+				</select>
+			</span>
 		</p>
 		<?php
 		$args = array(
@@ -235,22 +238,17 @@ class Projects_Writepanel {
 		);
 		$stati = get_post_stati($args, 'objects');
 		?>
-		<p class="box-field">
-			<label>
-				<span><?php _e('Status:', 'projects'); ?></span>
-				<select name="projects[status]">
-					<?php foreach($stati as $status) : ?>
-						<?php if(strrpos($status->name, Projects::$post_type . '_') !== false) : ?>
-					<option value="<?php echo $status->name; ?>" <?php selected($status->name, Projects::get_meta_value('status')); ?>><?php echo $status->label; ?></option>
-						<?php endif; ?>
-					<?php endforeach; ?>
-				</select>
-			</label>
-		</p>
-		<p class="box-field"><label><span><?php _e('Reference No.:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[reference]" value="<?php echo Projects::get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('Website:', 'projects'); ?></span><input type="text" class="regular-text" name="projects[website]" value="<?php echo esc_url(Projects::get_meta_value('website')); ?>" title="<?php _e('Address', 'projects'); ?>"></label></p>
-		<p class="box-field"><label><span><?php _e('Background:', 'projects'); ?></span><span class="input-group"><input type="text" class="regular-text minicolors" name="projects[background_color]" value="<?php echo Projects::get_meta_value('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></label></p>
-		<p class="box-field"><label><span><?php _e('Text:', 'projects'); ?></span><span class="input-group"><input type="text" class="regular-text minicolors" name="projects[text_color]" value="<?php echo Projects::get_meta_value('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></label></p>
+		<p class="form-field"><label><span><?php _e('Status:', 'projects'); ?></span></label><select name="projects[status]">
+			<?php foreach($stati as $status) : ?>
+				<?php if(strrpos($status->name, Projects::$post_type . '_') !== false) : ?>
+			<option value="<?php echo $status->name; ?>" <?php selected($status->name, Projects::get_meta_value('status')); ?>><?php echo $status->label; ?></option>
+				<?php endif; ?>
+			<?php endforeach; ?>
+		</select></p>
+		<p class="form-field"><label><span><?php _e('Reference No.:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[reference]" value="<?php echo Projects::get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
+		<p class="form-field"><label><span><?php _e('Website:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[website]" value="<?php echo esc_url(Projects::get_meta_value('website')); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
+		<p class="form-field"><label><span><?php _e('Background:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors" name="projects[background_color]" value="<?php echo Projects::get_meta_value('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
+		<p class="form-field"><label><span><?php _e('Text:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors" name="projects[text_color]" value="<?php echo Projects::get_meta_value('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
 		<?php
 	}
 	
@@ -280,15 +278,7 @@ class Projects_Writepanel {
 		}
 
 		// Create the list
-		$this->create_media_list($_POST['post_id']);
-	    
-		exit;
-	}
-	
-	/**
-	 * Create the media list
-	 */
-	public function create_media_list($post_id = null) {		
+		$post_id = $_POST['post_id'];
 		$attachments = $this->get_media($post_id);
 		$post_thumbnail_id = get_post_thumbnail_id($post_id);
 
@@ -311,7 +301,9 @@ class Projects_Writepanel {
 					<?php
 				}
 			}
-		}		
+		}
+	    
+		exit;
 	}
 	
 	/**
@@ -429,6 +421,30 @@ class Projects_Writepanel {
 		if(isset($_POST['projects'])) {
 			// create a date entry to make querying by month or year easy 
 			$_POST['projects']['date'] = mktime(0, 0, 0, $_POST['projects']['month'], 1, $_POST['projects']['year']);
+			
+			// query map service to geocode the location
+			$_POST['projects']['lat_lng'] = '';
+			
+			if(!empty($_POST['projects']['address']) && !empty($_POST['projects']['postal_code']) && !empty($_POST['projects']['city'])) {
+				$address = urlencode($_POST['projects']['address'] . ', ' . $_POST['projects']['postal_code'] . ' ' . $_POST['projects']['city']);
+				$url = 'http://nominatim.openstreetmap.org/search?format=json&limit=1&q=' . $address;
+				$curl = curl_init();
+				
+				// query the api and read the json file
+				curl_setopt ($curl, CURLOPT_URL, $url);
+				curl_setopt ($curl, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt ($curl, CURLOPT_CONNECTTIMEOUT, 5);
+				$json = curl_exec($curl);
+				curl_close($curl);
+				
+				$json = json_decode($json);
+				
+				// set lat lng
+				if(!empty($json)) {
+					$_POST['projects']['lat'] = $json[0]->lat;
+					$_POST['projects']['lon'] = $json[0]->lon;
+				}
+			} 
 			
 			// save the meta
 			foreach($_POST['projects'] as $key => $value) {

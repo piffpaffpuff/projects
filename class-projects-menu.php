@@ -95,6 +95,11 @@ class Projects_Menu {
 	public function add_scripts() {
 		wp_enqueue_script('minicolors', Projects::$plugin_directory_url . 'js/jquery.miniColors.min.js', array('jquery'));
 		wp_enqueue_script('projects', Projects::$plugin_directory_url . 'js/script.js', array('jquery'));
+
+		// enque map only when required
+		if(Projects::get_meta_value('lat') && Projects::get_meta_value('lon')) {
+			wp_enqueue_script('map', 'http://openlayers.org/api/OpenLayers.js');
+		}
 	}
 
 	/**

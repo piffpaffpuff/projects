@@ -29,30 +29,100 @@ table.wp-list-table .column-title {
    Meta Boxes
 */
 
-.box-field {
+.form-field {
 	display: block;
+	margin: 0px;
+	font-size: 12px;
+	padding: 3px 3px;
+	line-height: 24px;
+	clear: both;
 	overflow: hidden;
-	margin: 0.3em 0;
-	text-align: left;
+}
+.form-field label {
+	float: left;
+	width: 90px;
+	padding: 0;
 	vertical-align: middle;
 }
-.box-field input,
-.box-field select,
-.box-field .input-group {
-	display: block;
-	float: right;
-	width: 60%;
+.form-field input,
+.form-field select {
+	float: left;
+	width: 30%;
 }
-.box-field .input-group input,
-.box-field .input-group select {
-	float: none;
-	display: inline;
+#projects-location-map-wrap {
+	display: none;
+	border: 1px solid #DFDFDF;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	-ms-border-radius: 3px;
+	-o-border-radius: 3px;
+	border-radius: 3px;
+	margin-bottom: 9px;
 }
-.box-field .input-group .select-date {
-	width: 48%;
+#projects-location-map {
+	width: 100%;
+	height: 180px;
 }
-.box-field .input-group .minicolors {
-	width: 81%;
+#projects-location-map .olMapViewport {
+	cursor: move;
+}
+#projects-location-map .olControlAttribution {
+	bottom: 0;
+}
+#projects-location-map .olControlZoomPanel {
+	top: 5px;
+	left: 5px;
+}
+#projects-location-map .olControlZoomPanel div {
+	height: 20px;
+	width: 18px;
+	border: 1px solid #BBB;
+	color: #464646;
+	background-color: #F2F2F2;
+	background-image: url("../images/map/icons.png"), url("../../../../wp-admin/images/white-grad.png");
+	background-repeat: no-repeat, repeat-x;
+	background-position: left top;
+	text-shadow: rgba(255, 255, 255, 1) 0 1px 0;
+	cursor: pointer;
+}
+#projects-location-map div.olControlZoomInItemInactive {
+	background-position: 5px 6px, left top;
+	-webkit-border-top-left-radius: 9px;
+	-moz-border-top-left-radius: 9px;
+	-ms-border-top-left-radius: 9px;
+	-o-border-top-left-radius: 9px;
+	border-top-left-radius: 9px;
+	-webkit-border-top-right-radius: 9px;
+	-moz-border-top-right-radius: 9px;
+	-ms-border-top-right-radius: 9px;
+	-o-border-top-right-radius: 9px;
+	border-top-right-radius: 9px;
+}
+#projects-location-map div.olControlZoomToMaxExtentItemInactive {
+	display: none;
+}
+#projects-location-map div.olControlZoomOutItemInactive {
+	top: 20px;
+	border-top: none;
+	background-position: 5px -28px, left top;
+	-webkit-border-bottom-left-radius: 9px;
+	-moz-border-bottom-left-radius: 9px;
+	-ms-border-bottom-left-radius: 9px;
+	-o-border-bottom-left-radius: 9px;
+	border-bottom-left-radius: 9px;
+	-webkit-border-bottom-right-radius: 9px;
+	-moz-border-bottom-right-radius: 9px;
+	-ms-border-bottom-right-radius: 9px;
+	-o-border-bottom-right-radius: 9px;
+	border-bottom-right-radius: 9px;
+}
+#projects-location-map #OL_Icon_26 {
+	background-image: url("../images/map/markers.png");
+	background-repeat: no-repeat;
+	background-position: 0px 0px;
+}
+#projects-location-map #OL_Icon_26 img {
+	display: none;
 }
 
 /*
