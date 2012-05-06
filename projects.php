@@ -104,7 +104,7 @@ class Projects {
 	 * Query projects
 	 */
 	public function query_projects($args = null) {
-		global $projects, $paged;
+		global $paged;
 	
 		// pagination support when the projects 
 		// page is the frontpage and for all other
@@ -119,7 +119,7 @@ class Projects {
 	
 		// default args
 		$args = is_array($args) ? $args : array();
-		$args['post_type'] = Projects::$post_type;
+		$args['post_type'] = self::$post_type;
 		$args['orderby'] = isset($args['orderby']) ? $args['orderby'] : $this->order_by;
 		$args['meta_key'] = isset($args['meta_key']) ? $args['meta_key'] : $this->meta_key;
 		$args['paged'] = $paged;
@@ -132,7 +132,7 @@ class Projects {
 	 */
 	public function adjacent_post_sort() {
 		/*
-			TODO: make order by work with meta value
+			TODO: make 'orderby' work with $this->meta_key
 			
 			"ORDER BY p.post_date $order LIMIT 1"
 		*/
@@ -207,25 +207,34 @@ function query_projects($args = null) {
 /**
  * Get the media
  */
+function get_project_media($post_id = null, $mime = null) {
+	global $projects;
+	return $projects->writepanel->get_media($post_id, $mime);
+}
+
+/**
+ * Show the media
+ */
 function project_media($size = null, $post_id = null, $mime = null) {
 	global $projects;
 	$post_thumbnail_id = get_post_thumbnail_id($post_id);
 
 	?>
 	<ul class="project-media">
-		<?php foreach($projects->writepanel->get_media($post_id, $mime) as $attachment) : ?>
+		<?php foreach(get_project_media($post_id, $mime) as $attachment) : ?>
 			<?php if($post_thumbnail_id != $attachment->ID) : ?>
 		<li>
 			<a href="<?php echo get_attachment_link($attachment->ID); ?>">
 			<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
 				<?php 
 				$media_size = $size;
-				
+
 				if(empty($size)) {
 					$media_size = $attachment->default_size;
 				} 
 				?>
-				<?php echo wp_get_attachment_image($attachment->ID, $media_size); ?>
+				<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
+				<img src="<?php echo $attachment_src[0]; ?>" />
 			<?php else : ?>
 				
 			<?php endif; ?>
@@ -238,25 +247,20 @@ function project_media($size = null, $post_id = null, $mime = null) {
 }
 
 /**
- * Thumbnail
+ * Get the Thumbnail
+ */
+function get_project_thumbnail($size = 'thumbnail', $post_id = null) {	
+	$attachment_id = get_post_thumbnail_id($post_id);
+	$attachment_src = wp_get_attachment_image_src($post_id, $size);
+	return '<img src="' . $attachment_src[0] . '" />';
+}
+
+/**
+ * Show the Thumbnail
  */
 function project_thumbnail($size = 'thumbnail', $post_id = null) {	
-	global $projects;
 	$attachment_id = get_post_thumbnail_id($post_id);
-
-	// load the first image attachment id when no thumbnail
-	/*
-	if(empty($attachment_id)) {
-		foreach($projects->writepanel->get_media() as $attachment) {
-			if($projects->writepanel->is_web_image($attachment->post_mime_type)) {
-				$attachment_id = $attachment->ID;
-				break;
-			}
-		}
-	} 
-	*/
-	
-	echo wp_get_attachment_image($attachment_id, $size);
+	echo get_project_thumbnail($size, $attachment_id);
 }
 
 /**

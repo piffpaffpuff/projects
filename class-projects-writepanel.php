@@ -60,6 +60,7 @@ class Projects_Writepanel {
 	 * Set the media fields
 	 */
 	public function edit_media_options($form_fields, $post) {			
+		/*
 		$form_fields['image_alt']['value'] = '';
 		$form_fields['image_alt']['input'] = 'hidden';
 		
@@ -69,15 +70,16 @@ class Projects_Writepanel {
 		$form_fields['post_content']['value'] = '';
 		$form_fields['post_content']['input'] = 'hidden';
 		
-		$form_fields['url']['value'] = '';
-		$form_fields['url']['input'] = 'hidden';
-		
-		$form_fields['align']['value'] = 'left';
-		$form_fields['align']['input'] = 'hidden';
-		
 		$form_fields['image-caption']['value'] = 'caption';
 		$form_fields['image-caption']['input'] = 'hidden';
+		*/
 		
+		$form_fields['url']['value'] = '';
+		$form_fields['url']['input'] = 'hidden';
+
+		$form_fields['align']['value'] = 'left';
+		$form_fields['align']['input'] = 'hidden';
+
 		$form_fields['image-size']['value'] = 'full';
 		$form_fields['image-size']['input'] = 'hidden';
 				
@@ -187,12 +189,12 @@ class Projects_Writepanel {
 		</div>
 		<?php endif; ?>
 		<div class="location">
-			<p class="form-field"><label><span><?php _e('First Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo Projects::get_meta_value('first_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
-			<p class="form-field"><label><span><?php _e('Last Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo Projects::get_meta_value('last_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
-			<p class="form-field"><label><span><?php _e('Address:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo Projects::get_meta_value('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
-			<p class="form-field"><label><span><?php _e('Postal Code:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo Projects::get_meta_value('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
-			<p class="form-field"><label><span><?php _e('City:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo Projects::get_meta_value('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
-			<p class="form-field"><label><span><?php _e('Country:', 'projects'); ?></span></label><select name="projects[country]">
+			<p class="form-fieldset"><label><span><?php _e('First Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo Projects::get_meta_value('first_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Last Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo Projects::get_meta_value('last_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Address:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo Projects::get_meta_value('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Postal Code:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo Projects::get_meta_value('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('City:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo Projects::get_meta_value('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Country:', 'projects'); ?></span></label><select name="projects[country]">
 				<?php $country = Projects::get_meta_value('country'); ?>
 				<option value="CH" <?php selected('CH', $country); ?>><?php _e('Switzerland', 'projects'); ?></option>
 				<option value="LI" <?php selected('LI', $country); ?>><?php _e('Liechtenstein', 'projects'); ?></option>
@@ -215,7 +217,7 @@ class Projects_Writepanel {
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		
 		?>
-		<p class="form-field"><label><span><?php _e('Date:', 'projects'); ?></span></label>
+		<p class="form-fieldset"><label><span><?php _e('Date:', 'projects'); ?></span></label>
 			<span class="input-group">
 				<select class="select-date" name="projects[month]">
 					<?php 
@@ -249,17 +251,18 @@ class Projects_Writepanel {
 		);
 		$stati = get_post_stati($args, 'objects');
 		?>
-		<p class="form-field"><label><span><?php _e('Status:', 'projects'); ?></span></label><select name="projects[status]">
+		<p class="form-fieldset"><label><span><?php _e('Status:', 'projects'); ?></span></label><select name="projects[status]">
 			<?php foreach($stati as $status) : ?>
 				<?php if(strrpos($status->name, Projects::$post_type . '_') !== false) : ?>
 			<option value="<?php echo $status->name; ?>" <?php selected($status->name, Projects::get_meta_value('status')); ?>><?php echo $status->label; ?></option>
 				<?php endif; ?>
 			<?php endforeach; ?>
 		</select></p>
-		<p class="form-field"><label><span><?php _e('Reference No.:', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo Projects::get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
-		<p class="form-field"><label><span><?php _e('Website:', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo esc_url(Projects::get_meta_value('website')); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
-		<p class="form-field"><label><span><?php _e('Background:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo Projects::get_meta_value('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
-		<p class="form-field"><label><span><?php _e('Text:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo Projects::get_meta_value('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
+		<?php $website = Projects::get_meta_value('website'); ?>
+		<p class="form-fieldset"><label><span><?php _e('Reference No.:', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo Projects::get_meta_value('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
+		<p class="form-fieldset"><label><span><?php _e('Website:', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo $website; ?>" title="<?php _e('Address', 'projects'); ?>"><?php if(!empty($website)) : ?><a href="<?php echo $website; ?>" target="_blank" class="external"></a><?php endif; ?></p>
+		<p class="form-fieldset"><label><span><?php _e('Background:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo Projects::get_meta_value('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
+		<p class="form-fieldset"><label><span><?php _e('Text:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo Projects::get_meta_value('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
 		<?php
 	}
 	
