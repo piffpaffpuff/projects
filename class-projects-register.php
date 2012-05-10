@@ -3,8 +3,8 @@
 /**
  * Menu class
  */
-if (!class_exists('Projects_Menu')) {
-class Projects_Menu {
+if (!class_exists('Projects_Register')) {
+class Projects_Register {
 	
 	public $slug;
 
@@ -128,42 +128,42 @@ class Projects_Menu {
 		); 
 	
 		register_post_type(Projects::$post_type, $args);
-	}
-		
+	}	
+	
 	/**
 	 * Register the taxonomies
 	 */
 	public function register_taxonomies() {		
-		$this->add_taxonomy(__('Types', 'projects'), __('Type', 'projects'));
-		$this->add_taxonomy(__('Techniques', 'projects'), __('Technique', 'projects'));
-		$this->add_taxonomy(__('Tasks', 'projects'), __('Task', 'projects'));
-		$this->add_taxonomy(__('Agencies', 'projects'), __('Agency', 'projects'));
-		$this->add_taxonomy(__('Clients', 'projects'), __('Client', 'projects'));
-		$this->add_taxonomy(__('Awards', 'projects'), __('Award', 'projects'));
-		$this->add_taxonomy(__('Tags', 'projects'), __('Tag', 'projects'), array('herarchical' => false));
+		$this->add_taxonomy(__('Types', 'projects'), __('Type', 'projects'), 'type');
+		$this->add_taxonomy(__('Techniques', 'projects'), __('Technique', 'projects'), 'technique');
+		$this->add_taxonomy(__('Tasks', 'projects'), __('Task', 'projects'), 'task');
+		$this->add_taxonomy(__('Agencies', 'projects'), __('Agency', 'projects'), 'agency');
+		$this->add_taxonomy(__('Clients', 'projects'), __('Client', 'projects'), 'client');
+		$this->add_taxonomy(__('Awards', 'projects'), __('Award', 'projects'), 'award');
+		$this->add_taxonomy(__('Tags', 'projects'), __('Tag', 'projects'), 'tag', array('herarchical' => false));
 	}
 	
 	/**
 	 * Create a custom taxonomy
 	 */	
-	public function add_taxonomy($name, $singular_name, $args = null) {
-		$taxonomy_name = Projects::$post_type . '_' . sanitize_key($singular_name);
+	public function add_taxonomy($plural_label, $singular_label, $key, $args = null) {
+		$taxonomy_name = $this->generate_internal_name($key);
 	
 		$labels = array(
-		    'name' => $name, 'projects',
-		    'singular_name' => $singular_name, 'projects',
-		    'search_items' =>  sprintf(__('Search %s', 'projects'), $name),
-		    'all_items' => sprintf(__('All %s', 'projects'), $name),
-		    'parent_item' => sprintf(__( 'Parent %s', 'projects'), $name),
-    		'parent_item_colon' => sprintf(__( 'Parent %s:', 'projects'), $name),
-		    'edit_item' => sprintf(__('Edit %s', 'projects'), $singular_name),
-		    'update_item' => sprintf(__('Update %s', 'projects'), $singular_name),
-		    'add_new_item' => sprintf(__('Add New %s', 'projects'), $singular_name),
-		    'new_item_name' => sprintf(__('New %s Name', 'projects'), $singular_name),
-		    'separate_items_with_commas' => sprintf(__('Separate %s with commas', 'projects'), $name),
-		    'add_or_remove_items' => sprintf(__('Add or remove %s', 'projects'), $name),
-		    'choose_from_most_used' => sprintf(__('Choose from the most used %s', 'projects'), $name),
-		    'menu_name' => $name
+		    'name' => $plural_label, 'projects',
+		    'singular_name' => $singular_label, 'projects',
+		    'search_items' =>  sprintf(__('Search %s', 'projects'), $plural_label),
+		    'all_items' => sprintf(__('All %s', 'projects'), $plural_label),
+		    'parent_item' => sprintf(__( 'Parent %s', 'projects'), $plural_label),
+    		'parent_item_colon' => sprintf(__( 'Parent %s:', 'projects'), $plural_label),
+		    'edit_item' => sprintf(__('Edit %s', 'projects'), $singular_label),
+		    'update_item' => sprintf(__('Update %s', 'projects'), $singular_label),
+		    'add_new_item' => sprintf(__('Add New %s', 'projects'), $singular_label),
+		    'new_item_name' => sprintf(__('New %s Name', 'projects'), $singular_label),
+		    'separate_items_with_commas' => sprintf(__('Separate %s with commas', 'projects'), $plural_label),
+		    'add_or_remove_items' => sprintf(__('Add or remove %s', 'projects'), $plural_label),
+		    'choose_from_most_used' => sprintf(__('Choose from the most used %s', 'projects'), $plural_label),
+		    'menu_name' => $plural_label
 		);
 		
 		$args = is_array($args) ? $args : array();	
@@ -174,55 +174,69 @@ class Projects_Menu {
 		
 		register_taxonomy($taxonomy_name, Projects::$post_type, $args);
 	}
-	
-	/**
-	 * Check if the taxonomy name is a label or the database query name
-	 */	
-	public function is_taxonomy_name($name) {
-		if(strrpos($name, Projects::$post_type . '_') !== false) {
-			return true;
-		}
-		return false;
-	}
-	
+		
 	/**
 	 * Remove a custom taxonomy
 	 */	
-	public function remove_taxonomy($name) {
+	public function remove_taxonomy($key) {
 		global $wp_taxonomies;
 		
 		$args = array(
-			'label' => $name
+			'name' => $this->get_taxonomy_internal_name($key)
 		);
 		
 		$taxonomies = $this->get_added_taxonomies($args, 'names');
 
 		foreach($taxonomies as $taxonomy) {
-			if(taxonomy_exists($taxonomy) && $this->is_taxonomy_name($taxonomy)) {
+			if(taxonomy_exists($taxonomy)) {
 				unset($wp_taxonomies[$taxonomy]);
 			}
 		}
-		
+	}
+	
+	/**
+	 * Get taxonomy internal database name from label
+	 */
+	public function get_taxonomy_internal_name($key) {		
+		// get the taxonomy internal database name and 
+		// return the first that was found.
+		if(self::is_internal_name($key)) {
+			$taxonomy = $key;
+		} else {
+			$taxonomy = $this->generate_internal_name($key);
+		}
+		return $taxonomy;
 	}
 
+	/**
+	 * Get all registered taxonomies
+	 */
+	public function get_added_taxonomies($args = null, $type = 'objects') {
+		$args = is_array($args) ? $args : array();
+		$args['show_ui'] = isset($args['show_ui']) ? $args['show_ui'] : true;
+		$args['object_type'] = array(Projects::$post_type);
+	
+		return get_taxonomies($args, $type);
+	}
+	
 	/**
 	 * Register the post status
 	 */
 	public function register_status() {	
-		$this->add_status(__('Completed', 'projects'));
-		$this->add_status(__('In Progress', 'projects'));
-		$this->add_status(__('Planned', 'projects'));
+		$this->add_status(__('Completed', 'projects'), 'completed');
+		$this->add_status(__('In Progress', 'projects'), 'inprogress');
+		$this->add_status(__('Planned', 'projects'), 'planned');
 	}
 	
 	/**
 	 * Create a custom post status
 	 */	
-	public function add_status($name, $args = null) {
-		$status_name = Projects::$post_type . '_' . sanitize_key($name);
+	public function add_status($label, $key, $args = null) {
+		$status_name = $this->generate_internal_name($key);
 
 		$args = is_array($args) ? $args : array();
-		$args['label'] = isset($args['label']) ? $args['label'] : __($name, 'projects');
-		$args['label_count'] = isset($args['label_count']) ? $args['label_count'] : _n_noop($name . ' <span class="count">(%s)</span>', $name . ' <span class="count">(%s)</span>' );
+		$args['label'] = isset($args['label']) ? $args['label'] : __($label, 'projects');
+		$args['label_count'] = isset($args['label_count']) ? $args['label_count'] : _n_noop($label . ' <span class="count">(%s)</span>', $label . ' <span class="count">(%s)</span>' );
 		
 		register_post_status($status_name, $args);
 	}
@@ -322,16 +336,22 @@ class Projects_Menu {
 			}			
 		}	
 	}
-				
-	/**
-	 * Get all registered taxonomies
-	 */
-	public function get_added_taxonomies($args = null, $type = 'objects') {
-		$args = is_array($args) ? $args : array();
-		$args['show_ui'] = isset($args['show_ui']) ? $args['show_ui'] : true;
-		$args['object_type'] = array(Projects::$post_type);
 	
-		return get_taxonomies($args, $type);
+	/**
+	 * Generate an internal name
+	 */	
+	public function generate_internal_name($key) {
+		return Projects::$post_type . '_' . $key;
+	}
+	
+	/**
+	 * Check if it is an internal name
+	 */	
+	public static function is_internal_name($key) {
+		if(strrpos($key, Projects::$post_type . '_') !== false) {
+			return true;
+		} 
+		return false;
 	}
 }
 }

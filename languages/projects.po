@@ -1,0 +1,274 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Projects\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-05-09 18:06+0100\n"
+"PO-Revision-Date: 2012-05-09 18:20+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: __;gettext\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: /Users/negro/Projekte/iwannegro/201211 portfolio/website/programming/wp-content/plugins/projects\n"
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:105
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:117
+msgid "Projects"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:106
+msgid "Project"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:107
+msgid "Add New"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:108
+msgid "Add New Project"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:109
+msgid "Edit Project"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:110
+msgid "New Project"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:111
+msgid "All Projects"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:112
+msgid "View Project"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:113
+msgid "Search Projects"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:114
+msgid "No Projects found"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:115
+msgid "No Projects found in Trash"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:137
+msgid "Types"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:137
+msgid "Type"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:138
+msgid "Techniques"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:138
+msgid "Technique"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:139
+msgid "Tasks"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:139
+msgid "Task"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:140
+msgid "Agencies"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:140
+msgid "Agency"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:141
+msgid "Clients"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:141
+msgid "Client"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:142
+msgid "Awards"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:142
+msgid "Award"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:143
+msgid "Tags"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:143
+msgid "Tag"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:155
+#, php-format
+msgid "Search %s"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:156
+#, php-format
+msgid "All %s"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:157
+#, php-format
+msgid "Parent %s"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:158
+#, php-format
+msgid "Parent %s:"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:159
+#, php-format
+msgid "Edit %s"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:160
+#, php-format
+msgid "Update %s"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:161
+#, php-format
+msgid "Add New %s"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:162
+#, php-format
+msgid "New %s Name"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:163
+#, php-format
+msgid "Separate %s with commas"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:164
+#, php-format
+msgid "Add or remove %s"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:165
+#, php-format
+msgid "Choose from the most used %s"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:230
+msgid "Completed"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:231
+msgid "In Progress"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:232
+msgid "Planned"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:256
+msgid "Thumbnail"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:257
+msgid "Title"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:267
+msgid "Date"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:322
+msgid "None"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:338
+#, php-format
+msgid "No %s"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-settings.php:45
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-writepanel.php:292
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-writepanel.php:138
+msgid "Size"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-writepanel.php:166
+msgid "Media"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-writepanel.php:167
+msgid "General"
+msgstr ""
+
+#: /Users/negro/Projekte/iwannegro/201211
+#: portfolio/website/programming/wp-content/plugins/projects/class-projects-writepanel.php:168
+msgid "Location"
+msgstr ""
+

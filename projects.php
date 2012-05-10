@@ -43,7 +43,7 @@ class Projects {
 	public $meta_key;
 
 	public $installation;
-	public $menu;
+	public $register;
 	public $writepanel;
 	public $settings;
 
@@ -69,14 +69,15 @@ class Projects {
 		
 		$this->installation = new Projects_Installation();
 		$this->installation->load();
-		$this->menu = new Projects_Menu();
-		$this->menu->load();
+		$this->register = new Projects_Register();
+		$this->register->load();
 		$this->writepanel = new Projects_Writepanel();
 		$this->writepanel->load();
 		$this->settings = new Projects_Settings();
 		$this->settings->load();
 		
 		// load hooks
+		add_action('plugins_loaded', array($this, 'load_translation'));
 		add_action('init', array($this, 'load_hooks'));
 	}
 	
@@ -85,18 +86,25 @@ class Projects {
 	 */
 	public function includes() {
 		require_once('class-projects-installation.php');	
-		require_once('class-projects-menu.php');	
+		require_once('class-projects-register.php');	
+		require_once('class-projects-walkers.php');	
 		require_once('class-projects-writepanel.php');	
 		require_once('class-projects-settings.php');	
 	}
-
+	
+	/**
+	 * Load the translations
+	 */
+	public function load_translation() {
+   		load_plugin_textdomain('projects', false, dirname(self::$plugin_basename) . '/languages/');
+	}
+	
 	/**
 	 * Load the main hooks
 	 */
 	public function load_hooks() {
 		add_filter('get_previous_post_sort', array($this, 'adjacent_post_sort'));
 		add_filter('get_next_post_sort', array($this, 'adjacent_post_sort'));
-
    		add_theme_support('post-thumbnails', array(Projects::$post_type));
 	}
 	
@@ -183,6 +191,7 @@ class Projects {
 		}
 		return get_post_meta($post_id, '_projects_' . $key, true);
 	}
+	
 }
 }
 
@@ -247,70 +256,42 @@ function project_media($size = null, $post_id = null, $mime = null) {
 }
 
 /**
- * Get the Thumbnail
+ * Get the Thumbnail source info
  */
-function get_project_thumbnail($size = 'thumbnail', $post_id = null) {	
+function get_project_thumbnail_src($size = 'thumbnail', $post_id = null) {	
 	$attachment_id = get_post_thumbnail_id($post_id);
-	$attachment_src = wp_get_attachment_image_src($post_id, $size);
-	return '<img src="' . $attachment_src[0] . '" />';
+	$attachment_src = wp_get_attachment_image_src($attachment_id, $size);
+	return $attachment_src;
 }
 
 /**
  * Show the Thumbnail
  */
 function project_thumbnail($size = 'thumbnail', $post_id = null) {	
-	$attachment_id = get_post_thumbnail_id($post_id);
-	echo get_project_thumbnail($size, $attachment_id);
-}
-
-/**
- * Get added taxonomies
- */
-function get_registered_projects_taxonomies() {
-	global $projects;
-	return $projects->menu->get_added_taxonomies(null, 'names');
+	$src = get_project_thumbnail_src($size, $post_id);
+	?>
+	<img src="<?php echo $src[0]; ?>" />
+	<?php
 }
 
 /**
  * Get terms
  */
-function get_project_taxonomy($name, $args = null) {
+function get_project_taxonomy($key, $args = null) {
 	global $projects, $post;
-	
-	// find the taxonomy
-	if($projects->menu->is_taxonomy_name($name)) {
-		$taxonomy = $name;
-	} else {
-		$tax_args = array(
-			'label' => $name
-		);
-		$taxonomies = $projects->menu->get_added_taxonomies($tax_args, 'names');
-		reset($taxonomies);
-		$taxonomy = key($taxonomies);
-	}
-	
-	return wp_get_post_terms($post->ID, $taxonomy, $args);
+	$taxonomy = $projects->register->get_taxonomy_internal_name($key);
+	return wp_get_object_terms($post->ID, $taxonomy, $args);
 }
 
 /**
  * List terms
  */
-function project_taxonomy($name, $args = null) {
-	global $projects;
-		
-	// output the list
-	$terms = get_project_taxonomy($name, $args); 
-	?>
-	<ul class="project-taxonomy project-taxonomy-<?php echo sanitize_key($name); ?>">
-	<?php if(!isset($terms->errors)) : ?>
-		<?php foreach($terms as $term) : ?>
-		<li>
-			<a href="<?php echo get_term_link($term); ?>"><?php echo $term->name; ?></a>
-		</li>
-		<?php endforeach; ?>
-	<?php endif; ?>
-	</ul>
-	<?php
+function project_taxonomy($key, $args = null) {
+	global $projects, $post;
+	$args = is_array($args) ? $args : array();
+	$args['taxonomy'] = $projects->register->get_taxonomy_internal_name($key);
+	$args['walker'] = new Projects_Project_Taxonomy_Walker($post->ID, $args['taxonomy']);
+	return wp_list_categories($args);
 }
 
 /**
@@ -319,6 +300,14 @@ function project_taxonomy($name, $args = null) {
 function get_project_meta($key) {
 	global $projects;
 	return Projects::get_meta_value($key);
+}
+
+/**
+ * Show project meta
+ */
+function project_meta($key) {
+	global $projects;
+	return get_project_meta($key);
 }
 
 /**
@@ -342,33 +331,19 @@ function project_website($name = null, $target = '_blank') {
 }
 
 /**
- * Show project month
- */
-function project_month() {
-	echo get_project_meta('month');
-}
-
-/**
- * Show project month
- */
-function project_year() {
-	echo get_project_meta('year');
-}
-
-/**
  * Add taxonomy
  */
-function add_projects_taxonomy($name, $singular_name, $args = null) {
+function add_projects_taxonomy($plural_label, $singular_label, $key, $args = null) {
 	global $projects;
-	$projects->menu->add_taxonomy($name, $singular_name, $args);
+	$projects->register->add_taxonomy($plural_label, $singular_label, $key, $args);
 }
 
 /**
  * Remove taxonomy
  */
-function remove_projects_taxonomy($name) {
+function remove_projects_taxonomy($key) {
 	global $projects;
-	$projects->menu->remove_taxonomy($name);
+	$projects->register->remove_taxonomy($key);
 }
 
 /**

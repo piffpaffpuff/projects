@@ -112,27 +112,28 @@ class Projects_Writepanel {
 				if ($image_size == $meta_size) {
 					// select the size
 					if($enabled) {
-						$checked = ' checked="checked"';
+						$checked = ' selected="selected"';
 					} else {
 						$meta_size = '';
 					}
 				} elseif(empty($meta_size) && $enabled && $image_size != 'thumbnail') {
 					// if it is not enabled, default to the first available size that's bigger than a thumbnail
 					$meta_size = $image_size;
-					$checked = ' checked="checked"';
+					$checked = ' selected="selected"';
 				}
 				
-				// output the html
-				$html .= '<div class="image-size-item"><input type="radio" '.disabled($enabled, false, false).' name="'.$form_name.'" id="'.$css_id.'" value="'.$image_size.'" '.$checked.' />';
-				$html .= '<label for="'.$css_id.'">'.ucfirst($image_size).'</label>';
-				
+				// add the item to the list
+				$html .= '<option class="image-size-item" name="'.$form_name.'" value="'.$image_size.'" '.$checked.' '.disabled($enabled, false, false).'>'.ucfirst($image_size);
+							
 				// only show the dimensions if that choice is available
 				if($enabled) {
-					$html .= '<label for="'.$css_id.'" class="help">'.sprintf('(%d&nbsp;&times;&nbsp;%d)', $downsize[1], $downsize[2]).'</label>';
+					$html .= ' '.sprintf('(%d&nbsp;&times;&nbsp;%d)', $downsize[1], $downsize[2]);
 				}
-	
-				$html .= '</div>';
+				
+				$html .= '</option>';
 			}
+			
+			$html = '<select class="image-size-select">' . $html . '</select>';
 			
 			$form_fields['projects_default_image_size']['label'] = __('Size', 'projects');
 			$form_fields['projects_default_image_size']['input'] = 'html';
@@ -253,7 +254,7 @@ class Projects_Writepanel {
 		?>
 		<p class="form-fieldset"><label><span><?php _e('Status:', 'projects'); ?></span></label><select name="projects[status]">
 			<?php foreach($stati as $status) : ?>
-				<?php if(strrpos($status->name, Projects::$post_type . '_') !== false) : ?>
+				<?php if(Projects_Register::is_internal_name($status->name)) : ?>
 			<option value="<?php echo $status->name; ?>" <?php selected($status->name, Projects::get_meta_value('status')); ?>><?php echo $status->label; ?></option>
 				<?php endif; ?>
 			<?php endforeach; ?>
