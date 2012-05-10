@@ -226,21 +226,20 @@ function get_project_media($post_id = null, $mime = null) {
  */
 function project_media($size = null, $post_id = null, $mime = null) {
 	global $projects;
-	$post_thumbnail_id = get_post_thumbnail_id($post_id);
 
 	?>
 	<ul class="project-media">
 		<?php foreach(get_project_media($post_id, $mime) as $attachment) : ?>
-			<?php if($post_thumbnail_id != $attachment->ID) : ?>
 		<li>
 			<a href="<?php echo get_attachment_link($attachment->ID); ?>">
 			<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
-				<?php 
-				$media_size = $size;
-
-				if(empty($size)) {
+				<?php 				
+				// overwrite the size when the attachment has set a custom one
+				if(!empty($attachment->default_size)) {
 					$media_size = $attachment->default_size;
-				} 
+				} else {
+					$media_size = $size;
+				}
 				?>
 				<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
 				<img src="<?php echo $attachment_src[0]; ?>" />
@@ -249,7 +248,6 @@ function project_media($size = null, $post_id = null, $mime = null) {
 			<?php endif; ?>
 			</a>
 		</li>
-			<?php endif; ?>
 		<?php endforeach; ?>
 	</ul>
 	<?php

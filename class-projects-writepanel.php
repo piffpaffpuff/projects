@@ -59,21 +59,7 @@ class Projects_Writepanel {
 	/**
 	 * Set the media fields
 	 */
-	public function edit_media_options($form_fields, $post) {			
-		/*
-		$form_fields['image_alt']['value'] = '';
-		$form_fields['image_alt']['input'] = 'hidden';
-		
-		$form_fields['post_excerpt']['value'] = '';
-		$form_fields['post_excerpt']['input'] = 'hidden';
-		
-		$form_fields['post_content']['value'] = '';
-		$form_fields['post_content']['input'] = 'hidden';
-		
-		$form_fields['image-caption']['value'] = 'caption';
-		$form_fields['image-caption']['input'] = 'hidden';
-		*/
-		
+	public function edit_media_options($form_fields, $post) {		
 		$form_fields['url']['value'] = '';
 		$form_fields['url']['input'] = 'hidden';
 
@@ -89,60 +75,51 @@ class Projects_Writepanel {
 			$meta_size = Projects::get_meta_value('default_image_size', $post->ID);
 			$image_sizes = get_intermediate_image_sizes();
 			$image_sizes[] = 'full';
+			$form_name = 'attachments['.$post->ID.'][projects_default_image_size]';
+						
+			// check if the saved size is selectable to activate the 'none' option
+			$downsize = image_downsize($post->ID, $meta_size);
+			if(empty($downsize[3]) && $meta_size != 'full') {
+				$meta_size = null;
+			} 
 			
-			if(empty($meta_size)) {
-				$meta_size = get_option('projects_default_image_size');
-			}
-			
+			// build the selection
+			$html .= '<select class="image-size-select" name="' . $form_name . '">';
+			$html .= '<option class="image-size-item" value="" ' . selected($meta_size, null, false) . '>' . __('None', 'projects') . '</option>';
+						
 			// go through all sizes and generate the fields
 			foreach($image_sizes as $image_size) {
-				$css_id = 'projects-default-image-size-' . $image_size . '-' . $post->ID;
-				$form_name = 'attachments['.$post->ID.'][projects_default_image_size]';
-				$checked= '';
+				$css_id = 'projects-default-image-size-' . $image_size . '-' . $post->ID;				
 				
-				// check if the size is selectable
+				// check if the current size is selectable
 				$downsize = image_downsize($post->ID, $image_size);
-				if(!empty($downsize[3]) || $image_size == 'full') {
-					$enabled = true;
-				} else {
+				if(empty($downsize[3]) && $image_size != 'full') {
 					$enabled = false;
+				} else {
+					$enabled = true;
 				}
-				
-				// check if the current size is the saved size
-				if ($image_size == $meta_size) {
-					// select the size
-					if($enabled) {
-						$checked = ' selected="selected"';
-					} else {
-						$meta_size = '';
-					}
-				} elseif(empty($meta_size) && $enabled && $image_size != 'thumbnail') {
-					// if it is not enabled, default to the first available size that's bigger than a thumbnail
-					$meta_size = $image_size;
-					$checked = ' selected="selected"';
-				}
-				
+
 				// add the item to the list
-				$html .= '<option class="image-size-item" name="'.$form_name.'" value="'.$image_size.'" '.$checked.' '.disabled($enabled, false, false).'>'.ucfirst($image_size);
+				$html .= '<option class="image-size-item" name="' . $form_name . '" value="' . $image_size . '" ' . selected($meta_size, $image_size, false) . ' ' . disabled($enabled, false, false) . '>' . ucfirst($image_size);
 							
 				// only show the dimensions if that choice is available
 				if($enabled) {
-					$html .= ' '.sprintf('(%d&nbsp;&times;&nbsp;%d)', $downsize[1], $downsize[2]);
+					$html .= ' ' . sprintf('(%d &times; %d)', $downsize[1], $downsize[2]);
 				}
 				
 				$html .= '</option>';
 			}
 			
-			$html = '<select class="image-size-select">' . $html . '</select>';
+			$html .= '</select>';
 			
-			$form_fields['projects_default_image_size']['label'] = __('Size', 'projects');
+			$form_fields['projects_default_image_size']['label'] = __('Default Size', 'projects');
 			$form_fields['projects_default_image_size']['input'] = 'html';
 			$form_fields['projects_default_image_size']['html'] = $html;
 		}
 			
 		return $form_fields;
 	}
-	
+
 	/**
 	 * Save the media fields
 	 */
@@ -150,6 +127,7 @@ class Projects_Writepanel {
 		// $attachment part of the form $_POST ($_POST[attachments][postID])
 		// $post attachments wp post array - will be saved after returned
 		// $post['post_type'] == 'attachment'
+		print_r($attachment);
 		if(empty($attachment['projects_default_image_size'])) {
 			delete_post_meta($post['ID'], '_projects_default_image_size');
 		} else {
@@ -358,6 +336,9 @@ class Projects_Writepanel {
 			$post_id = $post->ID;
 		}
 		
+		// get the post thumbnail id
+		$post_thumbnail_id = get_post_thumbnail_id($post_id);
+
 		// get all media
 		$args = array( 
 			'post_type' => 'attachment', 
@@ -378,19 +359,20 @@ class Projects_Writepanel {
 		
 		// add the default size to the attachments
 		foreach($attachments as $attachment) {
-			$size = null;
-			
-			if($this->is_web_image($attachment->post_mime_type)) {		
-				$size = Projects::get_meta_value('default_image_size', $attachment->ID);
-
-				// fall back to options setting
-				if(empty($size)) {
-					$size = get_option('projects_default_image_size');
+			if($post_thumbnail_id == $attachment->ID) {
+				// do not include the post thumbnail in the list
+				unset($attachments[$attachment->ID]);
+			} else {
+				// set the default size
+				$size = null;
+				
+				if($this->is_web_image($attachment->post_mime_type)) {		
+					$size = Projects::get_meta_value('default_image_size', $attachment->ID);
 				}
+				
+				// add the default size to the attachment
+				$attachment->default_size = $size;
 			}
-			
-			// add the default size to the attachment
-			$attachment->default_size = $size;
 		} 
 
 		return $attachments;

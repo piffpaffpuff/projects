@@ -48,11 +48,6 @@ class Projects_Installation {
 		if(!get_option('projects_base_page_id')) {
 			add_option('projects_base_page_id', $page_id);
 		}
-		
-		// set the image size
-		if(!get_option('projects_default_image_size')) {
-			add_option('projects_default_image_size', 'medium');
-		}
 	}
 }
 }

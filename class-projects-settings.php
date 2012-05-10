@@ -79,27 +79,6 @@ class Projects_Settings {
 						</tr>
 					</tbody>
 				</table>
-				<h3><?php _e('Image Sizes', 'projects'); ?></h3>
-				<table class="form-table">
-					<tbody>
-						<tr>
-							<th>
-								<label for="projects_default_image_size"><?php _e('Default Image Size', 'projects'); ?></label>
-							</th>
-							<td>
-								<select name="projects_default_image_size">
-									<?php 
-									$sizes = get_intermediate_image_sizes();
-									$sizes[] = 'full';
-									?>
-									<?php foreach($sizes as $size) : ?>
-										<option value="<?php echo $size; ?>" <?php selected($size, get_option('projects_default_image_size')); ?>><?php echo ucfirst($size); ?></option>
-									<?php endforeach; ?>
-								</select>
-							</td>
-						</tr>
-					</tbody>
-				</table>
 				
 				<input type="hidden" name="<?php echo $this->hidden_submit; ?>" value="submitted">
 				
