@@ -84,9 +84,8 @@ class Projects_Writepanel {
 			} 
 			
 			// build the selection
-			$html .= '<div class="image-size-item"><input type="radio" name="' . $form_name . '" id="projects-default-image-size-none" value="" ' . checked($meta_size, null, false) . ' />';
-			$html .= '<label for="projects-default-image-size-none">' . __('None', 'projects') . '</label>';
-			$html .= '</div>';
+			$html .= '<select class="image-size-select" name="' . $form_name . '">';
+			$html .= '<option class="image-size-item" value="" ' . selected($meta_size, null, false) . '>' . __('None', 'projects') . '</option>';
 						
 			// go through all sizes and generate the fields
 			foreach($image_sizes as $image_size) {
@@ -101,17 +100,18 @@ class Projects_Writepanel {
 				}
 
 				// add the item to the list
-				$html .= '<div class="image-size-item"><input type="radio" name="' . $form_name . '" id="' . $css_id . '" value="' . $image_size . '" ' . checked($meta_size, $image_size, false) . ' ' . disabled($enabled, false, false) . ' />';
-				$html .= '<label for="' . $css_id . '">' . ucfirst($image_size) . '</label>';
+				$html .= '<option class="image-size-item" name="' . $form_name . '" value="' . $image_size . '" ' . selected($meta_size, $image_size, false) . ' ' . disabled($enabled, false, false) . '>' . ucfirst($image_size);
 							
 				// only show the dimensions if that choice is available
 				if($enabled) {
-					$html .= '<label for="' . $css_id . '" class="help">'.sprintf('(%d &times; %d)', $downsize[1], $downsize[2]).'</label>';
+					$html .= ' ' . sprintf('(%d &times; %d)', $downsize[1], $downsize[2]);
 				}
 				
-				$html .= '</div>';
+				$html .= '</option>';
 			}
-						
+			
+			$html .= '</select>';
+			
 			$form_fields['projects_default_image_size']['label'] = __('Default Size', 'projects');
 			$form_fields['projects_default_image_size']['input'] = 'html';
 			$form_fields['projects_default_image_size']['html'] = $html;
