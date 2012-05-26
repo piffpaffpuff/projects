@@ -124,12 +124,13 @@ table.wp-list-table .column-title {
 	background-image: url("../images/icons.png");
 	background-repeat: no-repeat;
 	background-position: right 3px;
-	display: block;
+	display: none;
 	position: absolute;
 	left: 235px;
 	top: 6px;
 	background-color: #fff;	
 }
+
 /*
    Media Meta Box
 */
@@ -141,39 +142,28 @@ table.wp-list-table .column-title {
 	overflow: hidden;
 }
 #projects-media-list li {
-	position: relative;
-	margin: 10px; 
-	padding: 0; 
-	float: left; 
-	width: 200px; 
-	height: 200px;
-	display: block;
+	float: left;
 	cursor: pointer;
-}
-#projects-media-list li.mime-placeholder {
-	background-color: #efefef;
-}
-#projects-media-list li .media-options,
-#projects-media-list li .media-content,
-#projects-media-list li .media-type {
-	position: absolute;
-	display: block;
-	color: #ccc;
+	margin: 10px;
 	text-align: center;
-	text-shadow: rgba(255, 255, 255, 0.7) 0 1px 0;
-	font-weight: bold;
 }
-#projects-media-list li .media-content {
-	z-index: 20;
-	width: 100%;
-	height: 100%;
+#projects-media-list li .media-content  {
+	line-height: 240px;
+	width: 240px; 
+	height: 240px;
+	display: block;
 }
 #projects-media-list li .media-content img {
-	vertical-align: bottom;
+	vertical-align: middle;
+}
+#projects-media-list li.mime-placeholder {
+	background-color: #f1f1f1;
 }
 #projects-media-list li .media-type {
-	top: 48%;
-	width: 100%;
+	color: #c0c0c0;
+	text-shadow: rgba(255, 255, 255, 1) 0 1px 0;
+	font-weight: bold;
+	white-space:  nowrap;
 }
 
 /*
@@ -196,12 +186,3 @@ div.image-size-item label.help {
 #media-items .savesend .wp-post-thumbnail {
 	margin: 0;
 }
-#gallery-settings *, 
-#media-items .savesend input[type=submit] {
-    display:none;
-}
-
-/*
-   Settings
-*/
-

@@ -54,7 +54,11 @@ class Projects_Register {
 		// get the base page slug for the post types
 		$page = get_post(get_option('projects_base_page_id')); 
 		$this->slug = $page->post_name;
-	
+		
+		// register the thumbnail and media browser image sizes
+		add_image_size('project-thumbnail', 40, 40, false);
+		add_image_size('project-media-manager', 240, 240, false);
+		
 		// set the content
 		$this->register_taxonomies();
 		$this->register_types();
@@ -73,7 +77,9 @@ class Projects_Register {
 		add_action('admin_print_styles', array($this, 'add_styles'));
 		add_action('admin_print_scripts-post.php', array($this, 'add_scripts'));
 		add_action('admin_print_scripts-post-new.php', array($this, 'add_scripts'));
-		
+		add_action('admin_print_styles-media-upload-popup', array($this, 'add_media_styles'));		
+		add_action('admin_print_scripts-media-upload-popup', array($this, 'add_media_scripts'));		
+			
 		// Enqueue script on settings page
 		if(isset($_GET['page']) && $_GET['page'] == 'projects-settings') {
 			$hook = get_plugin_page_hookname($_GET['page'], 'options-general.php');
@@ -88,7 +94,7 @@ class Projects_Register {
 		wp_enqueue_style('minicolors', Projects::$plugin_directory_url . 'css/jquery.miniColors.css');
 		wp_enqueue_style('projects', Projects::$plugin_directory_url . 'css/style.css');
 	}
-
+	
 	/**
 	 * Add the scripts
 	 */
@@ -97,6 +103,22 @@ class Projects_Register {
 		wp_enqueue_script('projects', Projects::$plugin_directory_url . 'js/script.js', array('jquery'));
 	}
 
+	/**
+	 * Add the media manager styles
+	 */
+	public function add_media_styles() {
+		$post_type = get_post_type($_GET['post_id']);
+		if(!empty($post_type) && $post_type == Projects::$post_type) {
+			wp_enqueue_style('projects-media', Projects::$plugin_directory_url . 'css/media-style.css');
+		}
+	}
+	
+	/**
+	 * Add the media manager scripts
+	 */
+	public function add_media_scripts() {
+	}
+	
 	/**
 	 * Create custom post type
 	 */
@@ -147,7 +169,7 @@ class Projects_Register {
 	 * Create a custom taxonomy
 	 */	
 	public function add_taxonomy($plural_label, $singular_label, $key, $args = null) {
-		$taxonomy_name = $this->generate_internal_name($key);
+		$taxonomy_name = self::generate_internal_name($key);
 	
 		$labels = array(
 		    'name' => $plural_label, 'projects',
@@ -182,7 +204,7 @@ class Projects_Register {
 		global $wp_taxonomies;
 		
 		$args = array(
-			'name' => $this->get_taxonomy_internal_name($key)
+			'name' => self::get_taxonomy_internal_name($key)
 		);
 		
 		$taxonomies = $this->get_added_taxonomies($args, 'names');
@@ -192,20 +214,6 @@ class Projects_Register {
 				unset($wp_taxonomies[$taxonomy]);
 			}
 		}
-	}
-	
-	/**
-	 * Get taxonomy internal database name from label
-	 */
-	public function get_taxonomy_internal_name($key) {		
-		// get the taxonomy internal database name and 
-		// return the first that was found.
-		if(self::is_internal_name($key)) {
-			$taxonomy = $key;
-		} else {
-			$taxonomy = $this->generate_internal_name($key);
-		}
-		return $taxonomy;
 	}
 
 	/**
@@ -232,7 +240,7 @@ class Projects_Register {
 	 * Create a custom post status
 	 */	
 	public function add_status($label, $key, $args = null) {
-		$status_name = $this->generate_internal_name($key);
+		$status_name = self::generate_internal_name($key);
 
 		$args = is_array($args) ? $args : array();
 		$args['label'] = isset($args['label']) ? $args['label'] : __($label, 'projects');
@@ -309,7 +317,7 @@ class Projects_Register {
 					$thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
 					
 					if($thumbnail_id) {
-						$thumbnail = wp_get_attachment_image($thumbnail_id, array(36, 36), true );
+						$thumbnail = wp_get_attachment_image($thumbnail_id, 'project-thumbnail', true );
 					}
 					
 					if(isset($thumbnail)) {
@@ -340,10 +348,10 @@ class Projects_Register {
 	/**
 	 * Generate an internal name
 	 */	
-	public function generate_internal_name($key) {
+	public static function generate_internal_name($key) {
 		return Projects::$post_type . '_' . $key;
 	}
-	
+
 	/**
 	 * Check if it is an internal name
 	 */	
@@ -352,6 +360,19 @@ class Projects_Register {
 			return true;
 		} 
 		return false;
+	}
+	
+	/**
+	 * Get taxonomy internal database name from key
+	 */
+	public static function get_taxonomy_internal_name($key) {		
+		// get the taxonomy internal database name 
+		if(self::is_internal_name($key)) {
+			$taxonomy = $key;
+		} else {
+			$taxonomy = self::generate_internal_name($key);
+		}
+		return $taxonomy;
 	}
 }
 }

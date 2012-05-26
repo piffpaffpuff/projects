@@ -1,0 +1,4 @@
+#gallery-settings *, 
+#media-items .savesend input[type=submit] {
+    display:none;
+}

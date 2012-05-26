@@ -39,7 +39,11 @@ class Projects_Writepanel {
 	 * Remove the media buttons
 	 */
 	public function remove_insert_media_buttons() {
-		remove_action('media_buttons', 'media_buttons');
+		global $post;
+
+		if($post->post_type == Projects::$post_type) {
+			remove_action('media_buttons', 'media_buttons');
+		}
 	}
 
 	/**
@@ -49,8 +53,9 @@ class Projects_Writepanel {
 	    if(isset($_REQUEST['post_id'])) {
 	        $post_type = get_post_type($_REQUEST['post_id']);
 	        if($post_type == Projects::$post_type) {
-      			unset($tabs['library']);
 	            unset($tabs['type_url']);
+	            unset($tabs['library']);
+	            $tabs['gallery'] = __('Project Media', 'projects');
 	        }
 	    }
 	    return $tabs;
@@ -256,7 +261,7 @@ class Projects_Writepanel {
   		?>
 		<ul class="hide-if-no-js" id="projects-media-list">
 		</ul>
-		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;TB_iframe=1&amp;width=640&amp;height=505" id="projects-media-add" class="thickbox"><?php _e('Add Media', 'projects'); ?></a></p>
+		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;TB_iframe=1&amp;width=640&amp;height=505" id="projects-media-add" class="thickbox"><?php _e('Manage Media', 'projects'); ?></a></p>
 		<?php
 	}
 		
@@ -271,7 +276,7 @@ class Projects_Writepanel {
 
 		// Create the list
 		$post_id = $_POST['post_id'];
-		$attachments = $this->get_media($post_id);
+		$attachments = $this->get_project_media($post_id);
 		$post_thumbnail_id = get_post_thumbnail_id($post_id);
 
 		if ($attachments) {
@@ -283,10 +288,10 @@ class Projects_Writepanel {
 						<span class="media-options"></span>
 						<span class="media-content">
 						<?php if($mime[0] == 'image') : ?>
-							<?php $src = wp_get_attachment_image_src($attachment->ID, array(200, 200)); ?>  		   
-							<img id="projects-media-<?php echo $attachment->ID; ?>" alt="<?php echo $attachment->ID; ?>" src="<?php echo $src[0]; ?>" width="<?php echo $src[1]; ?>" height="<?php echo $src[2]; ?>" />
+							<?php $image = wp_get_attachment_image($attachment->ID, 'project-media-manager'); ?>  		   
+							<?php echo $image; ?>
 						<?php else : ?>
-							<span class="media-type"><span class="media-name"><?php echo $attachment->post_title; ?></span><span class="media-suffix"><?php echo $mime[1]; ?></span></span>
+							<span class="media-type"><?php echo basename(get_attached_file($attachment->ID)); ?></span>
 						<?php endif; ?>
 						</span>
 					</li>
@@ -328,7 +333,7 @@ class Projects_Writepanel {
 	/**
 	 * Get the media
 	 */
-	public function get_media($post_id = null, $mime = null) {
+	public function get_project_media($post_id = null, $mime = null) {
 		// default id
 		if(empty($post_id)) {
 			global $post;
@@ -375,6 +380,43 @@ class Projects_Writepanel {
 		} 
 
 		return $attachments;
+	}
+
+	/**
+	 * Get a project taxonomy
+	 */	
+	public function get_project_taxonomy($post_id, $key, $hierarchical = true, $args = null) {		
+		$taxonomy = Projects_Register::get_taxonomy_internal_name($key);
+		$terms = wp_get_object_terms($post_id, $taxonomy, $args); 
+		
+		if(!isset($terms->errors) && sizeof($terms) > 0) {
+			// return the flat tree
+			if(!$hierarchical) {
+				return $terms;
+			}
+			
+			// return the hierarchical tree		
+			$childs = array();
+		
+			// find all childs
+			foreach($terms as $term) {
+				$childs[$term->parent][] = $term;
+			}
+		
+			// cascade all childs
+			foreach($terms as $term) {
+				if (isset($childs[$term->term_id])) {
+					$term->childs = $childs[$term->term_id];
+				}
+			}
+		
+			// flat the childs tree by its base node
+			$tree = $childs[0];
+			
+			return $tree;
+		}
+	
+		return;
 	}
 	
 	/**
@@ -438,7 +480,10 @@ class Projects_Writepanel {
 					$_POST['projects']['lat'] = $json->results[0]->geometry->location->lat;
 					$_POST['projects']['lng'] = $json->results[0]->geometry->location->lng;
 				}
-			} 
+			} else {
+				$_POST['projects']['lat'] = null;
+				$_POST['projects']['lng'] = null;
+			}
 			
 			// save the meta
 			foreach($_POST['projects'] as $key => $value) {

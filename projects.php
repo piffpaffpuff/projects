@@ -87,7 +87,6 @@ class Projects {
 	public function includes() {
 		require_once('class-projects-installation.php');	
 		require_once('class-projects-register.php');	
-		require_once('class-projects-walkers.php');	
 		require_once('class-projects-writepanel.php');	
 		require_once('class-projects-settings.php');	
 	}
@@ -218,20 +217,20 @@ function query_projects($args = null) {
  */
 function get_project_media($post_id = null, $mime = null) {
 	global $projects;
-	return $projects->writepanel->get_media($post_id, $mime);
+	return $projects->writepanel->get_project_media($post_id, $mime);
 }
 
 /**
  * Show the media
  */
-function project_media($size = null, $post_id = null, $mime = null) {
+function project_media($size = null, $post_id = null, $mime = null, $link = true) {
 	global $projects;
 
 	?>
 	<ul class="project-media">
 		<?php foreach(get_project_media($post_id, $mime) as $attachment) : ?>
 		<li>
-			<a href="<?php echo get_attachment_link($attachment->ID); ?>">
+			<?php if($link) : ?><a href="<?php echo get_attachment_link($attachment->ID); ?>"><?php endif; ?>
 			<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
 				<?php 				
 				// overwrite the size when the attachment has set a custom one
@@ -243,10 +242,8 @@ function project_media($size = null, $post_id = null, $mime = null) {
 				?>
 				<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
 				<img src="<?php echo $attachment_src[0]; ?>" />
-			<?php else : ?>
-				
 			<?php endif; ?>
-			</a>
+			<?php if($link) : ?></a><?php endif; ?>
 		</li>
 		<?php endforeach; ?>
 	</ul>
@@ -275,21 +272,45 @@ function project_thumbnail($size = 'thumbnail', $post_id = null) {
 /**
  * Get terms
  */
-function get_project_taxonomy($key, $args = null) {
+function get_project_taxonomy($key, $hierarchical = true, $args = null) {
 	global $projects, $post;
-	$taxonomy = $projects->register->get_taxonomy_internal_name($key);
-	return wp_get_object_terms($post->ID, $taxonomy, $args);
+	$terms = $projects->writepanel->get_project_taxonomy($post->ID, $key, $hierarchical, $args);
+	return $terms;
 }
 
 /**
- * List terms
+ * Show terms
  */
-function project_taxonomy($key, $args = null) {
-	global $projects, $post;
-	$args = is_array($args) ? $args : array();
-	$args['taxonomy'] = $projects->register->get_taxonomy_internal_name($key);
-	$args['walker'] = new Projects_Project_Taxonomy_Walker($post->ID, $args['taxonomy']);
-	return wp_list_categories($args);
+function project_taxonomy($key) {
+	$terms = get_project_taxonomy($key);
+	walk_project_taxonomy($terms);
+}
+
+/**
+ * Walk through a taxonomys term list
+ */
+function walk_project_taxonomy($terms, $args = null) {
+	if(!is_array($args) || empty($args)) {
+		$args = array(
+			'label' => '<h3>Taxonomy</h3>',
+			'link' => true,
+			'wrap_start' => '<ul>',
+			'wrap_end' => '</ul>',
+			'item_start' => '<li>',
+			'item_end' => '</li>',
+		);
+	}
+	?>
+	<?php echo $args['wrap_start']; ?>
+	<?php foreach($terms as $term) : ?>
+		<?php echo $args['item_start']; ?><?php if($args['link']) : ?><a href="<?php echo get_term_link($term); ?>"><?php endif; ?><span><?php echo $term->name; ?></span><?php if($args['link']) : ?></a><?php endif; ?>
+		<?php if(!empty($term->childs) && sizeof($term->childs) > 0) : ?>
+			<?php walk_project_taxonomy($term->childs, $args); ?>
+		<?php endif; ?>
+		<?php echo $args['item_end']; ?>
+	<?php endforeach; ?>
+	<?php echo $args['wrap_end']; ?>
+	<?php
 }
 
 /**
