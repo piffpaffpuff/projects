@@ -87,6 +87,7 @@ class Projects {
 	public function includes() {
 		require_once('class-projects-installation.php');	
 		require_once('class-projects-register.php');	
+		require_once('class-projects-walkers.php');  
 		require_once('class-projects-writepanel.php');	
 		require_once('class-projects-settings.php');	
 	}
@@ -281,36 +282,12 @@ function get_project_taxonomy($key, $hierarchical = true, $args = null) {
 /**
  * Show terms
  */
-function project_taxonomy($key) {
-	$terms = get_project_taxonomy($key);
-	walk_project_taxonomy($terms);
-}
-
-/**
- * Walk through a taxonomys term list
- */
-function walk_project_taxonomy($terms, $args = null) {
-	if(!is_array($args) || empty($args)) {
-		$args = array(
-			'label' => '<h3>Taxonomy</h3>',
-			'link' => true,
-			'wrap_start' => '<ul>',
-			'wrap_end' => '</ul>',
-			'item_start' => '<li>',
-			'item_end' => '</li>',
-		);
-	}
-	?>
-	<?php echo $args['wrap_start']; ?>
-	<?php foreach($terms as $term) : ?>
-		<?php echo $args['item_start']; ?><?php if($args['link']) : ?><a href="<?php echo get_term_link($term); ?>"><?php endif; ?><span><?php echo $term->name; ?></span><?php if($args['link']) : ?></a><?php endif; ?>
-		<?php if(!empty($term->childs) && sizeof($term->childs) > 0) : ?>
-			<?php walk_project_taxonomy($term->childs, $args); ?>
-		<?php endif; ?>
-		<?php echo $args['item_end']; ?>
-	<?php endforeach; ?>
-	<?php echo $args['wrap_end']; ?>
-	<?php
+function project_taxonomy($key, $args = null) {
+	global $post;
+	$args = is_array($args) ? $args : array();
+	$args['taxonomy'] = Projects_Register::get_taxonomy_internal_name($key);
+	$args['walker'] = new Projects_Project_Taxonomy_Walker($post->ID, $args['taxonomy']);
+	return wp_list_categories($args);
 }
 
 /**
