@@ -5,7 +5,7 @@
  */
 if (!class_exists('Projects_Writepanel')) {
 class Projects_Writepanel {
-
+		
 	/**
 	 * Constructor
 	 */
@@ -148,6 +148,13 @@ class Projects_Writepanel {
 		add_meta_box('projects-media-box', __('Media', 'projects'), array($this, 'create_box_media'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-general-box', __('General', 'projects'), array($this, 'create_box_general'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-location-box', __('Location', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
+	
+		// add the award box when the taxonomy exists
+		$taxonomy = Projects_Register::get_taxonomy_internal_name('award');
+
+		if(taxonomy_exists($taxonomy)) {
+			add_meta_box('projects-awards-box', __('Awards', 'projects'), array($this, 'create_box_awards'), Projects::$post_type, 'side', 'default');
+		}
 	}
 	
 	/**
@@ -188,6 +195,76 @@ class Projects_Writepanel {
 			<input type="hidden" name="projects[lng]" value="<?php echo $lng; ?>">
 		</div>
 		<?php
+	}
+	
+	/**
+	 * Create the box content
+	 */
+	public function create_box_awards() {		
+		// Use nonce for verification
+  		wp_nonce_field(Projects::$plugin_basename, 'projects_award_nonce');
+  		
+  		// Get the defined terms
+		$taxonomy = Projects_Register::get_taxonomy_internal_name('award');
+		$slugs = array(
+			'award-name',
+			'award-year',
+			'award-rank',
+			'award-category'
+		);  
+				
+  		// get the meta
+  		$meta = Projects::get_meta_value('awards');
+  		
+  		// fill an empty meta to get the select fields
+ 		if(!is_array($meta)) {
+	  		$meta = array('award_0' => null);
+  		} 
+  		
+  		$index = 0;
+  		?>
+		<ul class="award-list" id="projects-award-list">
+			<?php foreach($meta as $meta_key => $meta_value) : ?>
+			<li class="award-group">
+				<?php foreach($slugs as $slug) : ?>
+				<?php 
+				$term = get_term_by('slug', $slug, $taxonomy); 
+				$args = array(
+					'parent' => $term->term_id,
+					'hide_empty' => false
+				);
+				$child_terms = get_terms($taxonomy, $args);
+				$selected_child_term_id = isset($meta_value[$term->slug]) ? $meta_value[$term->slug] : null;
+				?>
+				<select name="projects[awards][<?php echo $meta_key; ?>][<?php echo $term->slug; ?>]">
+					<option value=""><?php printf(__('No %s…', 'projects'), $term->name); ?></option>
+					<?php foreach($child_terms as $child_term) : ?>
+						<option value="<?php echo $child_term->term_id; ?>" <?php selected($selected_child_term_id, $child_term->term_id, true); ?>><?php echo $child_term->name; ?></option>
+					<?php endforeach; ?>
+				</select>
+				<?php endforeach; ?>
+				<a href="#" class="remove-award-group"><?php _e('Delete', 'projects'); ?></a>
+			</li>
+			<?php $index++; ?>
+			<?php endforeach; ?>
+		</ul>
+		<a href="#" id="projects-add-award-group"><?php _e('Add Award', 'projects'); ?></a>
+		<?php
+	}
+	
+	/**
+	 * Create the box content
+	 */
+	public function add_award_group_ajax() {
+	    // Verifiy post data and nonce
+		if(empty($_POST) || empty($_POST['post_id']) || empty($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
+			wp_die(__('You do not have sufficient permissions to access this page.'));
+		}
+
+		// Create the group
+		$post_id = $_POST['post_id'];
+		
+		exit;
 	}
 	
 	/**

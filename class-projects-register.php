@@ -79,14 +79,14 @@ class Projects_Register {
 		add_action('admin_print_scripts-post-new.php', array($this, 'add_scripts'));
 		add_action('admin_print_styles-media-upload-popup', array($this, 'add_media_styles'));		
 		add_action('admin_print_scripts-media-upload-popup', array($this, 'add_media_scripts'));		
-			
+		
 		// Enqueue script on settings page
 		if(isset($_GET['page']) && $_GET['page'] == 'projects-settings') {
 			$hook = get_plugin_page_hookname($_GET['page'], 'options-general.php');
 			add_action('admin_print_scripts-' . $hook, array($this, 'add_scripts'));
 		}
 	}
-	
+
 	/**
 	 * Add the styles
 	 */
@@ -161,14 +161,14 @@ class Projects_Register {
 		$this->add_taxonomy(__('Tasks', 'projects'), __('Task', 'projects'), 'task');
 		$this->add_taxonomy(__('Agencies', 'projects'), __('Agency', 'projects'), 'agency');
 		$this->add_taxonomy(__('Clients', 'projects'), __('Client', 'projects'), 'client');
-		$this->add_taxonomy(__('Awards', 'projects'), __('Award', 'projects'), 'award');
 		$this->add_taxonomy(__('Tags', 'projects'), __('Tag', 'projects'), 'tag', array('herarchical' => false));
+		$this->add_awards();
 	}
 	
 	/**
 	 * Create a custom taxonomy
 	 */	
-	public function add_taxonomy($plural_label, $singular_label, $key, $args = null) {
+	public function add_taxonomy($plural_label, $singular_label, $key, $args = null) {	
 		$taxonomy_name = self::generate_internal_name($key);
 	
 		$labels = array(
@@ -214,6 +214,38 @@ class Projects_Register {
 				unset($wp_taxonomies[$taxonomy]);
 			}
 		}
+	}
+	
+	/**
+	 * Create award taxonomy
+	 */	
+	public function add_awards() {
+		$external_key = 'award';
+		$taxonomy = self::get_taxonomy_internal_name($external_key);
+		
+		$this->add_taxonomy(__('Awards', 'projects'), __('Award', 'projects'), $external_key);
+			
+		// add default terms
+		$default_terms = array(
+			'award-name' => __('Name', 'projects'),
+			'award-year' => __('Year', 'projects'),
+			'award-category' => __('Category', 'projects'),
+			'award-rank' => __('Rank', 'projects')
+		);
+		
+		foreach($default_terms as $slug => $name) {
+			$existing_term_id = term_exists($slug, $taxonomy);
+			
+			if(empty($existing_term_id)) {
+				$args = array(
+					'slug' => $slug
+				);
+				$term = wp_insert_term($name, $taxonomy, $args);
+			}
+		}
+		
+	
+
 	}
 
 	/**

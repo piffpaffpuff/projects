@@ -36,42 +36,50 @@ jQuery(document).ready(function($) {
 		});
 	}
 	
-	// Settings -------------------------
+			
+	// enable remove button
+/*
+	$('#projects-award-list .remove-award-group').each(function(index, element) {
+		console.log(index);
+		if(index == 0) {
+			$(element).hide();
+		}
+	});
 	
-	// add image size to settings
-	$('#projects-add-image-size').click(function(event) {
+*/
+	$('#projects-award-list .remove-award-group').live('click', function(event) {
+		$(this).closest('.award-group').remove();
+		event.preventDefault();
+	});
+		
+	// add new award list group
+	$('#projects-add-award-group').on('click', function(event) {
+		// all groups
+		var elements = $('#projects-award-list .award-group');
+		var id = elements.length;
 		
 		// clone the item
-		var item = $(imageSetTemplate).clone();
+		var element = elements.filter(':last').clone();
+		
+		// reset the values
+		$('option', element).removeAttr('selected');
+		
+		// set a new item index		
+		$('select', element).each(function() {
+			var name = $(this).attr('name').split('award_');
+			var newName = name[0] + 'award_' + id + name[1].substr(name[1].indexOf(']'));
+			$(this).attr('name', newName);
+		});
+		
+		// enable the remove button
+		//$('.remove-award-group', element).show();
+		
+		// append element
+		$('#projects-award-list').append(element);
 
-		// reset the values and set a new id
-		var id = $('.image-set').length;
-		var inputs = item.find(':input');
-		inputs.val('').removeAttr('checked');
-		
-		// set a new item index
-		inputs.each(function() {
-			var name = $(this).attr('name').split('item');
-			var nameAlt = name[0] + 'item' + id + name[1].substr(name[1].indexOf(']'));
-			$(this).attr('name', nameAlt);
-		});
-		
-		// enable remove button
-		item.find('a.remove-image-size').click(function(event) {
-			item.remove();
-			event.preventDefault();
-		});
-		
-		// append item
-		$('.image-sizes').append(item);
+		// prevent click
 		event.preventDefault();
 	});
 	
-	// remove row
-	$('.image-set a.remove-image-size').click(function(event) {
-		$(this).parent().remove();
-		event.preventDefault();
-	});
-
 });
 
