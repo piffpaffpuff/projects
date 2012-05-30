@@ -36,50 +36,41 @@ jQuery(document).ready(function($) {
 		});
 	}
 	
-			
-	// enable remove button
-/*
-	$('#projects-award-list .remove-award-group').each(function(index, element) {
-		console.log(index);
-		if(index == 0) {
-			$(element).hide();
-		}
+	
+	// add an award group 
+	$('#projects-add-award-group').on('click', function(event) {
+		load_award_group();
+		event.preventDefault();
 	});
 	
-*/
+	// remove an award group 
 	$('#projects-award-list .remove-award-group').live('click', function(event) {
 		$(this).closest('.award-group').remove();
 		event.preventDefault();
 	});
-		
-	// add new award list group
-	$('#projects-add-award-group').on('click', function(event) {
-		// all groups
-		var elements = $('#projects-award-list .award-group');
-		var id = elements.length;
-		
-		// clone the item
-		var element = elements.filter(':last').clone();
-		
-		// reset the values
-		$('option', element).removeAttr('selected');
-		
-		// set a new item index		
-		$('select', element).each(function() {
-			var name = $(this).attr('name').split('award_');
-			var newName = name[0] + 'award_' + id + name[1].substr(name[1].indexOf(']'));
-			$(this).attr('name', newName);
-		});
-		
-		// enable the remove button
-		//$('.remove-award-group', element).show();
-		
-		// append element
-		$('#projects-award-list').append(element);
 
-		// prevent click
-		event.preventDefault();
-	});
+	
+	/**
+	 * load new award list group item
+	 */
+	function load_award_group() {
+		var index = Number($('#projects_award_index').val());
+		var data = {
+			action: 'add_award_group',
+			index: index,
+			nonce: $('#projects_award_nonce').val()
+		};
+		
+		// raise the index for the next item
+		var index = index +1;
+		$('#projects_award_index').val(index);
+		
+		// send the request
+		$.post(ajaxurl, data, function(response) {
+			$('#projects-award-list').append(response);
+		});
+
+	}
 	
 });
 

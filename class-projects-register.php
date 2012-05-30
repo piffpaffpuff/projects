@@ -7,11 +7,12 @@ if (!class_exists('Projects_Register')) {
 class Projects_Register {
 	
 	public $slug;
-
+	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
+
 	}
 	
 	/**
@@ -222,30 +223,44 @@ class Projects_Register {
 	public function add_awards() {
 		$external_key = 'award';
 		$taxonomy = self::get_taxonomy_internal_name($external_key);
-		
+	
 		$this->add_taxonomy(__('Awards', 'projects'), __('Award', 'projects'), $external_key);
-			
-		// add default terms
-		$default_terms = array(
-			'award-name' => __('Name', 'projects'),
-			'award-year' => __('Year', 'projects'),
-			'award-category' => __('Category', 'projects'),
-			'award-rank' => __('Rank', 'projects')
-		);
-		
-		foreach($default_terms as $slug => $name) {
-			$existing_term_id = term_exists($slug, $taxonomy);
-			
-			if(empty($existing_term_id)) {
-				$args = array(
-					'slug' => $slug
-				);
-				$term = wp_insert_term($name, $taxonomy, $args);
-			}
+
+		// name
+		$existing_term_id = term_exists('name', $taxonomy);
+		if(empty($existing_term_id)) {
+			$args = array(
+				'slug' => 'name'
+			);
+			$term = wp_insert_term(__('Name', 'projects'), $taxonomy, $args);
 		}
 		
-	
-
+		// year
+		$existing_term_id = term_exists('year', $taxonomy);
+		if(empty($existing_term_id)) {
+			$args = array(
+				'slug' => 'year'
+			);
+			$term = wp_insert_term(__('Year', 'projects'), $taxonomy, $args);
+		}	
+		
+		// category
+		$existing_term_id = term_exists('category', $taxonomy);
+		if(empty($existing_term_id)) {
+			$args = array(
+				'slug' => 'category'
+			);
+			$term = wp_insert_term(__('Category', 'projects'), $taxonomy, $args);
+		}
+		
+		// rank
+		$existing_term_id = term_exists('rank', $taxonomy);
+		if(empty($existing_term_id)) {
+			$args = array(
+				'slug' => 'rank'
+			);
+			$term = wp_insert_term(__('Rank', 'projects'), $taxonomy, $args);
+		}
 	}
 
 	/**

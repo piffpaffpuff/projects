@@ -26,10 +26,12 @@ class Projects_Writepanel {
 		add_action('admin_head-post.php', array($this, 'remove_insert_media_buttons'));
 		add_action('admin_head-post-new.php', array($this, 'remove_insert_media_buttons'));
 		add_action('add_meta_boxes', array($this, 'add_boxes'));
+		add_action('add_meta_boxes', array($this, 'remove_boxes'), 20);
 		add_filter('attachment_fields_to_edit', array($this, 'edit_media_options'), 15, 2);
 		add_filter('attachment_fields_to_save', array($this, 'save_media_options'), 15, 2);
 		add_filter('media_upload_tabs', array($this, 'remove_media_tabs'));
 		add_action('wp_ajax_add_media_list', array($this, 'add_media_list_ajax'));
+		add_action('wp_ajax_add_award_group', array($this, 'add_award_group_ajax'));
 		add_filter('upload_mimes', array($this, 'add_mime_types'));
 
 		add_action('save_post', array($this, 'save_box_data'));
@@ -158,6 +160,19 @@ class Projects_Writepanel {
 	}
 	
 	/**
+	 * Remove the meta boxes
+	 */
+	public function remove_boxes() {
+		// remove the default award box when the taxonomy exists
+		$taxonomy = Projects_Register::get_taxonomy_internal_name('award');
+
+		if(taxonomy_exists($taxonomy)) {
+			remove_meta_box('tagsdiv-' . $taxonomy, Projects::$post_type, 'side');
+			remove_meta_box($taxonomy . 'div', Projects::$post_type, 'side');
+		}
+	}
+	
+	/**
 	 * Create the box content
 	 */
 	public function create_box_location() {
@@ -203,30 +218,42 @@ class Projects_Writepanel {
 	public function create_box_awards() {		
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_award_nonce');
-  		
-  		// Get the defined terms
-		$taxonomy = Projects_Register::get_taxonomy_internal_name('award');
-		$slugs = array(
-			'award-name',
-			'award-year',
-			'award-rank',
-			'award-category'
-		);  
-				
+
   		// get the meta
-  		$meta = Projects::get_meta_value('awards');
-  		
-  		// fill an empty meta to get the select fields
- 		if(!is_array($meta)) {
-	  		$meta = array('award_0' => null);
-  		} 
-  		
+  		$metas = Projects::get_meta_value('awards');
   		$index = 0;
   		?>
 		<ul class="award-list" id="projects-award-list">
-			<?php foreach($meta as $meta_key => $meta_value) : ?>
-			<li class="award-group">
-				<?php foreach($slugs as $slug) : ?>
+			<?php 
+			if(!empty($metas)) {
+				foreach($metas as $meta) {
+					$this->create_award_group_list_item($index, $meta);
+					$index++;
+				}
+			}
+			?>
+		</ul>
+		<input type="hidden" id="projects_award_index" value="<?php echo $index; ?>">
+		<a href="#" id="projects-add-award-group"><?php _e('Add Award', 'projects'); ?></a>
+		<?php
+	}
+	
+	/**
+	 * Create an award group item
+	 */
+	public function create_award_group_list_item($index, $meta = null) {
+		// Get the defined terms
+		$taxonomy = Projects_Register::get_taxonomy_internal_name('award');
+		$slugs = array(
+			'name',
+			'year',
+			'rank',
+			'category'
+		);  
+		
+		?>
+		<li class="award-group">
+			<?php foreach($slugs as $slug) : ?>
 				<?php 
 				$term = get_term_by('slug', $slug, $taxonomy); 
 				$args = array(
@@ -234,36 +261,32 @@ class Projects_Writepanel {
 					'hide_empty' => false
 				);
 				$child_terms = get_terms($taxonomy, $args);
-				$selected_child_term_id = isset($meta_value[$term->slug]) ? $meta_value[$term->slug] : null;
+				$selected_child_term_id = (isset($meta) && isset($meta[$term->slug])) ? $meta[$term->slug] : null;
 				?>
-				<select name="projects[awards][<?php echo $meta_key; ?>][<?php echo $term->slug; ?>]">
+				<select name="projects[awards][<?php echo $index; ?>][<?php echo $term->slug; ?>]">
 					<option value=""><?php printf(__('No %s…', 'projects'), $term->name); ?></option>
 					<?php foreach($child_terms as $child_term) : ?>
 						<option value="<?php echo $child_term->term_id; ?>" <?php selected($selected_child_term_id, $child_term->term_id, true); ?>><?php echo $child_term->name; ?></option>
 					<?php endforeach; ?>
 				</select>
-				<?php endforeach; ?>
-				<a href="#" class="remove-award-group"><?php _e('Delete', 'projects'); ?></a>
-			</li>
-			<?php $index++; ?>
 			<?php endforeach; ?>
-		</ul>
-		<a href="#" id="projects-add-award-group"><?php _e('Add Award', 'projects'); ?></a>
+			<a href="#" class="remove-award-group"><?php _e('Delete', 'projects'); ?></a>
+		</li>
 		<?php
 	}
 	
 	/**
-	 * Create the box content
+	 * Load the award item with ajax
 	 */
 	public function add_award_group_ajax() {
 	    // Verifiy post data and nonce
-		if(empty($_POST) || empty($_POST['post_id']) || empty($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
+		if(empty($_POST) || $_POST['index'] === null || empty($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
 			wp_die(__('You do not have sufficient permissions to access this page.'));
 		}
 
-		// Create the group
-		$post_id = $_POST['post_id'];
-		
+		// create an empty item
+		$this->create_award_group_list_item($_POST['index']);
+			
 		exit;
 	}
 	
@@ -562,10 +585,41 @@ class Projects_Writepanel {
 				$_POST['projects']['lng'] = null;
 			}
 			
+			// set the terms for the awards
+			$taxonomy = Projects_Register::get_taxonomy_internal_name('award');
+			if(empty($_POST['projects']['awards'])) {
+				$_POST['projects']['awards'] = '';
+				
+				// remove all related terms
+				wp_set_object_terms($post_id, null, $taxonomy, false);
+			} else {
+				$awards = $_POST['projects']['awards'];
+				$award_ids = array();
+				
+				// clean up the awards array
+				foreach($awards as $key => $value) {
+					if(empty($value['name'])) {
+						// remove all awards that have no name set
+						unset($_POST['projects']['awards'][$key]);
+					} else {
+						// add all ids to a list to relate them to the post
+						foreach($value as $key => $id) {
+							if(!empty($id)) {
+								// add the id to the relation table
+								array_push($award_ids, (int)$id);
+							}
+						}
+					}
+				}
+				
+				// relate terms
+				wp_set_object_terms($post_id, $award_ids, $taxonomy, false);
+			}
+
 			// save the meta
 			foreach($_POST['projects'] as $key => $value) {
 				// save the key, including empty keys too, 
-				// otherwise wordpres won't query them.
+				// otherwise wordpress can't query them.
 				// this is probably fixed in wordpress 3.4
 				update_post_meta($post_id, '_projects_' . $key, $value);
 				/*
