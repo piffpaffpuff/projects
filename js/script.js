@@ -36,7 +36,6 @@ jQuery(document).ready(function($) {
 		});
 	}
 	
-	
 	// add an award group 
 	$('#projects-add-award-group').on('click', function(event) {
 		load_award_group();
@@ -49,7 +48,23 @@ jQuery(document).ready(function($) {
 		event.preventDefault();
 	});
 
+	// sort award groups
+	$('#projects-award-list').sortable({
+		axis: 'y'
+	});
 	
+	// set title of award groups
+	$('#projects-award-list .award-select-name').live('change', function() {
+		var h4 = $(this).closest('.award-group').find('h4');
+		var value = $('option:selected', this).val();	
+		if(value) {
+			var title = $('option:selected', this).html();
+		} else {
+			var title = h4.attr('title');
+		}
+		h4.html(title);
+	});
+
 	/**
 	 * load new award list group item
 	 */
@@ -61,12 +76,16 @@ jQuery(document).ready(function($) {
 			nonce: $('#projects_award_nonce').val()
 		};
 		
+		// show the loader
+		$('#projects-award-loader').css('visibility', 'visible');
+		
 		// raise the index for the next item
 		var index = index +1;
 		$('#projects_award_index').val(index);
 		
 		// send the request
 		$.post(ajaxurl, data, function(response) {
+			$('#projects-award-loader').css('visibility', 'hidden');
 			$('#projects-award-list').append(response);
 		});
 

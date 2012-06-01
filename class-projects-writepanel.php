@@ -223,7 +223,7 @@ class Projects_Writepanel {
   		$metas = Projects::get_meta_value('awards');
   		$index = 0;
   		?>
-		<ul class="award-list" id="projects-award-list">
+		<div class="award-list" id="projects-award-list">
 			<?php 
 			if(!empty($metas)) {
 				foreach($metas as $meta) {
@@ -232,9 +232,12 @@ class Projects_Writepanel {
 				}
 			}
 			?>
-		</ul>
-		<input type="hidden" id="projects_award_index" value="<?php echo $index; ?>">
-		<a href="#" id="projects-add-award-group"><?php _e('Add Award', 'projects'); ?></a>
+		</div>
+		<div class="award-footer">
+			<input type="hidden" id="projects_award_index" value="<?php echo $index; ?>">
+			<a href="#" id="projects-add-award-group"><?php _e('Add Award', 'projects'); ?></a>
+			<img src="<?php echo get_admin_url(); ?>images/wpspin_light.gif" id="projects-award-loader" />
+		</div>
 		<?php
 	}
 	
@@ -251,8 +254,18 @@ class Projects_Writepanel {
 			'category'
 		);  
 		
+		// create the title
+		$title_placeholder = __('Untitled', 'projects');
+		if(isset($meta) && isset($meta['name'])) {
+			$title_term = get_term($meta['name'], $taxonomy); 
+			$title = $title_term->name;
+		} else {
+			$title = $title_placeholder;
+		}
 		?>
-		<li class="award-group">
+		<div class="award-group">
+			<div class="award-group-options"><h4 title="<?php echo $title_placeholder; ?>"><?php echo $title; ?></h4><a href="#" class="remove-award-group"><?php _e('Delete', 'projects'); ?></a></div>
+			<div class="award-group-fields">
 			<?php foreach($slugs as $slug) : ?>
 				<?php 
 				$term = get_term_by('slug', $slug, $taxonomy); 
@@ -263,15 +276,15 @@ class Projects_Writepanel {
 				$child_terms = get_terms($taxonomy, $args);
 				$selected_child_term_id = (isset($meta) && isset($meta[$term->slug])) ? $meta[$term->slug] : null;
 				?>
-				<select name="projects[awards][<?php echo $index; ?>][<?php echo $term->slug; ?>]">
+				<select name="projects[awards][<?php echo $index; ?>][<?php echo $term->slug; ?>]" class="award-select-<?php echo $term->slug; ?>">
 					<option value=""><?php printf(__('No %s…', 'projects'), $term->name); ?></option>
 					<?php foreach($child_terms as $child_term) : ?>
 						<option value="<?php echo $child_term->term_id; ?>" <?php selected($selected_child_term_id, $child_term->term_id, true); ?>><?php echo $child_term->name; ?></option>
 					<?php endforeach; ?>
 				</select>
 			<?php endforeach; ?>
-			<a href="#" class="remove-award-group"><?php _e('Delete', 'projects'); ?></a>
-		</li>
+			</div>
+		</div>
 		<?php
 	}
 	
