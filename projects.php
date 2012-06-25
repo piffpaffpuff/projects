@@ -39,7 +39,6 @@ class Projects {
 	public static $post_type;
 	public static $slug;
 	
-	public $order_by; 
 	public $meta_key;
 
 	public $installation;
@@ -64,7 +63,6 @@ class Projects {
 	public function load() {
 		$this->includes();
 		
-		$this->order_by = 'meta_value_num';
 		$this->meta_key = '_projects_date';
 		
 		$this->installation = new Projects_Installation();
@@ -103,8 +101,12 @@ class Projects {
 	 * Load the main hooks
 	 */
 	public function load_hooks() {
-		add_filter('get_previous_post_sort', array($this, 'adjacent_post_sort'));
-		add_filter('get_next_post_sort', array($this, 'adjacent_post_sort'));
+		add_filter('get_previous_post_join', array($this, 'adjacent_post_join'));
+		add_filter('get_next_post_join', array($this, 'adjacent_post_join'));
+		add_filter('get_previous_post_sort', array($this, 'adjacent_post_previous_sort'));
+		add_filter('get_next_post_sort', array($this, 'adjacent_post_next_sort'));
+		add_filter('get_previous_post_where', array($this, 'adjacent_post_previous_where'));
+		add_filter('get_next_post_where', array($this, 'adjacent_post_next_where'));
    		add_theme_support('post-thumbnails', array(Projects::$post_type));
 	}
 	
@@ -113,10 +115,10 @@ class Projects {
 	 */
 	public function query_projects($args = null) {
 		global $paged;
-	
-		// pagination support when the projects 
-		// page is the frontpage and for all other
-		// cases too.
+		 
+		/* pagination support when the projects 
+		page is the frontpage and for all other
+		cases too. */
 		if(get_query_var('paged')) {
 		    $paged = get_query_var('paged');
 		} else if(get_query_var('page')) {
@@ -125,32 +127,96 @@ class Projects {
 		    $paged = 1;
 		}
 	
-		// default args
+		/* set the default args.
+		posts with the same date are sorted ordered 
+		by title DESC because WordPress doesn't
+		support multiple orders yet.
+		attention: if this changes anytime the adjacent
+		needs adaption too. */
 		$args = is_array($args) ? $args : array();
 		$args['post_type'] = self::$post_type;
-		$args['orderby'] = isset($args['orderby']) ? $args['orderby'] : $this->order_by;
+		$args['orderby'] = isset($args['orderby']) ? $args['orderby'] : 'meta_value_num';
+		$args['order'] = isset($args['order']) ? $args['order'] : 'DESC';
 		$args['meta_key'] = isset($args['meta_key']) ? $args['meta_key'] : $this->meta_key;
 		$args['paged'] = $paged;
-		
+				
 		return query_posts($args);
 	}
 	
 	/**
-	 * Set the sort for post navigation to be the
+	 * Adjacents JOIN query part
 	 */
-	public function adjacent_post_sort() {
-		/*
-			TODO: make 'orderby' work with $this->meta_key
-			
-			"ORDER BY p.post_date $order LIMIT 1"
-		*/
-		global $wp_query;
+	public function adjacent_post_join($join) {
+		global $wp_query, $wpdb;
 		
 		if($wp_query->get('post_type') == Projects::$post_type) {
+			// select the meta table info
+			$join = $wpdb->prepare(" INNER JOIN $wpdb->postmeta AS m ON p.ID = m.post_id AND m.meta_key = %s", $this->meta_key);
 		}
-		return;
+
+		return $join;
 	}
+	
+	/**
+	 * Next Adjacents ORDER query part
+	 */
+	public function adjacent_post_next_sort($sort) {
+		global $wp_query, $wpdb;
 		
+		if($wp_query->get('post_type') == Projects::$post_type) {
+			// sort both by the same order because $wp_query
+			// doesn't support multiple different orders.
+			$sort = "ORDER BY m.meta_value+0 DESC, p.post_name DESC LIMIT 1";
+		}
+		
+		return $sort;
+	}
+	
+	/**
+	 * Previous Adjacents ORDER query part
+	 */
+	public function adjacent_post_previous_sort($sort) {
+		global $wp_query, $wpdb;
+		
+		if($wp_query->get('post_type') == Projects::$post_type) {
+			// sort both by the same order because $wp_query
+			// doesn't support multiple different orders.
+			$sort = "ORDER BY m.meta_value+0 ASC, p.post_name ASC LIMIT 1";
+		}
+		
+		return $sort;
+	}
+	
+	/**
+	 * Next Adjacents WHERE query part
+	 */
+	public function adjacent_post_next_where($where) {
+		global $wp_query, $wpdb, $post;
+
+		if($wp_query->get('post_type') == Projects::$post_type) {
+			$operator = '<';
+			$meta = self::get_meta_value('date');
+			$where = $wpdb->prepare(" WHERE (m.meta_value+0 $operator %d OR (m.meta_value+0 = '%d' AND p.post_name $operator %s)) AND p.post_type IN (%s) AND p.post_status = 'publish' ", $meta, $meta, $post->post_name, self::$post_type);
+		}
+		
+		return $where;
+	}
+	
+	/**
+	 * Previous Adjacents WHERE query part
+	 */
+	public function adjacent_post_previous_where($where) {
+		global $wp_query, $wpdb, $post;
+
+		if($wp_query->get('post_type') == Projects::$post_type) {
+			$operator = '>';
+			$meta = self::get_meta_value('date');
+			$where = $wpdb->prepare(" WHERE (m.meta_value+0 $operator %d OR (m.meta_value+0 = '%d' AND p.post_name $operator %s)) AND p.post_type IN (%s) AND p.post_status = 'publish' ", $meta, $meta, $post->post_name, self::$post_type);
+		}
+		
+		return $where;
+	}
+
 	/**
 	 * Is single project item
 	 */
@@ -224,14 +290,14 @@ function get_project_media($post_id = null, $mime = null) {
 /**
  * Show the media
  */
-function project_media($size = null, $post_id = null, $mime = null, $link = true) {
+function project_media($size = null, $post_id = null, $mime = null) {
 	global $projects;
 
 	?>
 	<ul class="project-media">
 		<?php foreach(get_project_media($post_id, $mime) as $attachment) : ?>
 		<li>
-			<?php if($link) : ?><a href="<?php echo get_attachment_link($attachment->ID); ?>"><?php endif; ?>
+			<a href="<?php echo get_attachment_link($attachment->ID); ?>">
 			<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
 				<?php 				
 				// overwrite the size when the attachment has set a custom one
@@ -244,7 +310,7 @@ function project_media($size = null, $post_id = null, $mime = null, $link = true
 				<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
 				<img src="<?php echo $attachment_src[0]; ?>" />
 			<?php endif; ?>
-			<?php if($link) : ?></a><?php endif; ?>
+			</a>
 		</li>
 		<?php endforeach; ?>
 	</ul>
