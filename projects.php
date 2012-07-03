@@ -108,14 +108,13 @@ class Projects {
 		add_filter('get_previous_post_where', array($this, 'adjacent_post_previous_where'));
 		add_filter('get_next_post_where', array($this, 'adjacent_post_next_where'));
    		add_theme_support('post-thumbnails', array(Projects::$post_type));
+   		add_action('pre_get_posts', array($this, 'projects_page_query'));
 	}
 	
 	/**
 	 * Query projects
 	 */
-	public function query_projects($args = null) {
-		global $paged;
-		 
+	public function query_projects($args = null) {		 
 		/* pagination support when the projects 
 		page is the frontpage and for all other
 		cases too. */
@@ -141,6 +140,73 @@ class Projects {
 		$args['paged'] = $paged;
 				
 		return query_posts($args);
+	}
+	
+	/**
+	 * Get projects
+	 */
+	public function get_projects($args = null) {
+		/* pagination support when the projects 
+		page is the frontpage and for all other
+		cases too. */
+		if(get_query_var('paged')) {
+		    $paged = get_query_var('paged');
+		} else if(get_query_var('page')) {
+		    $paged = get_query_var('page');
+		} else {
+		    $paged = 1;
+		}
+
+		/* set the default args.
+		posts with the same date are sorted ordered 
+		by title DESC because WordPress doesn't
+		support multiple orders yet.
+		attention: if this changes anytime the adjacent
+		needs adaption too. */
+		$default_args = array(
+			'post_type' => self::$post_type,
+			'meta_key' => $this->meta_key,
+			'orderby' => 'meta_value_num',
+			'order' => 'DESC',
+			'paged' => $paged
+		);
+		
+		// merge the default and additional args
+		if(is_array($args)) {
+			$args = array_merge($default_args, $args);
+		} else {
+			$args = $default_args;
+		}
+		
+		return new WP_Query($args);
+	}
+	
+	public function projects_page_query($query) {
+    	/* pagination support when the projects 
+		page is the frontpage and for all other
+		cases too. */
+		if($query->get('paged')) {
+		    $paged = $query->get('paged');
+		} else if($query->get('page')) {
+		    $paged = $query->get('page');
+		} else {
+		    $paged = 1;
+		}
+		
+    	if($query->is_main_query() && $this->is_projects_page()) {
+    		$query->set('post_type', self::$post_type);
+			$query->set('meta_key', $this->meta_key);
+    		$query->set('orderby', 'meta_value+0');
+    		$query->set('order', 'DESC');
+    		$query->set('paged', $paged);
+			$query->set('page_id', ''); //Empty 
+			$query->is_page = 0;
+        	$query->is_singular = 0;		
+		}
+    	
+//print_r($query);
+
+    	return $query;
 	}
 	
 	/**
@@ -232,8 +298,8 @@ class Projects {
 	 * Is projects main page
 	 */
 	public function is_projects_page() {
-		global $post;
-		if(is_page(get_option('projects_base_page_id')) || is_post_type_archive(self::$post_type)) {
+		global $wp_query;
+		if($wp_query->get('page_id') == get_option('projects_base_page_id') || $wp_query->get('page_id') == get_option('page_on_front') || is_post_type_archive(self::$post_type)) {
 			return true;
 		}
 		return false;
@@ -277,6 +343,14 @@ $projects->load();
 function query_projects($args = null) {
 	global $projects;
 	return $projects->query_projects($args);
+}
+
+/**
+ * Get projects
+ */
+function get_projects($args = null) {
+	global $projects;
+	return $projects->get_projects($args);
 }
 
 /**
