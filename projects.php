@@ -390,7 +390,7 @@ function project_thumbnail($size = 'thumbnail', $post_id = null) {
 
 	?>
 	<?php if($attachments_count > 0) : ?>
-		<?php //if($attachments_count == 1) : ?>
+		<?php if($attachments_count == 1) : ?>
 		 	<?php foreach($attachments as $attachment) : ?>
 				<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
 					<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
