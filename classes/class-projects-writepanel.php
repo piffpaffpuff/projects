@@ -5,11 +5,16 @@
  */
 if (!class_exists('Projects_Writepanel')) {
 class Projects_Writepanel {
-		
+	
+	private $type_featured;
+	private $type_gallery;
+	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
+		$this->type_featured = 'featured';
+		$this->type_gallery = 'gallery';
 	}
 
 	/**
@@ -30,13 +35,13 @@ class Projects_Writepanel {
 		add_filter('attachment_fields_to_edit', array($this, 'edit_media_options'), 15, 2);
 		add_filter('attachment_fields_to_save', array($this, 'save_media_options'), 15, 2);
 		add_filter('media_upload_tabs', array($this, 'remove_media_tabs'));
-		add_action('wp_ajax_add_media_list', array($this, 'add_media_list_ajax'));
+		add_action('wp_ajax_load_media_list', array($this, 'load_media_list_ajax'));
 		add_action('wp_ajax_add_award_group', array($this, 'add_award_group_ajax'));
 		add_filter('upload_mimes', array($this, 'add_mime_types'));
 
 		add_action('save_post', array($this, 'save_box_data'));
 	}
-		
+			
 	/**
 	 * Remove the media buttons
 	 */
@@ -67,6 +72,7 @@ class Projects_Writepanel {
 	 * Set the media fields
 	 */
 	public function edit_media_options($form_fields, $post) {		
+		// default fields
 		$form_fields['url']['value'] = '';
 		$form_fields['url']['input'] = 'hidden';
 
@@ -75,24 +81,30 @@ class Projects_Writepanel {
 
 		$form_fields['image-size']['value'] = 'full';
 		$form_fields['image-size']['input'] = 'hidden';
-				
+		
+		// add a thumbnail check field
+		$meta = Projects::get_meta_value('featured_image', $post->ID);		
+		$form_fields['projects_featured_image']['label'] = __('Featured Image', 'projects');
+		$form_fields['projects_featured_image']['input'] = 'html';
+		$form_fields['projects_featured_image']['html'] = '<label><input type="checkbox" name="attachments[' . $post->ID . '][projects_featured_image]" value="1" ' . checked($meta, 1, false) . ' /> ' . __('Use as featured image', 'projects') . '</label>';
+		
 		// add a custom image size field
 		if(strpos($post->post_mime_type, 'image') !== false) {
 			$html = '';
-			$meta_size = Projects::get_meta_value('default_image_size', $post->ID);
+			$meta = Projects::get_meta_value('default_image_size', $post->ID);
 			$image_sizes = get_intermediate_image_sizes();
 			$image_sizes[] = 'full';
-			$form_name = 'attachments['.$post->ID.'][projects_default_image_size]';
+			$form_name = 'attachments[' . $post->ID . '][projects_default_image_size]';
 						
 			// check if the saved size is selectable to activate the 'none' option
-			$downsize = image_downsize($post->ID, $meta_size);
-			if(empty($downsize[3]) && $meta_size != 'full') {
-				$meta_size = null;
+			$downsize = image_downsize($post->ID, $meta);
+			if(empty($downsize[3]) && $meta != 'full') {
+				$meta = null;
 			} 
 			
 			// build the selection
 			$html .= '<select class="image-size-select" name="' . $form_name . '">';
-			$html .= '<option class="image-size-item" value="" ' . selected($meta_size, null, false) . '>' . __('None', 'projects') . '</option>';
+			$html .= '<option class="image-size-item" value="" ' . selected($meta, null, false) . '>' . __('None', 'projects') . '</option>';
 						
 			// go through all sizes and generate the fields
 			foreach($image_sizes as $image_size) {
@@ -107,7 +119,7 @@ class Projects_Writepanel {
 				}
 
 				// add the item to the list
-				$html .= '<option class="image-size-item" name="' . $form_name . '" value="' . $image_size . '" ' . selected($meta_size, $image_size, false) . ' ' . disabled($enabled, false, false) . '>' . ucfirst($image_size);
+				$html .= '<option class="image-size-item" name="' . $form_name . '" value="' . $image_size . '" ' . selected($meta, $image_size, false) . ' ' . disabled($enabled, false, false) . '>' . ucfirst($image_size);
 							
 				// only show the dimensions if that choice is available
 				if($enabled) {
@@ -123,7 +135,7 @@ class Projects_Writepanel {
 			$form_fields['projects_default_image_size']['input'] = 'html';
 			$form_fields['projects_default_image_size']['html'] = $html;
 		}
-			
+
 		return $form_fields;
 	}
 
@@ -139,6 +151,12 @@ class Projects_Writepanel {
 		} else {
 			add_post_meta($post['ID'], '_projects_default_image_size', $attachment['projects_default_image_size'], true ) or update_post_meta($post['ID'], '_projects_default_image_size', $attachment['projects_default_image_size']);
   		}
+  		
+  		if(empty($attachment['projects_featured_image'])) {
+			delete_post_meta($post['ID'], '_projects_featured_image');
+		} else {
+			add_post_meta($post['ID'], '_projects_featured_image', $attachment['projects_featured_image'], true ) or update_post_meta($post['ID'], '_projects_featured_image', $attachment['projects_featured_image']);
+  		}
 		
 		return $post;
 	}
@@ -147,7 +165,8 @@ class Projects_Writepanel {
 	 * Add the meta boxes
 	 */
 	public function add_boxes() {			
-		add_meta_box('projects-media-box', __('Media', 'projects'), array($this, 'create_box_media'), Projects::$post_type, 'normal', 'default');
+		add_meta_box('projects-featured-image-box', __('Featured Image', 'projects'), array($this, 'create_box_featured_image'), Projects::$post_type, 'normal', 'default');
+		add_meta_box('projects-gallery-box', __('Gallery', 'projects'), array($this, 'create_box_gallery'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-general-box', __('General', 'projects'), array($this, 'create_box_general'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-location-box', __('Location', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
 	
@@ -211,7 +230,7 @@ class Projects_Writepanel {
 		</div>
 		<?php
 	}
-	
+
 	/**
 	 * Create the box content
 	 */
@@ -365,57 +384,83 @@ class Projects_Writepanel {
 	/**
 	 * Create the box content
 	 */
-	public function create_box_media() {
+	public function create_box_gallery() {
 		global $post;
 		
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_media_nonce');
   		
   		?>
-		<ul class="hide-if-no-js" id="projects-media-list">
+		<ul class="projects-media-list hide-if-no-js" id="projects-gallery-list">
+		<?php $this->create_media_list(null, $this->type_gallery); ?>
 		</ul>
-		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;TB_iframe=1&amp;width=640&amp;height=505" id="projects-media-add" class="thickbox"><?php _e('Manage Media', 'projects'); ?></a></p>
+		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;TB_iframe=1" id="projects-gallery-add" class="thickbox projects-media-add"><?php _e('Manage Gallery', 'projects'); ?></a></p>
 		<?php
 	}
-		
+	
 	/**
-	 * Create the media list with an ajax callback
+	 * Create the box content
 	 */
-	public function add_media_list_ajax() {
+	public function create_box_featured_image() {
+		global $post;
+				
+		// Use nonce for verification
+  		wp_nonce_field(Projects::$plugin_basename, 'projects_media_nonce');
+  		
+  		?>
+		<ul class="projects-media-list hide-if-no-js" id="projects-featured-image-list">
+		<?php $this->create_media_list(null, $this->type_featured); ?>
+		</ul>
+		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;TB_iframe=1" id="projects-featured-image-add" class="thickbox projects-media-add"><?php _e('Manage featured images', 'projects'); ?></a></p>
+		<?php
+	}
+	
+	/**
+	 * Create the media list
+	 */
+	public function create_media_list($post_id = null, $type = null) {
+		if(empty($post_id)) {
+			global $post;
+			$post_id = $post->ID;
+		}
+		
+		$attachments = $this->get_project_media($post_id, null, $type);
+		
+		if ($attachments) {
+			foreach($attachments as $attachment) {
+				$mime = explode('/', strtolower($attachment->post_mime_type)); 
+				$meta = wp_get_attachment_metadata($attachment->ID); ?>
+				<li class="projects-media-item mime-<?php echo $mime[1]; ?> <?php if($mime[0] != 'image') : ?>mime-placeholder<?php endif; ?>">
+					<span class="media-options"></span>
+					<span class="media-content">
+					<?php if($mime[0] == 'image') : ?>
+						<?php $image = wp_get_attachment_image($attachment->ID, 'project-media-manager'); ?>  		   
+						<?php echo $image; ?>
+					<?php else : ?>
+						<span class="media-type"><?php echo basename(get_attached_file($attachment->ID)); ?></span>
+					<?php endif; ?>
+					</span>
+				</li>
+				<?php
+			}
+		}
+	}
+	
+	/**
+	 * Load the media list with an ajax callback
+	 */
+	public function load_media_list_ajax() {
 	    // Verifiy post data and nonce
 		if(empty($_POST) || empty($_POST['post_id']) || empty($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
 			wp_die(__('You do not have sufficient permissions to access this page.'));
 		}
 
 		// Create the list
-		$post_id = $_POST['post_id'];
-		$attachments = $this->get_project_media($post_id);
-		$post_thumbnail_id = get_post_thumbnail_id($post_id);
-
-		if ($attachments) {
-			foreach($attachments as $attachment) {
-				if($attachment->ID != $post_thumbnail_id) {
-					$mime = explode('/', strtolower($attachment->post_mime_type)); 
-					$meta = wp_get_attachment_metadata($attachment->ID); ?>
-					<li class="projects-media-item mime-<?php echo $mime[1]; ?> <?php if($mime[0] != 'image') : ?>mime-placeholder<?php endif; ?>">
-						<span class="media-options"></span>
-						<span class="media-content">
-						<?php if($mime[0] == 'image') : ?>
-							<?php $image = wp_get_attachment_image($attachment->ID, 'project-media-manager'); ?>  		   
-							<?php echo $image; ?>
-						<?php else : ?>
-							<span class="media-type"><?php echo basename(get_attached_file($attachment->ID)); ?></span>
-						<?php endif; ?>
-						</span>
-					</li>
-					<?php
-				}
-			}
-		}
+		$this->create_media_list($_POST['post_id'], $_POST['type']);
 	    
 		exit;
 	}
-	
+		
 	/**
 	 * Check if the mime is of a certain type
 	 */
@@ -437,25 +482,22 @@ class Projects_Writepanel {
 	 * Register the mime type
 	 */
 	public function add_mime_types($mimes) {
-		$mimes = array_merge($mimes, array(
+		$mimes = wp_parse_args(array(
 			'csv' => 'text/csv'
-		));
+		), $mimes);
 		return $mimes;
 	}
 
 	/**
 	 * Get the media
 	 */
-	public function get_project_media($post_id = null, $mime = null) {
+	public function get_project_media($post_id = null, $mime = null, $type = null) {
 		// default id
 		if(empty($post_id)) {
 			global $post;
 			$post_id = $post->ID;
 		}
 		
-		// get the post thumbnail id
-		$post_thumbnail_id = get_post_thumbnail_id($post_id);
-
 		// get all media
 		$args = array( 
 			'post_type' => 'attachment', 
@@ -474,23 +516,56 @@ class Projects_Writepanel {
 		// the the attachments
 		$attachments = get_children($args);
 		
+		// get the post thumbnail id
+		//$post_thumbnail_id = get_post_thumbnail_id($post_id);
+
 		// add the default size to the attachments
 		foreach($attachments as $attachment) {
-			if($post_thumbnail_id == $attachment->ID) {
-				// do not include the post thumbnail in the list
-				unset($attachments[$attachment->ID]);
-			} else {
-				// set the default size
-				$size = null;
-				
-				if($this->is_web_image($attachment->post_mime_type)) {		
-					$size = Projects::get_meta_value('default_image_size', $attachment->ID);
+			$size = null;
+			$meta = null;		
+			
+			// add the default size
+			if($this->is_web_image($attachment->post_mime_type)) {		
+				$size = Projects::get_meta_value('default_image_size', $attachment->ID);
+				$meta = Projects::get_meta_value('featured_image', $attachment->ID);		
+			}
+			
+			// set the default size property
+			$attachment->default_size = $size;
+			
+			// remove images
+			if(!empty($type) && $type == $this->type_featured) {
+				// remove all gallery images
+				//if($post_thumbnail_id != $attachment->ID && empty($meta)) {
+				if(empty($meta)) {
+					unset($attachments[$attachment->ID]);
 				}
-				
-				// add the default size to the attachment
-				$attachment->default_size = $size;
+			} else if(!empty($type) && $type == $this->type_gallery) {
+				// remove all featured images
+				//if($post_thumbnail_id == $attachment->ID || !empty($meta)) {
+				if(!empty($meta)) {
+					unset($attachments[$attachment->ID]);
+				}
 			}
 		} 
+		
+		return $attachments;
+	}
+
+	/**
+	 * Get the featured image
+	 */
+	public function get_project_featured_image($post_id = null, $mime = null) {
+		$attachments = $this->get_project_media($post_id, $mime, $this->type_featured);
+		
+		return $attachments;
+	}
+	
+	/**
+	 * Get the gallery
+	 */
+	public function get_project_gallery($post_id = null, $mime = null) {		
+		$attachments = $this->get_project_media($post_id, $mime, $this->type_gallery);
 
 		return $attachments;
 	}

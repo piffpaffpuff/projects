@@ -187,34 +187,34 @@ table.wp-list-table .column-title {
 }
 
 /*
-   Media Meta Box
+   Attachments Meta Box
 */
 
-#projects-media-list { 
+.projects-media-list { 
 	list-style-type: none; 
 	margin: 0; 
 	padding: 0;
 	overflow: hidden;
 }
-#projects-media-list li {
+.projects-media-list li {
 	float: left;
 	cursor: pointer;
 	margin: 10px;
 	text-align: center;
 }
-#projects-media-list li .media-content  {
+.projects-media-list li .media-content  {
 	line-height: 240px;
 	width: 240px; 
 	height: 240px;
 	display: block;
 }
-#projects-media-list li .media-content img {
+.projects-media-list li .media-content img {
 	vertical-align: middle;
 }
-#projects-media-list li.mime-placeholder {
+.projects-media-list li.mime-placeholder {
 	background-color: #f1f1f1;
 }
-#projects-media-list li .media-type {
+.projects-media-list li .media-type {
 	color: #c0c0c0;
 	text-shadow: rgba(255, 255, 255, 1) 0 1px 0;
 	font-weight: bold;

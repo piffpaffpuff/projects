@@ -9,33 +9,42 @@ jQuery(document).ready(function($) {
 	$('#projects-general-box input.minicolors').miniColors();
 	
 	// make the images clickable. maybe this will be later replaced. 
-	$('#projects-media-list').on('click', function(event) {
-		$('#projects-media-add').trigger('click');
+	$('#projects-gallery-list').on('click', function(event) {
+		$('#projects-gallery-add').trigger('click');		
+		event.preventDefault();
+	});
+	$('#projects-featured-image-list').on('click', function(event) {
+		$('#projects-featured-image-add').trigger('click');
+		event.preventDefault();
 	});
 	
 	// reload the media list on thickbox close 
 	$('#TB_overlay, #TB_closeWindowButton').live('mouseup', function(event) {
-		load_media_list();
+		load_media_list('featured');
+		load_media_list('gallery');
 	});
-
-	// load the list
-	load_media_list();
 	
 	/**
 	 * load the media list with ajax
 	 */
-	function load_media_list() {
+	function load_media_list(type) {
 		var data = {
-			action: 'add_media_list',
+			action: 'load_media_list',
+			type: type,
 			post_id: $('#post_ID').val(),
 			nonce: $('#projects_media_nonce').val()
 		};
 		
-		$.post(ajaxurl, data, function(response) {
-			$('#projects-media-list').empty().append(response);
+		$.post(ajaxurl, data, function(response) {			
+			// check the media type and load the list into the right box
+			if(data.type == 'featured') {
+				$('#projects-featured-image-list').empty().append(response);
+			} else {
+				$('#projects-gallery-list').empty().append(response);
+			}
 		});
 	}
-	
+		
 	// add an award group 
 	$('#projects-add-award-group').on('click', function(event) {
 		load_award_group();

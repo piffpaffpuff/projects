@@ -83,11 +83,11 @@ class Projects {
 	 * Include the classes
 	 */
 	public function includes() {
-		require_once('class-projects-installation.php');	
-		require_once('class-projects-register.php');	
-		require_once('class-projects-walkers.php');  
-		require_once('class-projects-writepanel.php');	
-		require_once('class-projects-settings.php');	
+		require_once('classes/class-projects-installation.php');	
+		require_once('classes/class-projects-register.php');	
+		require_once('classes/class-projects-walkers.php');  
+		require_once('classes/class-projects-writepanel.php');	
+		require_once('classes/class-projects-settings.php');	
 	}
 	
 	/**
@@ -101,68 +101,39 @@ class Projects {
 	 * Load the main hooks
 	 */
 	public function load_hooks() {
+   		remove_theme_support('post-thumbnails');
 		add_filter('get_previous_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_next_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_previous_post_sort', array($this, 'adjacent_post_previous_sort'));
 		add_filter('get_next_post_sort', array($this, 'adjacent_post_next_sort'));
 		add_filter('get_previous_post_where', array($this, 'adjacent_post_previous_where'));
 		add_filter('get_next_post_where', array($this, 'adjacent_post_next_where'));
-   		add_theme_support('post-thumbnails', array(Projects::$post_type));
    		add_action('pre_get_posts', array($this, 'projects_page_query'));
 	}
 	
 	/**
-	 * Query projects
+	 * Build the query args to get the projects
 	 */
-	public function query_projects($args = null) {		 
-		/* pagination support when the projects 
-		page is the frontpage and for all other
-		cases too. */
-		if(get_query_var('paged')) {
-		    $paged = get_query_var('paged');
-		} else if(get_query_var('page')) {
-		    $paged = get_query_var('page');
+	public function build_query_args($args = null) {
+		global $wp_query;
+		
+		/* pagination support for the projects page. 
+		in wordpress 3.0.2 the 'paged' option was 
+		renamed to 'page'. check for both cases because
+		the archive uses the new and the page the old
+		option name. */
+		if($wp_query->get('paged')) {
+		    $paged = $wp_query->get('paged');
+		} else if($wp_query->get('page')) {
+		    $paged = $wp_query->get('page');
 		} else {
 		    $paged = 1;
 		}
-	
-		/* set the default args.
-		posts with the same date are sorted ordered 
-		by title DESC because WordPress doesn't
-		support multiple orders yet.
-		attention: if this changes anytime the adjacent
-		needs adaption too. */
-		$args = is_array($args) ? $args : array();
-		$args['post_type'] = self::$post_type;
-		$args['orderby'] = isset($args['orderby']) ? $args['orderby'] : 'meta_value_num';
-		$args['order'] = isset($args['order']) ? $args['order'] : 'DESC';
-		$args['meta_key'] = isset($args['meta_key']) ? $args['meta_key'] : $this->meta_key;
-		$args['paged'] = $paged;
-				
-		return query_posts($args);
-	}
-	
-	/**
-	 * Get projects
-	 */
-	public function get_projects($args = null) {
-		/* pagination support when the projects 
-		page is the frontpage and for all other
-		cases too. */
-		if(get_query_var('paged')) {
-		    $paged = get_query_var('paged');
-		} else if(get_query_var('page')) {
-		    $paged = get_query_var('page');
-		} else {
-		    $paged = 1;
-		}
-
-		/* set the default args.
-		posts with the same date are sorted ordered 
-		by title DESC because WordPress doesn't
-		support multiple orders yet.
-		attention: if this changes anytime the adjacent
-		needs adaption too. */
+		
+		/* set the default args. posts with the 
+		same date are ordered by title DESC because 
+		wordpress doesn't support multiple ordering 
+		yet. */
 		$default_args = array(
 			'post_type' => self::$post_type,
 			'meta_key' => $this->meta_key,
@@ -172,43 +143,50 @@ class Projects {
 		);
 		
 		// merge the default and additional args
-		if(is_array($args)) {
-			$args = array_merge($default_args, $args);
-		} else {
-			$args = $default_args;
+		$args = wp_parse_args($args, $default_args);
+
+		return $args;
+	}
+	
+	/**
+	 * Hook into the main query to get projects
+	 */
+	public function projects_page_query($wp_query) {
+    	if($wp_query->is_main_query() && $this->is_projects_page()) {
+    		// set the default query args
+    		$args = $this->build_query_args();
+    		foreach($args as $key => $value) {
+    			$wp_query->set($key, $value);
+    		}
+			
+			/* set the page type to is_archive if the 
+			projects page is also the front page. */
+			$wp_query->set('page_id', 0);
+			$wp_query->is_page = '';
+        	$wp_query->is_singular = '';		
+        	$wp_query->is_archive = 1;		
+        	$wp_query->is_post_type_archive = 1;
 		}
-		
+
+    	return $wp_query;
+	}
+	
+	/**
+	 * Query projects
+	 */
+	public function query_projects($args = null) {		 
+		$args = $this->build_query_args($args);
+		return query_posts($args);
+	}
+	
+	/**
+	 * Get projects
+	 */
+	public function get_projects($args = null) {
+		$args = $this->build_query_args($args);
 		return new WP_Query($args);
 	}
-	
-	public function projects_page_query($query) {
-    	/* pagination support when the projects 
-		page is the frontpage and for all other
-		cases too. */
-		if($query->get('paged')) {
-		    $paged = $query->get('paged');
-		} else if($query->get('page')) {
-		    $paged = $query->get('page');
-		} else {
-		    $paged = 1;
-		}
 		
-    	if($query->is_main_query() && $this->is_projects_page()) {
-    		$query->set('post_type', self::$post_type);
-			$query->set('meta_key', $this->meta_key);
-    		$query->set('orderby', 'meta_value+0');
-    		$query->set('order', 'DESC');
-    		$query->set('paged', $paged);
-			$query->set('page_id', ''); //Empty 
-			$query->is_page = 0;
-        	$query->is_singular = 0;		
-		}
-    	
-//print_r($query);
-
-    	return $query;
-	}
-	
 	/**
 	 * Adjacents JOIN query part
 	 */
@@ -354,22 +332,32 @@ function get_projects($args = null) {
 }
 
 /**
- * Get the media
+ * Get the gallery
  */
-function get_project_media($post_id = null, $mime = null) {
+function get_project_gallery($post_id = null, $mime = null) {
 	global $projects;
-	return $projects->writepanel->get_project_media($post_id, $mime);
+	return $projects->writepanel->get_project_gallery($post_id, $mime);
 }
 
 /**
- * Show the media
+ * Get the featured
  */
-function project_media($size = null, $post_id = null, $mime = null) {
+function get_project_featured_image($post_id = null, $mime = null) {
+	global $projects;
+	return $projects->writepanel->get_project_featured_image($post_id, $mime);
+}
+
+/**
+ * Show the gallery
+ */
+function project_gallery($size = null, $post_id = null, $mime = null) {
 	global $projects;
 
+	$attachments = get_project_gallery($post_id, $mime);
+	
 	?>
 	<ul class="project-media">
-		<?php foreach(get_project_media($post_id, $mime) as $attachment) : ?>
+		<?php foreach($attachments as $attachment) : ?>
 		<li>
 			<a href="<?php echo get_attachment_link($attachment->ID); ?>">
 			<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
@@ -392,21 +380,36 @@ function project_media($size = null, $post_id = null, $mime = null) {
 }
 
 /**
- * Get the Thumbnail source info
+ * Show the featured image
  */
-function get_project_thumbnail_src($size = 'thumbnail', $post_id = null) {	
-	$attachment_id = get_post_thumbnail_id($post_id);
-	$attachment_src = wp_get_attachment_image_src($attachment_id, $size);
-	return $attachment_src;
-}
+function project_thumbnail($size = 'thumbnail', $post_id = null) {
+	global $projects;
 
-/**
- * Show the Thumbnail
- */
-function project_thumbnail($size = 'thumbnail', $post_id = null) {	
-	$src = get_project_thumbnail_src($size, $post_id);
+	$attachments = get_project_featured_image($post_id);
+	$attachments_count = count($attachments);
+
 	?>
-	<img src="<?php echo $src[0]; ?>" />
+	<?php if($attachments_count > 0) : ?>
+		<?php //if($attachments_count == 1) : ?>
+		 	<?php foreach($attachments as $attachment) : ?>
+				<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
+					<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
+					<img src="<?php echo $attachment_src[0]; ?>" />
+				<?php endif; ?>
+			<?php endforeach; ?>
+		<?php else : ?>
+			<ul class="project-featured-image">
+				<?php foreach($attachments as $attachment) : ?>
+				<li>
+				<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
+					<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
+					<img src="<?php echo $attachment_src[0]; ?>" />
+				<?php endif; ?>
+				</li>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
+	<?php endif; ?>	
 	<?php
 }
 

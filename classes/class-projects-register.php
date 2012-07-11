@@ -123,26 +123,46 @@ class Projects_Register {
 	}
 	
 	/**
-	 * Create custom post type
+	 * Create custom post types
 	 */
 	public function register_types() {		
+		$this->add_type(__('Projects', 'projects'), __('Project', 'projects'), Projects::$post_type);
+		
+		/* hidden post type for the awards. it is used
+		to query awards and list projects for every
+		award. it alsow permits to group awards by year, 
+		name, etc. */
+		/*
+$args = array(
+			'exclude_from_search' => false,
+			'publicly_queryable' => true,
+			'show_ui' => true,
+		);
+		$this->add_type(__('Awards', 'projects'), __('Award', 'projects'), $this->generate_internal_name('award'), $args);
+*/
+	}
+	
+	/**
+	 * Create custom post type
+	 */
+	public function add_type($plural_label, $singular_label, $key, $args = null) {		
 		$labels = array(
-			'name' => __('Projects', 'projects'),
-			'singular_name' => __('Project', 'projects'),
+			'name' => $plural_label,
+			'singular_name' => $singular_label,
 			'add_new' => __('Add New', 'projects'),
-			'add_new_item' => __('Add New Project', 'projects'),
-			'edit_item' => __('Edit Project', 'projects'),
-			'new_item' => __('New Project', 'projects'),
-			'all_items' => __('All Projects', 'projects'),
-			'view_item' => __('View Project', 'projects'),
-			'search_items' => __('Search Projects', 'projects'),
-			'not_found' =>  __('No Projects found', 'projects'),
-			'not_found_in_trash' => __('No Projects found in Trash', 'projects'), 
+			'add_new_item' => sprintf(__('Add New %s', 'projects'), $singular_label),
+			'edit_item' => sprintf(__('Edit %s', 'projects'), $singular_label),
+			'new_item' => sprintf(__('New %s', 'projects'), $singular_label),
+			'all_items' => sprintf(__('All %s', 'projects'), $plural_label),
+			'view_item' => sprintf(__('View %s', 'projects'), $plural_label),
+			'search_items' => sprintf(__('Search %s', 'projects'), $plural_label),
+			'not_found' => sprintf(__('No %s found', 'projects'), $plural_label),
+			'not_found_in_trash' => sprintf(__('No %s found in Trash', 'projects'), $plural_label),
 			'parent_item_colon' => '',
-			'menu_name' => __('Projects', 'projects')
+			'menu_name' => $plural_label
 		);
 	
-		$args = array(
+		$default_args = array(
 	    	'labels' => $labels,
 	    	'public' => true,
 			'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'post-formats'),
@@ -151,8 +171,12 @@ class Projects_Register {
 			'menu_position' => 4,
 			'has_archive' => true
 		); 
-	
-		register_post_type(Projects::$post_type, $args);
+		
+		// merge the default and additional args
+		$args = wp_parse_args($args, $default_args);
+		
+		// register
+		register_post_type($key, $args);
 	}	
 	
 	/**
@@ -164,20 +188,33 @@ class Projects_Register {
 		$this->add_taxonomy(__('Tasks', 'projects'), __('Task', 'projects'), 'task');
 		$this->add_taxonomy(__('Agencies', 'projects'), __('Agency', 'projects'), 'agency');
 		$this->add_taxonomy(__('Clients', 'projects'), __('Client', 'projects'), 'client');
-		$this->add_taxonomy(__('Tags', 'projects'), __('Tag', 'projects'), 'tag', array('herarchical' => false));
+		$this->add_taxonomy(__('Tags', 'projects'), __('Tag', 'projects'), 'tag', array('hierarchical' => false));
+		
+		// award taxonomies
+		/*
+$args = array(
+			'hierarchical' => false,
+			'post_type' => $this->generate_internal_name('award')
+		);
+		$this->add_taxonomy(__('Names', 'projects'), __('Name', 'projects'), 'award_name', $args);
+		$this->add_taxonomy(__('Years', 'projects'), __('Year', 'projects'), 'award_year', $args);
+		$this->add_taxonomy(__('Categories', 'projects'), __('Category', 'projects'), 'award_category', $args);
+		$this->add_taxonomy(__('Ranks', 'projects'), __('Rank', 'projects'), 'award_rank', $args);
+*/
+
 		$this->add_awards();
 	}
 	
 	/**
 	 * Create a custom taxonomy
 	 */	
-	public function add_taxonomy($plural_label, $singular_label, $key, $args = null) {	
+	public function add_taxonomy($plural_label, $singular_label, $key, $args = null) {			
 		$taxonomy_name = self::generate_internal_name($key);
 	
 		$labels = array(
-		    'name' => $plural_label, 'projects',
-		    'singular_name' => $singular_label, 'projects',
-		    'search_items' =>  sprintf(__('Search %s', 'projects'), $plural_label),
+		    'name' => $plural_label,
+		    'singular_name' => $singular_label,
+		    'search_items' => sprintf(__('Search %s', 'projects'), $plural_label),
 		    'all_items' => sprintf(__('All %s', 'projects'), $plural_label),
 		    'parent_item' => sprintf(__( 'Parent %s', 'projects'), $plural_label),
     		'parent_item_colon' => sprintf(__( 'Parent %s:', 'projects'), $plural_label),
@@ -191,13 +228,19 @@ class Projects_Register {
 		    'menu_name' => $plural_label
 		);
 		
-		$args = is_array($args) ? $args : array();	
-		$args['rewrite'] = array('slug' => $this->slug . '/' . $taxonomy_name);
-		$args['hierarchical'] = isset($args['hierarchical']) ? $args['hierarchical'] : true;
-		$args['labels'] = isset($args['labels']) ? $args['labels'] : $labels;
-		$args['show_ui'] = isset($args['show_ui']) ? $args['show_ui'] : true;
+		$default_args = array(
+			'labels' => $labels,
+	    	'rewrite' => array('slug' => $this->slug . '/' . $taxonomy_name),
+	    	'hierarchical' => true,
+			'show_ui' => true,
+			'post_type' => Projects::$post_type
+		);
 		
-		register_taxonomy($taxonomy_name, Projects::$post_type, $args);
+		// merge the default and additional args
+		$args = wp_parse_args($args, $default_args);
+		
+		// register
+		register_taxonomy($taxonomy_name, $args['post_type'], $args);
 	}
 		
 	/**
@@ -269,10 +312,14 @@ class Projects_Register {
 	 * Get all registered taxonomies
 	 */
 	public function get_added_taxonomies($args = null, $type = 'objects') {
-		$args = is_array($args) ? $args : array();
-		$args['show_ui'] = isset($args['show_ui']) ? $args['show_ui'] : true;
-		$args['object_type'] = array(Projects::$post_type);
-	
+		$default_args = array(
+	    	'object_type' => array(Projects::$post_type),
+			'show_ui' => true
+		);
+		
+		// merge the default and additional args
+		$args = wp_parse_args($args, $default_args);
+
 		return get_taxonomies($args, $type);
 	}
 	
@@ -290,11 +337,15 @@ class Projects_Register {
 	 */	
 	public function add_status($label, $key, $args = null) {
 		$status_name = self::generate_internal_name($key);
-
-		$args = is_array($args) ? $args : array();
-		$args['label'] = isset($args['label']) ? $args['label'] : __($label, 'projects');
-		$args['label_count'] = isset($args['label_count']) ? $args['label_count'] : _n_noop($label . ' <span class="count">(%s)</span>', $label . ' <span class="count">(%s)</span>' );
 		
+		$default_args = array(
+	    	'label' => __($label, 'projects'),
+			'label_count' => _n_noop($label . ' <span class="count">(%s)</span>', $label . ' <span class="count">(%s)</span>' )
+		);
+
+		// merge the default and additional args
+		$args = wp_parse_args($args, $default_args);
+
 		register_post_status($status_name, $args);
 	}
 	
