@@ -19,16 +19,16 @@ class Projects_Taxonomy {
 	}
 	
 	/**
-	 * Load the class
+	 * Load the class hooks
 	 */
 	public function load() {
-		add_action('init', array($this, 'load_hooks'));
+		add_action('init', array($this, 'hook_init'));
 	}
 	
 	/**
-	 * Load the main hooks
+	 * Hook into the main hooks
 	 */
-	public function load_hooks() {		
+	public function hook_init() {		
 	}
 }
 }

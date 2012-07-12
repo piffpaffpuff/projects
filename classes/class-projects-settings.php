@@ -16,7 +16,7 @@ class Projects_Settings {
 	}
 
 	/**
-	 * Load the class
+	 * Load the class hooks
 	 */
 	public function load() {
 		add_action('admin_menu', array($this, 'add_page'));

@@ -20,16 +20,16 @@ class Projects_Writepanel {
 	}
 
 	/**
-	 * Load the class
+	 * Load the class hooks
 	 */
 	public function load() {
-		add_action('admin_init', array($this, 'load_admin_hooks'));
+		add_action('admin_init', array($this, 'hook_admin'));
 	}
 		
 	/**
-	 * Load the admin hooks
+	 * Hook into the admin hooks
 	 */
-	public function load_admin_hooks() {		
+	public function hook_admin() {		
 		add_action('admin_head-post.php', array($this, 'remove_insert_media_buttons'));
 		add_action('admin_head-post-new.php', array($this, 'remove_insert_media_buttons'));
 		add_action('add_meta_boxes', array($this, 'add_boxes'));

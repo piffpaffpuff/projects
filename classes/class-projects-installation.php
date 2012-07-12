@@ -13,7 +13,7 @@ class Projects_Installation {
 	}
 	
 	/**
-	 * Load the class
+	 * Load the class hooks
 	 */
 	public function load() {
 		register_activation_hook(Projects::$plugin_file_path, array($this, 'add_default_settings'));

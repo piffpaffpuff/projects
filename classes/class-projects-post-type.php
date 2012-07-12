@@ -17,13 +17,13 @@ class Projects_Post_Type {
 	}
 	
 	/**
-	 * Load the class
+	 * Load the class hooks
 	 */
 	public function load() {
 		register_activation_hook(Projects::$plugin_file_path, array($this, 'add_default_settings'));
 		register_deactivation_hook(Projects::$plugin_file_path, array($this, 'remove_default_settings'));
-		add_action('init', array($this, 'load_hooks'));
-		add_action('admin_init', array($this, 'load_admin_hooks'));
+		add_action('init', array($this, 'hook_init'));
+		add_action('admin_init', array($this, 'hook_admin'));
 	}
 	
 	/**
@@ -50,9 +50,9 @@ class Projects_Post_Type {
 	}
 	
 	/**
-	 * Load the main hooks
+	 * Hook into the main hooks
 	 */
-	public function load_hooks() {
+	public function hook_init() {
 		// get the base page slug for the post types
 		$page = get_post(get_option('projects_base_page_id')); 
 		$this->slug = $page->post_name;
@@ -68,9 +68,9 @@ class Projects_Post_Type {
 	}
 
 	/**
-	 * Load the admin hooks
+	 * Hook into the admin hooks
 	 */
-	public function load_admin_hooks() {			
+	public function hook_admin() {			
 		add_filter('manage_edit-' . Projects::$post_type . '_columns', array($this, 'add_columns'));
 		add_action('manage_posts_custom_column', array($this, 'create_column_content'), 10, 2);
 		add_filter('manage_edit-' . Projects::$post_type . '_sortable_columns', array($this, 'add_sorting_columns'));	
