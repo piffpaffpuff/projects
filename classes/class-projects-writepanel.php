@@ -171,7 +171,7 @@ class Projects_Writepanel {
 		add_meta_box('projects-location-box', __('Location', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
 	
 		// add the award box when the taxonomy exists
-		$taxonomy = Projects_Register::get_taxonomy_internal_name('award');
+		$taxonomy = Projects_Post_Type::get_taxonomy_internal_name('award');
 
 		if(taxonomy_exists($taxonomy)) {
 			add_meta_box('projects-awards-box', __('Awards', 'projects'), array($this, 'create_box_awards'), Projects::$post_type, 'side', 'default');
@@ -183,7 +183,7 @@ class Projects_Writepanel {
 	 */
 	public function remove_boxes() {
 		// remove the default award box when the taxonomy exists
-		$taxonomy = Projects_Register::get_taxonomy_internal_name('award');
+		$taxonomy = Projects_Post_Type::get_taxonomy_internal_name('award');
 
 		if(taxonomy_exists($taxonomy)) {
 			remove_meta_box('tagsdiv-' . $taxonomy, Projects::$post_type, 'side');
@@ -265,7 +265,7 @@ class Projects_Writepanel {
 	 */
 	public function create_award_group_list_item($index, $meta = null) {
 		// Get the defined terms
-		$taxonomy = Projects_Register::get_taxonomy_internal_name('award');
+		$taxonomy = Projects_Post_Type::get_taxonomy_internal_name('award');
 		$slugs = array(
 			'name',
 			'year',
@@ -368,7 +368,7 @@ class Projects_Writepanel {
 		?>
 		<p class="form-fieldset"><label><span><?php _e('Status:', 'projects'); ?></span></label><select name="projects[status]">
 			<?php foreach($stati as $status) : ?>
-				<?php if(Projects_Register::is_internal_name($status->name)) : ?>
+				<?php if(Projects_Post_Type::is_internal_name($status->name)) : ?>
 			<option value="<?php echo $status->name; ?>" <?php selected($status->name, Projects::get_meta_value('status')); ?>><?php echo $status->label; ?></option>
 				<?php endif; ?>
 			<?php endforeach; ?>
@@ -574,7 +574,7 @@ class Projects_Writepanel {
 	 * Get a project taxonomy
 	 */	
 	public function get_project_taxonomy($post_id, $key, $hierarchical = true, $args = null) {		
-		$taxonomy = Projects_Register::get_taxonomy_internal_name($key);
+		$taxonomy = Projects_Post_Type::get_taxonomy_internal_name($key);
 		$terms = wp_get_object_terms($post_id, $taxonomy, $args); 
 		
 		if(!isset($terms->errors) && sizeof($terms) > 0) {
@@ -674,7 +674,7 @@ class Projects_Writepanel {
 			}
 			
 			// set the terms for the awards
-			$taxonomy = Projects_Register::get_taxonomy_internal_name('award');
+			$taxonomy = Projects_Post_Type::get_taxonomy_internal_name('award');
 			if(empty($_POST['projects']['awards'])) {
 				$_POST['projects']['awards'] = '';
 				

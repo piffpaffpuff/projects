@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Menu class
+ * Post type class
  */
-if (!class_exists('Projects_Register')) {
-class Projects_Register {
+if (!class_exists('Projects_Post_Type')) {
+class Projects_Post_Type {
 	
 	public $slug;
 	
@@ -12,7 +12,6 @@ class Projects_Register {
 	 * Constructor
 	 */
 	public function __construct() {
-
 	}
 	
 	/**
@@ -74,54 +73,8 @@ class Projects_Register {
 		add_action('manage_posts_custom_column', array($this, 'create_column_content'), 10, 2);
 		add_filter('manage_edit-' . Projects::$post_type . '_sortable_columns', array($this, 'add_sorting_columns'));	
 		add_filter('request', array($this, 'default_column_orderby'));
-		
-		add_action('admin_print_styles', array($this, 'add_styles'));
-		add_action('admin_print_scripts-post.php', array($this, 'add_scripts'));
-		add_action('admin_print_scripts-post-new.php', array($this, 'add_scripts'));
-		add_action('admin_print_styles-media-upload-popup', array($this, 'add_media_styles'));		
-		add_action('admin_print_scripts-media-upload-popup', array($this, 'add_media_scripts'));		
-		
-		// Enqueue script on settings page
-		if(isset($_GET['page']) && $_GET['page'] == 'projects-settings') {
-			$hook = get_plugin_page_hookname($_GET['page'], 'options-general.php');
-			add_action('admin_print_scripts-' . $hook, array($this, 'add_scripts'));
-		}
 	}
 
-	/**
-	 * Add the styles
-	 */
-	public function add_styles() {
-		wp_enqueue_style('minicolors', Projects::$plugin_directory_url . 'css/jquery.miniColors.css');
-		wp_enqueue_style('projects', Projects::$plugin_directory_url . 'css/style.css');
-	}
-	
-	/**
-	 * Add the scripts
-	 */
-	public function add_scripts() {
-		wp_enqueue_script('jquery-ui-core');
-		wp_enqueue_script('jquery-ui-sortable');
-		wp_enqueue_script('minicolors', Projects::$plugin_directory_url . 'js/jquery.miniColors.min.js', array('jquery'));
-		wp_enqueue_script('projects', Projects::$plugin_directory_url . 'js/script.js', array('jquery'));
-	}
-
-	/**
-	 * Add the media manager styles
-	 */
-	public function add_media_styles() {
-		$post_type = get_post_type($_GET['post_id']);
-		if(!empty($post_type) && $post_type == Projects::$post_type) {
-			wp_enqueue_style('projects-media', Projects::$plugin_directory_url . 'css/media-style.css');
-		}
-	}
-	
-	/**
-	 * Add the media manager scripts
-	 */
-	public function add_media_scripts() {
-	}
-	
 	/**
 	 * Create custom post types
 	 */

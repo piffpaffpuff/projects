@@ -67,7 +67,7 @@ class Projects {
 		
 		$this->installation = new Projects_Installation();
 		$this->installation->load();
-		$this->register = new Projects_Register();
+		$this->register = new Projects_Post_Type();
 		$this->register->load();
 		$this->writepanel = new Projects_Writepanel();
 		$this->writepanel->load();
@@ -84,10 +84,13 @@ class Projects {
 	 */
 	public function includes() {
 		require_once('classes/class-projects-installation.php');	
-		require_once('classes/class-projects-register.php');	
-		require_once('classes/class-projects-walkers.php');  
+		require_once('classes/class-projects-post-type.php');	
+		require_once('classes/class-projects-taxonomy.php');	
+		require_once('classes/class-projects-walkers.php');
 		require_once('classes/class-projects-writepanel.php');	
 		require_once('classes/class-projects-settings.php');	
+		
+		require_once('projects-template-functions.php');	
 	}
 	
 	/**
@@ -102,13 +105,61 @@ class Projects {
 	 */
 	public function load_hooks() {
    		remove_theme_support('post-thumbnails');
+		
 		add_filter('get_previous_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_next_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_previous_post_sort', array($this, 'adjacent_post_previous_sort'));
 		add_filter('get_next_post_sort', array($this, 'adjacent_post_next_sort'));
 		add_filter('get_previous_post_where', array($this, 'adjacent_post_previous_where'));
 		add_filter('get_next_post_where', array($this, 'adjacent_post_next_where'));
+   		
    		add_action('pre_get_posts', array($this, 'projects_page_query'));
+   		
+   		add_action('admin_print_styles', array($this, 'add_styles'));
+		add_action('admin_print_scripts-post.php', array($this, 'add_scripts'));
+		add_action('admin_print_scripts-post-new.php', array($this, 'add_scripts'));
+		add_action('admin_print_styles-media-upload-popup', array($this, 'add_media_styles'));		
+		add_action('admin_print_scripts-media-upload-popup', array($this, 'add_media_scripts'));		
+		
+		// Enqueue script on settings page
+		if(isset($_GET['page']) && $_GET['page'] == 'projects-settings') {
+			$hook = get_plugin_page_hookname($_GET['page'], 'options-general.php');
+			add_action('admin_print_scripts-' . $hook, array($this, 'add_scripts'));
+		}
+	}
+	
+	/**
+	 * Add the styles
+	 */
+	public function add_styles() {
+		wp_enqueue_style('minicolors', self::$plugin_directory_url . 'css/jquery.miniColors.css');
+		wp_enqueue_style('projects', self::$plugin_directory_url . 'css/style.css');
+	}
+	
+	/**
+	 * Add the scripts
+	 */
+	public function add_scripts() {
+		wp_enqueue_script('jquery-ui-core');
+		wp_enqueue_script('jquery-ui-sortable');
+		wp_enqueue_script('minicolors', self::$plugin_directory_url . 'js/jquery.miniColors.min.js', array('jquery'));
+		wp_enqueue_script('projects', self::$plugin_directory_url . 'js/script.js', array('jquery'));
+	}
+
+	/**
+	 * Add the media manager styles
+	 */
+	public function add_media_styles() {
+		$post_type = get_post_type($_GET['post_id']);
+		if(!empty($post_type) && $post_type == self::$post_type) {
+			wp_enqueue_style('projects-media', self::$plugin_directory_url . 'css/media-style.css');
+		}
+	}
+	
+	/**
+	 * Add the media manager scripts
+	 */
+	public function add_media_scripts() {
 	}
 	
 	/**
@@ -193,7 +244,7 @@ class Projects {
 	public function adjacent_post_join($join) {
 		global $wp_query, $wpdb;
 		
-		if($wp_query->get('post_type') == Projects::$post_type) {
+		if($wp_query->get('post_type') == self::$post_type) {
 			// select the meta table info
 			$join = $wpdb->prepare(" INNER JOIN $wpdb->postmeta AS m ON p.ID = m.post_id AND m.meta_key = %s", $this->meta_key);
 		}
@@ -207,7 +258,7 @@ class Projects {
 	public function adjacent_post_next_sort($sort) {
 		global $wp_query, $wpdb;
 		
-		if($wp_query->get('post_type') == Projects::$post_type) {
+		if($wp_query->get('post_type') == self::$post_type) {
 			// sort both by the same order because $wp_query
 			// doesn't support multiple different orders.
 			$sort = "ORDER BY m.meta_value+0 DESC, p.post_name DESC LIMIT 1";
@@ -222,7 +273,7 @@ class Projects {
 	public function adjacent_post_previous_sort($sort) {
 		global $wp_query, $wpdb;
 		
-		if($wp_query->get('post_type') == Projects::$post_type) {
+		if($wp_query->get('post_type') == self::$post_type) {
 			// sort both by the same order because $wp_query
 			// doesn't support multiple different orders.
 			$sort = "ORDER BY m.meta_value+0 ASC, p.post_name ASC LIMIT 1";
@@ -237,7 +288,7 @@ class Projects {
 	public function adjacent_post_next_where($where) {
 		global $wp_query, $wpdb, $post;
 
-		if($wp_query->get('post_type') == Projects::$post_type) {
+		if($wp_query->get('post_type') == self::$post_type) {
 			$operator = '<';
 			$meta = self::get_meta_value('date');
 			$where = $wpdb->prepare(" WHERE (m.meta_value+0 $operator %d OR (m.meta_value+0 = '%d' AND p.post_name $operator %s)) AND p.post_type IN (%s) AND p.post_status = 'publish' ", $meta, $meta, $post->post_name, self::$post_type);
@@ -252,7 +303,7 @@ class Projects {
 	public function adjacent_post_previous_where($where) {
 		global $wp_query, $wpdb, $post;
 
-		if($wp_query->get('post_type') == Projects::$post_type) {
+		if($wp_query->get('post_type') == self::$post_type) {
 			$operator = '>';
 			$meta = self::get_meta_value('date');
 			$where = $wpdb->prepare(" WHERE (m.meta_value+0 $operator %d OR (m.meta_value+0 = '%d' AND p.post_name $operator %s)) AND p.post_type IN (%s) AND p.post_status = 'publish' ", $meta, $meta, $post->post_name, self::$post_type);
@@ -310,203 +361,5 @@ class Projects {
  */
 $projects = new Projects();
 $projects->load();
-
-/*
- * API
- */
-
-/**
- * Query projects
- */
-function query_projects($args = null) {
-	global $projects;
-	return $projects->query_projects($args);
-}
-
-/**
- * Get projects
- */
-function get_projects($args = null) {
-	global $projects;
-	return $projects->get_projects($args);
-}
-
-/**
- * Get the gallery
- */
-function get_project_gallery($post_id = null, $mime = null) {
-	global $projects;
-	return $projects->writepanel->get_project_gallery($post_id, $mime);
-}
-
-/**
- * Get the featured
- */
-function get_project_featured_image($post_id = null, $mime = null) {
-	global $projects;
-	return $projects->writepanel->get_project_featured_image($post_id, $mime);
-}
-
-/**
- * Show the gallery
- */
-function project_gallery($size = null, $post_id = null, $mime = null) {
-	global $projects;
-
-	$attachments = get_project_gallery($post_id, $mime);
-	
-	?>
-	<ul class="project-media">
-		<?php foreach($attachments as $attachment) : ?>
-		<li>
-			<a href="<?php echo get_attachment_link($attachment->ID); ?>">
-			<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
-				<?php 				
-				// overwrite the size when the attachment has set a custom one
-				if(!empty($attachment->default_size)) {
-					$media_size = $attachment->default_size;
-				} else {
-					$media_size = $size;
-				}
-				?>
-				<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
-				<img src="<?php echo $attachment_src[0]; ?>" />
-			<?php endif; ?>
-			</a>
-		</li>
-		<?php endforeach; ?>
-	</ul>
-	<?php
-}
-
-/**
- * Show the featured image
- */
-function project_thumbnail($size = 'thumbnail', $post_id = null) {
-	global $projects;
-
-	$attachments = get_project_featured_image($post_id);
-	$attachments_count = count($attachments);
-
-	?>
-	<?php if($attachments_count > 0) : ?>
-		<?php if($attachments_count == 1) : ?>
-		 	<?php foreach($attachments as $attachment) : ?>
-				<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
-					<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
-					<img src="<?php echo $attachment_src[0]; ?>" />
-				<?php endif; ?>
-			<?php endforeach; ?>
-		<?php else : ?>
-			<ul class="project-featured-image">
-				<?php foreach($attachments as $attachment) : ?>
-				<li>
-				<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
-					<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
-					<img src="<?php echo $attachment_src[0]; ?>" />
-				<?php endif; ?>
-				</li>
-				<?php endforeach; ?>
-			</ul>
-		<?php endif; ?>
-	<?php endif; ?>	
-	<?php
-}
-
-/**
- * Get terms
- */
-function get_project_taxonomy($key, $hierarchical = true, $args = null) {
-	global $projects, $post;
-	$terms = $projects->writepanel->get_project_taxonomy($post->ID, $key, $hierarchical, $args);
-	return $terms;
-}
-
-/**
- * Show terms
- */
-function project_taxonomy($key, $args = null) {
-	global $post;
-	$args = is_array($args) ? $args : array();
-	$args['taxonomy'] = Projects_Register::get_taxonomy_internal_name($key);
-	$args['walker'] = new Projects_Project_Taxonomy_Walker($post->ID, $args['taxonomy']);
-	return wp_list_categories($args);
-}
-
-/**
- * Get project meta
- */
-function get_project_meta($key) {
-	global $projects;
-	return Projects::get_meta_value($key);
-}
-
-/**
- * Show project meta
- */
-function project_meta($key) {
-	global $projects;
-	return get_project_meta($key);
-}
-
-/**
- * Show project website
- */
-function project_website($name = null, $target = '_blank') {
-	$url = get_project_meta('website');
-	$url_target = 'target="' . $target . '"';
-	
-	if(!empty($url)) {
-		if(empty($name)) {
-			$name = preg_replace('/(?<!href=["\'])http:\/\//', '', $url);
-		}
-		if(empty($target)) {
-			$url_target = '';
-		}
-		?>
-		<a href="<?php echo $url; ?>" title="<?php esc_attr($name); ?>" <?php echo $url_target; ?>><?php echo $name; ?></a>
-		<?
-	}
-}
-
-/**
- * Add taxonomy
- */
-function add_projects_taxonomy($plural_label, $singular_label, $key, $args = null) {
-	global $projects;
-	$projects->register->add_taxonomy($plural_label, $singular_label, $key, $args);
-}
-
-/**
- * Remove taxonomy
- */
-function remove_projects_taxonomy($key) {
-	global $projects;
-	$projects->register->remove_taxonomy($key);
-}
-
-/**
- * Is single project item
- */
-function is_project() {
-	global $projects;
-	return $projects->is_project();
-}
-
-/**
- * Is projects main page
- */
-function is_projects_page() {
-	global $projects;
-	return $projects->is_projects_page();
-}
-
-/**
- * Is projects taxonomy
- */
-function is_projects_tax() {
-	global $projects;
-	return $projects->is_projects_tax();
-}
 
 ?>
