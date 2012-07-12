@@ -7,11 +7,13 @@ if (!class_exists('Projects_Post_Type')) {
 class Projects_Post_Type {
 	
 	public $slug;
+	public $projects;
 	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
+		$this->projects = new Projects();
 	}
 	
 	/**
@@ -91,7 +93,7 @@ $args = array(
 			'publicly_queryable' => true,
 			'show_ui' => true,
 		);
-		$this->add_type(__('Awards', 'projects'), __('Award', 'projects'), $this->generate_internal_name('award'), $args);
+		$this->add_type(__('Awards', 'projects'), __('Award', 'projects'), $this->projects->get_internal_name('award'), $args);
 */
 	}
 	
@@ -147,7 +149,7 @@ $args = array(
 		/*
 $args = array(
 			'hierarchical' => false,
-			'post_type' => $this->generate_internal_name('award')
+			'post_type' => $this->projects->get_internal_name('award')
 		);
 		$this->add_taxonomy(__('Names', 'projects'), __('Name', 'projects'), 'award_name', $args);
 		$this->add_taxonomy(__('Years', 'projects'), __('Year', 'projects'), 'award_year', $args);
@@ -161,8 +163,8 @@ $args = array(
 	/**
 	 * Create a custom taxonomy
 	 */	
-	public function add_taxonomy($plural_label, $singular_label, $key, $args = null) {			
-		$taxonomy_name = self::generate_internal_name($key);
+	public function add_taxonomy($plural_label, $singular_label, $key, $args = null) {	
+		$taxonomy_name = $this->projects->get_internal_name($key);
 	
 		$labels = array(
 		    'name' => $plural_label,
@@ -203,7 +205,7 @@ $args = array(
 		global $wp_taxonomies;
 		
 		$args = array(
-			'name' => self::get_taxonomy_internal_name($key)
+			'name' => $this->projects->get_internal_name($key)
 		);
 		
 		$taxonomies = $this->get_added_taxonomies($args, 'names');
@@ -220,7 +222,7 @@ $args = array(
 	 */	
 	public function add_awards() {
 		$external_key = 'award';
-		$taxonomy = self::get_taxonomy_internal_name($external_key);
+		$taxonomy = $this->projects->get_internal_name($external_key);
 	
 		$this->add_taxonomy(__('Awards', 'projects'), __('Award', 'projects'), $external_key);
 
@@ -289,7 +291,7 @@ $args = array(
 	 * Create a custom post status
 	 */	
 	public function add_status($label, $key, $args = null) {
-		$status_name = self::generate_internal_name($key);
+		$status_name = $this->projects->get_internal_name($key);
 		
 		$default_args = array(
 	    	'label' => __($label, 'projects'),
@@ -350,7 +352,7 @@ $args = array(
 		if(isset($args['post_type']) && $args['post_type'] == Projects::$post_type) {
 			if(!isset($args['orderby']) || (isset($args['orderby']) && $args['orderby'] == 'year')) {
 				$args['orderby'] = 'meta_value_num';
-				$args['meta_key'] = '_projects_date';
+				$args['meta_key'] = $this->projects->get_internal_name('date', true);
 			}
 		}
 		return $args;
@@ -381,7 +383,7 @@ $args = array(
 					break;
 					
 				case 'year':
-					echo date_i18n('M', Projects::get_meta_value('date', $post_id)) . ', ' . Projects::get_meta_value('year', $post_id);
+					echo date_i18n('M', $this->projects->get_meta('date', $post_id)) . ', ' . $this->projects->get_meta('year', $post_id);
 					break;
 			}
 			
@@ -398,35 +400,7 @@ $args = array(
 		}	
 	}
 	
-	/**
-	 * Generate an internal name
-	 */	
-	public static function generate_internal_name($key) {
-		return Projects::$post_type . '_' . $key;
-	}
 
-	/**
-	 * Check if it is an internal name
-	 */	
-	public static function is_internal_name($key) {
-		if(strrpos($key, Projects::$post_type . '_') !== false) {
-			return true;
-		} 
-		return false;
-	}
-	
-	/**
-	 * Get taxonomy internal database name from key
-	 */
-	public static function get_taxonomy_internal_name($key) {		
-		// get the taxonomy internal database name 
-		if(self::is_internal_name($key)) {
-			$taxonomy = $key;
-		} else {
-			$taxonomy = self::generate_internal_name($key);
-		}
-		return $taxonomy;
-	}
 }
 }
 ?>
