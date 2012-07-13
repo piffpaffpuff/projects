@@ -9,12 +9,12 @@ jQuery(document).ready(function($) {
 	$('#projects-general-box input.minicolors').miniColors();
 	
 	// make the images clickable. maybe this will be later replaced. 
-	$('#projects-gallery-list').on('click', function(event) {
-		$('#projects-gallery-add').trigger('click');		
+	$('#projects-gallery-media-list').on('click', function(event) {
+		$('#projects-gallery-media-add').trigger('click');		
 		event.preventDefault();
 	});
-	$('#projects-featured-image-list').on('click', function(event) {
-		$('#projects-featured-image-add').trigger('click');
+	$('#projects-featured-media-list').on('click', function(event) {
+		$('#projects-featured-media-add').trigger('click');
 		event.preventDefault();
 	});
 	
@@ -38,9 +38,9 @@ jQuery(document).ready(function($) {
 		$.post(ajaxurl, data, function(response) {			
 			// check the media type and load the list into the right box
 			if(data.type == 'featured') {
-				$('#projects-featured-image-list').empty().append(response);
+				$('#projects-featured-media-list').empty().append(response);
 			} else {
-				$('#projects-gallery-list').empty().append(response);
+				$('#projects-gallery-media-list').empty().append(response);
 			}
 		});
 	}

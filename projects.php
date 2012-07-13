@@ -40,7 +40,8 @@ class Projects {
 	public static $slug;
 	
 	public $installation;
-	public $register;
+	public $types;
+	public $taxonomies;
 	public $writepanel;
 	public $settings;
 	
@@ -67,8 +68,10 @@ class Projects {
 		
 		$this->installation = new Projects_Installation();
 		$this->installation->load();
-		$this->register = new Projects_Post_Type();
-		$this->register->load();
+		$this->types = new Projects_Types();
+		$this->types->load();
+		$this->taxonomies = new Projects_Taxonomies();
+		$this->taxonomies->load();
 		$this->writepanel = new Projects_Writepanel();
 		$this->writepanel->load();
 		$this->settings = new Projects_Settings();
@@ -76,7 +79,8 @@ class Projects {
 		
 		// load hooks
 		add_action('plugins_loaded', array($this, 'load_translation'));
-		add_action('init', array($this, 'load_hooks'));
+		add_action('init', array($this, 'hooks_init'));
+		add_action('admin_init', array($this, 'hooks_admin'));
 	}
 	
 	/**
@@ -84,8 +88,8 @@ class Projects {
 	 */
 	public function includes() {
 		require_once('classes/class-projects-installation.php');	
-		require_once('classes/class-projects-post-type.php');	
-		require_once('classes/class-projects-taxonomy.php');	
+		require_once('classes/class-projects-types.php');	
+		require_once('classes/class-projects-taxonomies.php');	
 		require_once('classes/class-projects-walkers.php');
 		require_once('classes/class-projects-writepanel.php');	
 		require_once('classes/class-projects-settings.php');	
@@ -101,7 +105,7 @@ class Projects {
 	/**
 	 * Load the main hooks
 	 */
-	public function load_hooks() {
+	public function hooks_init() {
    		remove_theme_support('post-thumbnails');
 		
 		add_filter('get_previous_post_join', array($this, 'adjacent_post_join'));
@@ -118,7 +122,12 @@ class Projects {
 		add_action('admin_print_scripts-post-new.php', array($this, 'add_scripts'));
 		add_action('admin_print_styles-media-upload-popup', array($this, 'add_media_styles'));		
 		add_action('admin_print_scripts-media-upload-popup', array($this, 'add_media_scripts'));		
-		
+	}
+	
+	/**
+	 * Load the main hooks
+	 */
+	public function hooks_admin() {
 		// Enqueue script on settings page
 		if(isset($_GET['page']) && $_GET['page'] == 'projects-settings') {
 			$hook = get_plugin_page_hookname($_GET['page'], 'options-general.php');
@@ -408,29 +417,29 @@ function get_projects($args = null) {
 /**
  * Get the gallery
  */
-function get_project_gallery($post_id = null, $mime = null) {
+function get_project_gallery_media($post_id = null, $mime = null) {
 	global $projects;
-	return $projects->writepanel->get_project_gallery($post_id, $mime);
+	return $projects->writepanel->get_project_gallery_media($post_id, $mime);
 }
 
 /**
  * Get the featured
  */
-function get_project_featured_image($post_id = null, $mime = null) {
+function get_project_featured_media($post_id = null, $mime = null) {
 	global $projects;
-	return $projects->writepanel->get_project_featured_image($post_id, $mime);
+	return $projects->writepanel->get_project_featured_media($post_id, $mime);
 }
 
 /**
  * Show the gallery
  */
-function project_gallery($size = null, $post_id = null, $mime = null) {
+function project_gallery_media($size = null, $post_id = null, $mime = null) {
 	global $projects;
 
-	$attachments = get_project_gallery($post_id, $mime);
+	$attachments = get_project_gallery_media($post_id, $mime);
 	
 	?>
-	<ul class="project-media">
+	<ul class="project-gallery-media">
 		<?php foreach($attachments as $attachment) : ?>
 		<li>
 			<a href="<?php echo get_attachment_link($attachment->ID); ?>">
@@ -458,10 +467,10 @@ function project_gallery($size = null, $post_id = null, $mime = null) {
 /**
  * Show the featured image
  */
-function project_featured_image($size = 'thumbnail', $post_id = null) {
+function project_featured_media($size = 'thumbnail', $post_id = null) {
 	global $projects;
 
-	$attachments = get_project_featured_image($post_id);
+	$attachments = get_project_featured_media($post_id);
 
 	?>
  	<?php foreach($attachments as $attachment) : ?>
@@ -528,7 +537,7 @@ function project_website($name = null, $target = '_blank') {
  */
 function add_projects_taxonomy($plural_label, $singular_label, $key, $args = null) {
 	global $projects;
-	$projects->register->add_taxonomy($plural_label, $singular_label, $key, $args);
+	$projects->taxonomies->add_taxonomy($plural_label, $singular_label, $key, $args);
 }
 
 /**
@@ -536,7 +545,7 @@ function add_projects_taxonomy($plural_label, $singular_label, $key, $args = nul
  */
 function remove_projects_taxonomy($key) {
 	global $projects;
-	$projects->register->remove_taxonomy($key);
+	$projects->taxonomies->remove_taxonomy($key);
 }
 
 /**
