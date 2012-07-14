@@ -1,12 +1,9 @@
 jQuery(document).ready(function($) {
-	// make the media gallery sortable
-	//$('#projects-media-list').sortable();
-	//$('#projects-media-list').disableSelection();
 
 	// Writepanel -------------------------
 			
 	// color picker
-	$('#projects-general-box input.minicolors').miniColors();
+	$('input.minicolors').miniColors();
 	
 	// make the images clickable. maybe this will be later replaced. 
 	$('#projects-gallery-media-list').on('click', function(event) {

@@ -25,7 +25,7 @@ class Projects_Writepanel {
 	public function load() {
 		add_action('admin_init', array($this, 'hook_admin'));
 	}
-		
+	
 	/**
 	 * Hook into the admin hooks
 	 */
@@ -43,7 +43,7 @@ class Projects_Writepanel {
 
 		add_action('save_post', array($this, 'save_box_data'));
 	}
-			
+	
 	/**
 	 * Remove the media buttons
 	 */
@@ -85,7 +85,7 @@ class Projects_Writepanel {
 		$form_fields['image-size']['input'] = 'hidden';
 		
 		// add a thumbnail check field
-		$meta = $this->projects->get_meta('featured_media', $post->ID);		
+		$meta = $this->projects->get_project_meta('featured_media', $post->ID);		
 		$form_fields['projects_featured_media']['label'] = __('Featured Media', 'projects');
 		$form_fields['projects_featured_media']['input'] = 'html';
 		$form_fields['projects_featured_media']['html'] = '<label><input type="checkbox" name="attachments[' . $post->ID . '][projects_featured_media]" value="1" ' . checked($meta, 1, false) . ' /> ' . __('Use as featured media', 'projects') . '</label>';
@@ -93,7 +93,7 @@ class Projects_Writepanel {
 		// add a custom image size field
 		if(strpos($post->post_mime_type, 'image') !== false) {
 			$html = '';
-			$meta = $this->projects->get_meta('default_image_size', $post->ID);
+			$meta = $this->projects->get_project_meta('default_image_size', $post->ID);
 			$image_sizes = get_intermediate_image_sizes();
 			$image_sizes[] = 'full';
 			$form_name = 'attachments[' . $post->ID . '][projects_default_image_size]';
@@ -170,6 +170,7 @@ class Projects_Writepanel {
 		add_meta_box('projects-featured-media-box', __('Featured Media', 'projects'), array($this, 'create_box_featured_media'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-gallery-media-box', __('Media', 'projects'), array($this, 'create_box_gallery_media'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-general-box', __('General', 'projects'), array($this, 'create_box_general'), Projects::$post_type, 'side', 'default');
+		add_meta_box('projects-color-box', __('Color', 'projects'), array($this, 'create_box_color'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-location-box', __('Location', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
 	
 		// add the award box when the taxonomy exists
@@ -203,8 +204,8 @@ class Projects_Writepanel {
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		?>
 		<?php 
-			$lat = $this->projects->get_meta('lat');
-			$lng = $this->projects->get_meta('lng');
+			$lat = $this->projects->get_project_meta('lat');
+			$lng = $this->projects->get_project_meta('lng');
 			$zoom = 15;
 		?>
 		<?php if(!empty($lat) && !empty($lng)) : ?>
@@ -215,17 +216,20 @@ class Projects_Writepanel {
 		</div>
 		<?php endif; ?>
 		<div class="location">
-			<p class="form-fieldset"><label><span><?php _e('First Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo $this->projects->get_meta('first_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Last Name:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo $this->projects->get_meta('last_name'); ?>" title="<?php _e('Name', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Address:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo $this->projects->get_meta('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Postal Code:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo $this->projects->get_meta('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('City:', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo $this->projects->get_meta('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Country:', 'projects'); ?></span></label><select name="projects[country]">
-				<?php $country = $this->projects->get_meta('country'); ?>
-				<option value="CH" <?php selected('CH', $country); ?>><?php _e('Switzerland', 'projects'); ?></option>
-				<option value="LI" <?php selected('LI', $country); ?>><?php _e('Liechtenstein', 'projects'); ?></option>
-				<option value="DE" <?php selected('DE', $country); ?>><?php _e('Germany', 'projects'); ?></option>
-				<option value="AT" <?php selected('AT', $country); ?>><?php _e('Austria', 'projects'); ?></option>
+			<p class="form-fieldset"><label><span><?php _e('First Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo $this->projects->get_project_meta('first_name'); ?>" title="<?php _e('First Name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Last Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo $this->projects->get_project_meta('last_name'); ?>" title="<?php _e('Last Name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Company Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[company_name]" value="<?php echo $this->projects->get_project_meta('last_name'); ?>" title="<?php _e('Company Name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Address', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo $this->projects->get_project_meta('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Postal Code', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo $this->projects->get_project_meta('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('City', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo $this->projects->get_project_meta('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Country', 'projects'); ?></span></label><select name="projects[country]">
+				<?php 
+				$countries = new Projects_Countries();
+				$option = get_option('projects_selected_country'); 
+				?>
+				<?php foreach($countries->world as $code => $name) : ?>
+					<option value="<?php echo $code; ?>" <?php selected($code, $option); ?>><?php printf(__('%s', 'projects'), $name); ?></option>
+				<?php endforeach; ?>
 			</select></p>
 			<input type="hidden" name="projects[lat]" value="<?php echo $lat; ?>">
 			<input type="hidden" name="projects[lng]" value="<?php echo $lng; ?>">
@@ -241,7 +245,7 @@ class Projects_Writepanel {
   		wp_nonce_field(Projects::$plugin_basename, 'projects_award_nonce');
 
   		// get the meta
-  		$metas = $this->projects->get_meta('awards');
+  		$metas = $this->projects->get_project_meta('awards');
   		$index = 0;
   		?>
 		<div class="award-list" id="projects-award-list">
@@ -298,7 +302,7 @@ class Projects_Writepanel {
 				$selected_child_term_id = (isset($meta) && isset($meta[$term->slug])) ? $meta[$term->slug] : null;
 				?>
 				<select name="projects[awards][<?php echo $index; ?>][<?php echo $term->slug; ?>]" class="award-select-<?php echo $term->slug; ?>">
-					<option value=""><?php printf(__('No %s…', 'projects'), $term->name); ?></option>
+					<option value=""><?php printf(__('No %s', 'projects'), $term->name); ?></option>
 					<?php foreach($child_terms as $child_term) : ?>
 						<option value="<?php echo $child_term->term_id; ?>" <?php selected($selected_child_term_id, $child_term->term_id, true); ?>><?php echo $child_term->name; ?></option>
 					<?php endforeach; ?>
@@ -325,6 +329,16 @@ class Projects_Writepanel {
 	}
 	
 	/**
+	 * Create the box color
+	 */
+	public function create_box_color() {
+		?>
+		<p class="form-fieldset"><label><span><?php _e('Background', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo $this->projects->get_project_meta('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
+		<p class="form-fieldset"><label><span><?php _e('Text', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo $this->projects->get_project_meta('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
+		<?php
+	}
+	
+	/**
 	 * Create the box content
 	 */
 	public function create_box_general() {
@@ -334,12 +348,12 @@ class Projects_Writepanel {
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		
 		?>
-		<p class="form-fieldset"><label><span><?php _e('Date:', 'projects'); ?></span></label>
+		<p class="form-fieldset"><label><span><?php _e('Date', 'projects'); ?></span></label>
 			<span class="input-group">
 				<select class="select-date" name="projects[month]">
 					<?php 
 					$count = 1;
-					$month_meta = $this->projects->get_meta('month');
+					$month_meta = $this->projects->get_project_meta('month');
 					if(empty($month_meta)) {
 						$month_meta = date_i18n('n');
 					}
@@ -353,7 +367,7 @@ class Projects_Writepanel {
 					<?php 
 					$count = 0;
 					$year = date_i18n('Y');
-					$year_meta = $this->projects->get_meta('year');
+					$year_meta = $this->projects->get_project_meta('year');
 					?>
 					<?php while($count <= 100) : ?>
 					<option value="<?php echo $year - $count; ?>" <?php selected($year - $count, $year_meta); ?>><?php echo $year - $count; ?></option>						
@@ -371,15 +385,13 @@ class Projects_Writepanel {
 		<p class="form-fieldset"><label><span><?php _e('Status:', 'projects'); ?></span></label><select name="projects[status]">
 			<?php foreach($stati as $status) : ?>
 				<?php if($this->projects->is_internal_name($status->name)) : ?>
-			<option value="<?php echo $status->name; ?>" <?php selected($status->name, $this->projects->get_meta('status')); ?>><?php echo $status->label; ?></option>
+			<option value="<?php echo $status->name; ?>" <?php selected($status->name, $this->projects->get_project_meta('status')); ?>><?php echo $status->label; ?></option>
 				<?php endif; ?>
 			<?php endforeach; ?>
 		</select></p>
-		<?php $website = $this->projects->get_meta('website'); ?>
-		<p class="form-fieldset"><label><span><?php _e('Reference No.:', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo $this->projects->get_meta('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
-		<p class="form-fieldset"><label><span><?php _e('Website:', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo $website; ?>" title="<?php _e('Address', 'projects'); ?>"><?php if(!empty($website)) : ?><a href="<?php echo $website; ?>" target="_blank" class="external"></a><?php endif; ?></p>
-		<p class="form-fieldset"><label><span><?php _e('Background:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo $this->projects->get_meta('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
-		<p class="form-fieldset"><label><span><?php _e('Text:', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo $this->projects->get_meta('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
+		<?php $website = $this->projects->get_project_meta('website'); ?>
+		<p class="form-fieldset"><label><span><?php _e('Reference No.', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo $this->projects->get_project_meta('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
+		<p class="form-fieldset"><label><span><?php _e('Website', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo $website; ?>" title="<?php _e('Address', 'projects'); ?>"><?php if(!empty($website)) : ?><a href="<?php echo $website; ?>" target="_blank" class="external"></a><?php endif; ?></p>
 		<?php
 	}
 	
@@ -528,8 +540,8 @@ class Projects_Writepanel {
 			
 			// add the default size
 			if($this->is_web_image($attachment->post_mime_type)) {		
-				$size = $this->projects->get_meta('default_image_size', $attachment->ID);
-				$meta = $this->projects->get_meta('featured_media', $attachment->ID);		
+				$size = $this->projects->get_project_meta('default_image_size', $attachment->ID);
+				$meta = $this->projects->get_project_meta('featured_media', $attachment->ID);		
 			}
 			
 			// set the default size property

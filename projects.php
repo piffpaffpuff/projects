@@ -87,12 +87,13 @@ class Projects {
 	 * Include the classes
 	 */
 	public function includes() {
-		require_once('classes/class-projects-installation.php');	
-		require_once('classes/class-projects-types.php');	
-		require_once('classes/class-projects-taxonomies.php');	
-		require_once('classes/class-projects-walkers.php');
-		require_once('classes/class-projects-writepanel.php');	
-		require_once('classes/class-projects-settings.php');	
+		require_once('library/classes/class-projects-countries.php');	
+		require_once('library/classes/class-projects-installation.php');	
+		require_once('library/classes/class-projects-types.php');	
+		require_once('library/classes/class-projects-taxonomies.php');	
+		require_once('library/classes/class-projects-walkers.php');
+		require_once('library/classes/class-projects-writepanel.php');	
+		require_once('library/classes/class-projects-settings.php');	
 	}
 	
 	/**
@@ -106,7 +107,7 @@ class Projects {
 	 * Load the main hooks
 	 */
 	public function hooks_init() {
-   		remove_theme_support('post-thumbnails');
+ 		remove_theme_support('post-thumbnails');
 		
 		add_filter('get_previous_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_next_post_join', array($this, 'adjacent_post_join'));
@@ -167,6 +168,15 @@ class Projects {
 	 * Add the media manager scripts
 	 */
 	public function add_media_scripts() {
+		$post_type = get_post_type($_GET['post_id']);
+		if(!empty($post_type) && $post_type == self::$post_type) {
+			wp_enqueue_script('projects-media', self::$plugin_directory_url . 'js/media-script.js');
+			
+			// localize the script to send some properties
+			wp_localize_script('projects-media', 'ProjectsScript', array(
+				'label_featured' => __( 'Featured', 'projects' )
+			));
+		}
 	}
 	
 	/**
@@ -252,7 +262,7 @@ class Projects {
 		
 		if($wp_query->get('post_type') == self::$post_type) {
 			// select the meta table info
-			$join = $wpdb->prepare(" INNER JOIN $wpdb->postmeta AS m ON p.ID = m.post_id AND m.meta_key = %s", $this->get_internal_name('date', true));
+			$join = $wpdb->prepare(" INNER JOIN $wpdb->postmeta AS m ON p.ID = m.post_id AND m.meta_key = %s", $this->order_sort_key);
 		}
 
 		return $join;
@@ -296,7 +306,7 @@ class Projects {
 
 		if($wp_query->get('post_type') == self::$post_type) {
 			$operator = '<';
-			$meta = $this->get_meta('date');
+			$meta = $this->get_project_meta('date');
 			$where = $wpdb->prepare(" WHERE (m.meta_value+0 $operator %d OR (m.meta_value+0 = '%d' AND p.post_name $operator %s)) AND p.post_type IN (%s) AND p.post_status = 'publish' ", $meta, $meta, $post->post_name, self::$post_type);
 		}
 		
@@ -311,7 +321,7 @@ class Projects {
 
 		if($wp_query->get('post_type') == self::$post_type) {
 			$operator = '>';
-			$meta = $this->get_meta('date');
+			$meta = $this->get_project_meta('date');
 			$where = $wpdb->prepare(" WHERE (m.meta_value+0 $operator %d OR (m.meta_value+0 = '%d' AND p.post_name $operator %s)) AND p.post_type IN (%s) AND p.post_status = 'publish' ", $meta, $meta, $post->post_name, self::$post_type);
 		}
 		
@@ -351,7 +361,7 @@ class Projects {
 	/**
 	 * Get the meta value from a key
 	 */
-	public function get_meta($key, $post_id = null) {
+	public function get_project_meta($key, $post_id = null) {
 		if(empty($post_id)) {
 			global $post;
 			$post_id = $post->ID;
@@ -433,17 +443,14 @@ function get_project_featured_media($post_id = null, $mime = null) {
 /**
  * Show the gallery
  */
-function project_gallery_media($size = null, $post_id = null, $mime = null) {
+function project_gallery_media($size = 'large', $post_id = null, $mime = null) {
 	global $projects;
 
 	$attachments = get_project_gallery_media($post_id, $mime);
 	
 	?>
 	<ul class="project-gallery-media">
-		<?php foreach($attachments as $attachment) : ?>
-		<li>
-			<a href="<?php echo get_attachment_link($attachment->ID); ?>">
-			<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
+		<?php foreach($attachments as $attachment) : ?><?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?><li>
 				<?php 				
 				// overwrite the size when the attachment has set a custom one
 				if(!empty($attachment->default_size)) {
@@ -454,12 +461,15 @@ function project_gallery_media($size = null, $post_id = null, $mime = null) {
 				?>
 				<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
 				<img src="<?php echo $attachment_src[0]; ?>" />
-			<?php else : ?>
+			</li><?php elseif($projects->writepanel->is_mime_type($attachment->post_mime_type, 'video|m4v|mp4|ogv|webm')) : ?>
+			<li>
+				<video src="<?php echo wp_get_attachment_url($attachment->ID); ?>" controls></video>
+			</li><?php elseif($projects->writepanel->is_mime_type($attachment->post_mime_type, 'audio|m4a|mp3|oga|wav')) : ?>
+			<li>
+				<audio src="<?php echo wp_get_attachment_url($attachment->ID); ?>" controls></audio>
+			</li><?php else : ?>
 				<?php // no support for other media types yet ?>
-			<?php endif; ?>
-			</a>
-		</li>
-		<?php endforeach; ?>
+		<?php endif; ?><?php endforeach; ?>
 	</ul>
 	<?php
 }
@@ -473,14 +483,8 @@ function project_featured_media($size = 'thumbnail', $post_id = null) {
 	$attachments = get_project_featured_media($post_id);
 
 	?>
- 	<?php foreach($attachments as $attachment) : ?>
-		<?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?>
-			<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
-			<img src="<?php echo $attachment_src[0]; ?>" />
-		<?php else : ?>
-				<?php // no support for other media types yet ?>
-		<?php endif; ?>
-	<?php endforeach; ?>
+ 	<?php foreach($attachments as $attachment) : ?><?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
+ 		<img src="<?php echo $attachment_src[0]; ?>" /><?php endforeach; ?>
 	<?php
 }
 
@@ -509,7 +513,7 @@ function project_taxonomy($key, $args = null) {
  */
 function get_project_meta($key) {
 	global $projects;
-	return $projects->get_meta($key);
+	return $projects->get_project_meta($key);
 }
 
 /**

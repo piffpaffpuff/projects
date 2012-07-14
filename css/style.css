@@ -150,22 +150,19 @@ table.wp-list-table .column-title {
 	-ms-border-radius: 3px;
 	-o-border-radius: 3px;
 	border-radius: 3px;
-	background-color: white;
-/*
-	background-color: #F1F1F1;
-	background-image: -ms-linear-gradient(top, #F9F9F9, #ECECEC);
-	background-image: -moz-linear-gradient(top, #F9F9F9, #ECECEC);
-	background-image: -o-linear-gradient(top, #F9F9F9, #ECECEC);
-	background-image: -webkit-gradient(linear, left top, left bottom, from(#F9F9F9), to(#ECECEC));
-	background-image: -webkit-linear-gradient(top, #F9F9F9, #ECECEC);
-	background-image: linear-gradient(top, #F9F9F9, #ECECEC);
+	background-color:#ffffff;
+	/*
+	background-image: -moz-linear-gradient(top , #ffffff, #f7f7f7 17%);
+	background-image: -webkit-linear-gradient(top , #ffffff, #f7f7f7 17%);
+	background-image: -o-linear-gradient(top , #ffffff, #f7f7f7 17%);
+	background-image: -ms-linear-gradient(top , #ffffff, #f7f7f7 17%);
+	background-image: linear-gradient(top , #ffffff, #f7f7f7 17%);
 	-webkit-box-shadow: 0 1px 0 white;
 	-moz-box-shadow: 0 1px 0 white;
 	-ms-box-shadow: 0 1px 0 white;
 	-o-box-shadow: 0 1px 0 white;
 	box-shadow: 0 1px 0 white;
-
-*/
+	*/
 }
 #projects-award-list select {
 	width: 48%;
@@ -180,7 +177,7 @@ table.wp-list-table .column-title {
 	width: 60%;
 	float: left;
 	color: #333;
-	font-weight: normal;
+	font-weight: bold;
 }
 #projects-award-list .award-group-options a {
 	float: right;

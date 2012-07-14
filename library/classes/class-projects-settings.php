@@ -79,6 +79,27 @@ class Projects_Settings {
 						</tr>
 					</tbody>
 				</table>
+				<h3><?php _e('Location', 'projects'); ?></h3>
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<th>
+								<label for="projects_selected_country"><?php _e('Default Country', 'projects'); ?></label>
+							</th>
+							<td>
+								<select name="projects_selected_country">
+									<?php 
+									$countries = new Projects_Countries();
+									$option = get_option('projects_selected_country');
+									?>
+									<?php foreach($countries->world as $code => $name) : ?>
+										<option value="<?php echo $code; ?>" <?php selected($code, $option); ?>><?php printf(__('%s', 'projects'), $name); ?></option>
+									<?php endforeach; ?>
+								</select>
+							</td>
+						</tr>
+					</tbody>
+				</table>
 				
 				<input type="hidden" name="<?php echo $this->hidden_submit; ?>" value="submitted">
 				

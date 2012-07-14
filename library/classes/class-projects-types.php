@@ -9,6 +9,7 @@ class Projects_Types {
 	public $slug;
 	public $projects;
 	public $taxonomies;
+	public $writepanel;
 	
 	/**
 	 * Constructor
@@ -17,6 +18,7 @@ class Projects_Types {
 		// instances
 		$this->projects = new Projects();
 		$this->taxonomies = new Projects_Taxonomies();
+		$this->writepanel = new Projects_Writepanel();
 	}
 	
 	/**
@@ -111,7 +113,7 @@ class Projects_Types {
 			'edit_item' => sprintf(__('Edit %s', 'projects'), $singular_label),
 			'new_item' => sprintf(__('New %s', 'projects'), $singular_label),
 			'all_items' => sprintf(__('All %s', 'projects'), $plural_label),
-			'view_item' => sprintf(__('View %s', 'projects'), $plural_label),
+			'view_item' => sprintf(__('View %s', 'projects'), $singular_label),
 			'search_items' => sprintf(__('Search %s', 'projects'), $plural_label),
 			'not_found' => sprintf(__('No %s found', 'projects'), $plural_label),
 			'not_found_in_trash' => sprintf(__('No %s found in Trash', 'projects'), $plural_label),
@@ -227,21 +229,26 @@ class Projects_Types {
 			// default column content
 			switch ($column) {
 				case 'thumbnail':
-					$thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
+					$thumbnail_id = null;
 					
-					if($thumbnail_id) {
-						$thumbnail = wp_get_attachment_image($thumbnail_id, 'project-thumbnail', true );
+					// load the first attachment that is an image
+					$attachments = $this->writepanel->get_project_featured_media();					
+					foreach($attachments as $attachment) {
+						if($this->writepanel->is_web_image($attachment->post_mime_type)) {
+							$thumbnail_id = $attachment->ID;
+							break;
+						}
 					}
 					
-					if(isset($thumbnail)) {
-						echo $thumbnail;
+					if(isset($thumbnail_id)) {
+						echo wp_get_attachment_image($thumbnail_id, 'project-thumbnail', true );
 					} else {
 						echo __('None', 'projects');
 					}
 					break;
 					
 				case 'year':
-					echo date_i18n('M', $this->projects->get_meta('date', $post_id)) . ', ' . $this->projects->get_meta('year', $post_id);
+					echo date_i18n('M', $this->projects->get_project_meta('date', $post_id)) . ', ' . $this->projects->get_project_meta('year', $post_id);
 					break;
 			}
 			
