@@ -7,39 +7,29 @@
 /**
  * Post type class
  */
-if (!class_exists('Projects_Taxonomies')) {
-class Projects_Taxonomies {
+if (!class_exists('Projects_Taxonomy')) {
+class Projects_Taxonomy {
 
 	public $slug;	
 	public $projects;
+	public $installation;
 	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {	
-		// load the basepage to get the slug name
-		$page = get_post(get_option('projects_base_page_id')); 
-		$this->slug = $page->post_name;
-		
 		// instances
 		$this->projects = new Projects();
+		$this->installation = new Projects_Installation();
 	}
 	
 	/**
 	 * Load the class hooks
 	 */
 	public function load() {
-		register_activation_hook(Projects::$plugin_file_path, array($this, 'add_default_settings'));
+		register_activation_hook(Projects::$plugin_file_path, array($this, 'add_rewrite_rules'));
+		register_deactivation_hook(Projects::$plugin_file_path, array($this, 'remove_rewrite_rules'));
 		add_action('init', array($this, 'hook_init'));
-	}
-
-	/**
-	 * Add default settings
-	 */
-	public function add_default_settings() {		
-		// load the basepage to get the slug name
-		$page = get_post(get_option('projects_base_page_id')); 
-		$this->slug = $page->post_name;
 	}
 	
 	/**
@@ -47,6 +37,23 @@ class Projects_Taxonomies {
 	 */
 	public function hook_init() {		
 		$this->register_taxonomies();
+	}
+	
+	/**
+	 * Flush the permalinks to enable 
+	 * the correct rewrite rules.
+	 */
+	public function add_rewrite_rules() {
+		$this->register_taxonomies();
+		flush_rewrite_rules();
+	}
+	
+	/**
+	 * Flush the permalinks to reenable 
+	 * the old rewrite rules.
+	 */
+	public function remove_rewrite_rules() {
+		flush_rewrite_rules();
 	}
 	
 	/**
@@ -59,20 +66,6 @@ class Projects_Taxonomies {
 		$this->add_taxonomy(__('Agencies', 'projects'), __('Agency', 'projects'), 'agency');
 		$this->add_taxonomy(__('Clients', 'projects'), __('Client', 'projects'), 'client');
 		$this->add_taxonomy(__('Tags', 'projects'), __('Tag', 'projects'), 'tag', array('hierarchical' => false));
-		
-		// award taxonomies
-		/*
-		$args = array(
-			'hierarchical' => false,
-			'post_type' => $this->projects->get_internal_name('award')
-		);
-		$this->add_taxonomy(__('Names', 'projects'), __('Name', 'projects'), 'award_name', $args);
-		$this->add_taxonomy(__('Years', 'projects'), __('Year', 'projects'), 'award_year', $args);
-		$this->add_taxonomy(__('Categories', 'projects'), __('Category', 'projects'), 'award_category', $args);
-		$this->add_taxonomy(__('Ranks', 'projects'), __('Rank', 'projects'), 'award_rank', $args);
-		*/
-
-		$this->add_awards();
 	}
 	
 	/**
@@ -100,7 +93,7 @@ class Projects_Taxonomies {
 		
 		$default_args = array(
 			'labels' => $labels,
-	    	'rewrite' => array('slug' => $this->slug . '/' . $taxonomy_name),
+	    	'rewrite' => array('slug' => $this->installation->slug . '/' . sprintf(__('project-%s', 'projects'), $key), 'with_front' => true),
 	    	'hierarchical' => true,
 			'show_ui' => true,
 			'post_type' => Projects::$post_type
@@ -129,52 +122,6 @@ class Projects_Taxonomies {
 			if(taxonomy_exists($taxonomy)) {
 				unset($wp_taxonomies[$taxonomy]);
 			}
-		}
-	}
-				
-	/**
-	 * Create award taxonomy
-	 */	
-	public function add_awards() {
-		$external_key = 'award';
-		$taxonomy = $this->projects->get_internal_name($external_key);
-	
-		$this->add_taxonomy(__('Awards', 'projects'), __('Award', 'projects'), $external_key);
-
-		// name
-		$existing_term_id = term_exists('name', $taxonomy);
-		if(empty($existing_term_id)) {
-			$args = array(
-				'slug' => 'name'
-			);
-			$term = wp_insert_term(__('Name', 'projects'), $taxonomy, $args);
-		}
-		
-		// year
-		$existing_term_id = term_exists('year', $taxonomy);
-		if(empty($existing_term_id)) {
-			$args = array(
-				'slug' => 'year'
-			);
-			$term = wp_insert_term(__('Year', 'projects'), $taxonomy, $args);
-		}	
-		
-		// category
-		$existing_term_id = term_exists('category', $taxonomy);
-		if(empty($existing_term_id)) {
-			$args = array(
-				'slug' => 'category'
-			);
-			$term = wp_insert_term(__('Category', 'projects'), $taxonomy, $args);
-		}
-		
-		// rank
-		$existing_term_id = term_exists('rank', $taxonomy);
-		if(empty($existing_term_id)) {
-			$args = array(
-				'slug' => 'rank'
-			);
-			$term = wp_insert_term(__('Rank', 'projects'), $taxonomy, $args);
 		}
 	}
 

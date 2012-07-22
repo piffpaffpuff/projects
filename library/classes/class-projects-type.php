@@ -3,65 +3,39 @@
 /**
  * Post type class
  */
-if (!class_exists('Projects_Types')) {
-class Projects_Types {
+if (!class_exists('Projects_Type')) {
+class Projects_Type {
 	
-	public $slug;
 	public $projects;
-	public $taxonomies;
+	public $taxonomy;
 	public $writepanel;
+	public $installation;
 	
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	public function __construct() {	
 		// instances
 		$this->projects = new Projects();
-		$this->taxonomies = new Projects_Taxonomies();
+		$this->taxonomy = new Projects_Taxonomy();
 		$this->writepanel = new Projects_Writepanel();
+		$this->installation = new Projects_Installation();
 	}
 	
 	/**
 	 * Load the class hooks
 	 */
 	public function load() {
-		register_activation_hook(Projects::$plugin_file_path, array($this, 'add_default_settings'));
-		register_deactivation_hook(Projects::$plugin_file_path, array($this, 'remove_default_settings'));
+		register_activation_hook(Projects::$plugin_file_path, array($this, 'add_rewrite_rules'));
+		register_deactivation_hook(Projects::$plugin_file_path, array($this, 'remove_rewrite_rules'));
 		add_action('init', array($this, 'hook_init'));
 		add_action('admin_init', array($this, 'hook_admin'));
 	}
-	
-	/**
-	 * Add default settings
-	 */
-	public function add_default_settings() {		
-		// load the basepage to get the slug name
-		$page = get_post(get_option('projects_base_page_id')); 
-		$this->slug = $page->post_name;
 		
-		// flush the permalinks to make the custom 
-		// post type rewrite rule work correctly
-		$this->register_types();
-		flush_rewrite_rules();
-	}
-	
-	/**
-	 * Remove default settings
-	 */
-	public function remove_default_settings() {
-		// flush the permalinks to remove the 
-		// post type rewrite rules
-		flush_rewrite_rules();
-	}
-	
 	/**
 	 * Hook into the main hooks
 	 */
-	public function hook_init() {
-		// get the base page slug for the post types
-		$page = get_post(get_option('projects_base_page_id')); 
-		$this->slug = $page->post_name;
-		
+	public function hook_init() {		
 		// register the thumbnail and media browser image sizes
 		add_image_size('project-thumbnail', 40, 40, false);
 		add_image_size('project-media-manager', 240, 240, false);
@@ -82,23 +56,27 @@ class Projects_Types {
 	}
 
 	/**
+	 * Flush the permalinks to enable 
+	 * the correct rewrite rules.
+	 */
+	public function add_rewrite_rules() {
+		$this->register_types();
+		flush_rewrite_rules();
+	}
+	
+	/**
+	 * Flush the permalinks to reenable 
+	 * the old rewrite rules.
+	 */
+	public function remove_rewrite_rules() {
+		flush_rewrite_rules();
+	}
+
+	/**
 	 * Create custom post types
 	 */
 	public function register_types() {		
 		$this->add_type(__('Projects', 'projects'), __('Project', 'projects'), Projects::$post_type);
-		
-		/* hidden post type for the awards. it is used
-		to query awards and list projects for every
-		award. it alsow permits to group awards by year, 
-		name, etc. */
-		/*
-		$args = array(
-			'exclude_from_search' => false,
-			'publicly_queryable' => true,
-			'show_ui' => true,
-		);
-		$this->add_type(__('Awards', 'projects'), __('Award', 'projects'), $this->projects->get_internal_name('award'), $args);
-		*/
 	}
 	
 	/**
@@ -126,7 +104,7 @@ class Projects_Types {
 	    	'public' => true,
 			'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'post-formats'),
 			'capability_type' => 'post',
-			'rewrite' => array('slug' => $this->slug),
+			'rewrite' => array('slug' => $this->installation->slug),
 			'menu_position' => 4,
 			'has_archive' => true
 		); 
@@ -176,7 +154,7 @@ class Projects_Types {
 		$columns['title'] = __('Title', 'projects');
 		
 		// registered taxonomies
-		$taxonomies = $this->taxonomies->get_added_taxonomies();
+		$taxonomies = $this->taxonomy->get_added_taxonomies();
 
 		foreach($taxonomies as $taxonomy) {
 			$columns[$taxonomy->query_var] = __($taxonomy->labels->name, 'projects');
@@ -196,7 +174,7 @@ class Projects_Types {
 		$columns['year'] = 'year';
 		
 		// registered taxonomies
-		$taxonomies = $this->taxonomies->get_added_taxonomies(null, 'names');
+		$taxonomies = $this->taxonomy->get_added_taxonomies(null, 'names');
 		
 		foreach($taxonomies as $taxonomy) {
 			$columns[$taxonomy] = $taxonomy;
@@ -224,7 +202,7 @@ class Projects_Types {
 	public function create_column_content($column, $post_id) {		
 		if(isset($_GET['post_type']) && $_GET['post_type'] == Projects::$post_type) { 			
 			// registered taxonomies
-			$taxonomies = $this->taxonomies->get_added_taxonomies(null, 'names');
+			$taxonomies = $this->taxonomy->get_added_taxonomies(null, 'names');
 			
 			// default column content
 			switch ($column) {
@@ -264,8 +242,7 @@ class Projects_Types {
 			}			
 		}	
 	}
-	
-
+		
 }
 }
 ?>

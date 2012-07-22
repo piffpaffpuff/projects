@@ -115,7 +115,7 @@ class Projects_Settings {
 	 * Save all settings
 	 */
 	public function save_settings() {
-		foreach ( $_POST as $key => $value ) {
+		foreach($_POST as $key => $value) {
 			if($key != $this->hidden_submit) {
 				if( empty( $value ) ) {
 					delete_option( $key );
@@ -127,10 +127,16 @@ class Projects_Settings {
 						add_option( $key, $value );
 					}
 				}
-				
-				flush_rewrite_rules();
 			}
 		}
+		
+		/* rehook the post types and taxonomies, then 
+		flush the permalinks to make the new slug work. */
+		$taxonomy = new Projects_Taxonomy(); 
+		$taxonomy->add_rewrite_rules();
+		$type = new Projects_Type(); 
+		$type->add_rewrite_rules();
+		
 	}
 
 }

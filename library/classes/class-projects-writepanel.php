@@ -170,8 +170,8 @@ class Projects_Writepanel {
 		add_meta_box('projects-featured-media-box', __('Featured Media', 'projects'), array($this, 'create_box_featured_media'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-gallery-media-box', __('Media', 'projects'), array($this, 'create_box_gallery_media'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-general-box', __('General', 'projects'), array($this, 'create_box_general'), Projects::$post_type, 'side', 'default');
+		add_meta_box('projects-location-box', __('Locate', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-color-box', __('Color', 'projects'), array($this, 'create_box_color'), Projects::$post_type, 'side', 'default');
-		add_meta_box('projects-location-box', __('Location', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
 	
 		// add the award box when the taxonomy exists
 		$taxonomy = $this->projects->get_internal_name('award');

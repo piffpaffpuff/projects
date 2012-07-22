@@ -84,10 +84,13 @@ table.wp-list-table .column-title {
 #normal-sortables .form-fieldset select,
 #normal-sortables .form-fieldset .input-group,
 #normal-sortables .form-fieldset .input-group .miniColors {
-	width: 160px;
+	width: 200px;
 }
 #normal-sortables .form-fieldset .input-group .select-date  {
-	width: 80px;
+	width: 100px;
+}
+#normal-sortables .form-fieldset label {
+	width: 120px;
 }
 .map {
 	border: 1px solid #DFDFDF;

@@ -6,16 +6,21 @@
 if (!class_exists('Projects_Installation')) {
 class Projects_Installation {
 	
+	public $slug;
+	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
+		// load the basepage to get the slug name
+		$page = get_post(get_option('projects_base_page_id')); 
+		$this->slug = $page->post_name;
 	}
 	
 	/**
 	 * Load the class hooks
 	 */
-	public function load() {
+	public function load() {		
 		register_activation_hook(Projects::$plugin_file_path, array($this, 'add_default_settings'));
 	}
 	
@@ -23,7 +28,7 @@ class Projects_Installation {
 	 * Add default settings
 	 */
 	public function add_default_settings() {
-		global $wpdb;		
+		global $wpdb;
 				
 		// check the collate for the term table
 		$collate = '';
@@ -67,6 +72,8 @@ class Projects_Installation {
 		if(!get_option('projects_base_page_id')) {
 			add_option('projects_base_page_id', $page_id);
 		}
+				
+		$this->slug = $page->post_name;
 	}
 }
 }

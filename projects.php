@@ -40,8 +40,8 @@ class Projects {
 	public static $slug;
 	
 	public $installation;
-	public $types;
-	public $taxonomies;
+	public $type;
+	public $taxonomy;
 	public $writepanel;
 	public $settings;
 	
@@ -68,10 +68,12 @@ class Projects {
 		
 		$this->installation = new Projects_Installation();
 		$this->installation->load();
-		$this->types = new Projects_Types();
-		$this->types->load();
-		$this->taxonomies = new Projects_Taxonomies();
-		$this->taxonomies->load();
+		$this->taxonomy = new Projects_Taxonomy();
+		$this->taxonomy->load();
+		$this->award = new Projects_Award();
+		$this->award->load();
+		$this->type = new Projects_Type();
+		$this->type->load();
 		$this->writepanel = new Projects_Writepanel();
 		$this->writepanel->load();
 		$this->settings = new Projects_Settings();
@@ -89,13 +91,15 @@ class Projects {
 	public function includes() {
 		require_once('library/classes/class-projects-countries.php');	
 		require_once('library/classes/class-projects-installation.php');	
-		require_once('library/classes/class-projects-types.php');	
-		require_once('library/classes/class-projects-taxonomies.php');	
+		require_once('library/classes/class-projects-type.php');	
+		require_once('library/classes/class-projects-taxonomy.php');	
+		require_once('library/classes/class-projects-award.php');	
 		require_once('library/classes/class-projects-walkers.php');
 		require_once('library/classes/class-projects-writepanel.php');	
 		require_once('library/classes/class-projects-settings.php');	
 	}
 	
+
 	/**
 	 * Load the translations
 	 */
@@ -395,6 +399,7 @@ class Projects {
 			}
 		}
 	}
+
 }
 }
 
@@ -537,11 +542,31 @@ function project_website($name = null, $target = '_blank') {
 }
 
 /**
+ * Get awards
+ */
+function get_projects_awards($sort = null) {
+	global $projects;
+	if(is_array($sort) && !empty($sort)) {
+		return $projects->award->get_awards_sorted($sort);
+	} else {
+		return $projects->award->get_awards_sorted();
+	}
+}
+
+/**
+ * Get term permalink
+ */
+function get_projects_award_permalink($term_id, $operator = '+') {
+	global $projects;
+	return $projects->award->get_term_permalink($term_id, $operator);
+}
+
+/**
  * Add taxonomy
  */
 function add_projects_taxonomy($plural_label, $singular_label, $key, $args = null) {
 	global $projects;
-	$projects->taxonomies->add_taxonomy($plural_label, $singular_label, $key, $args);
+	$projects->taxonomy->add_taxonomy($plural_label, $singular_label, $key, $args);
 }
 
 /**
@@ -549,7 +574,7 @@ function add_projects_taxonomy($plural_label, $singular_label, $key, $args = nul
  */
 function remove_projects_taxonomy($key) {
 	global $projects;
-	$projects->taxonomies->remove_taxonomy($key);
+	$projects->taxonomy->remove_taxonomy($key);
 }
 
 /**
