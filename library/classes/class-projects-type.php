@@ -15,7 +15,6 @@ class Projects_Type {
 	 * Constructor
 	 */
 	public function __construct() {	
-		// instances
 		$this->projects = new Projects();
 		$this->taxonomy = new Projects_Taxonomy();
 		$this->writepanel = new Projects_Writepanel();

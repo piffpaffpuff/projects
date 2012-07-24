@@ -32,17 +32,38 @@ class Projects_Award extends Projects_Taxonomy {
 	}
 	
 	/**
+	 * Hook into the init hooks
+	 */
+	public function hook_init() {
+		//add_action('admin_menu', array($this, 'add_page'));
+		
+		$this->register_taxonomies();
+	}
+
+	/**
 	 * Hook into the admin hooks
 	 */
 	public function hook_admin() {
 		//add_action('generate_rewrite_rules', array($this, 'create_rewrite_rules'));			
-		//add_submenu_page('edit.php?post_type=' . Projects::$post_type, __('Awards 2', 'projects'), __('Awards 2', 'projects'), 'manage_options', $this->projects->get_internal_name('award2'), array($this, 'create_page'));
-		
+
 		if(!empty($_GET['taxonomy']) && $_GET['taxonomy'] == $this->taxonomy) {
 			add_filter('wp_dropdown_cats', array($this, 'remove_dropdown_child_terms'));
 		}
 	}
+	
+	/**
+	 * Add a page
+	 */
+	public function add_page() {
+		add_submenu_page('edit.php?post_type=' . Projects::$post_type, __('Awards 2', 'projects'), __('Awards 2', 'projects'), 'manage_options', $this->projects->get_internal_name('award2'), array($this, 'create_page'));
+	}
 		
+	/**
+	 * Create page content
+	 */
+	public function create_page() {	
+	}
+
 	/**
 	 * Display only root level terms in the admin form
 	 */
@@ -80,18 +101,7 @@ class Projects_Award extends Projects_Taxonomy {
 		$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
 	}
 	*/
-	
-	/**
-	 * Create page
-	 */
-	/*
-	public function create_page() {	
-		?>
-		<p>award page</p>
-		<?php
-	}
-	*/	
-	
+
 	/**
 	 * Register the taxonomies
 	 */
