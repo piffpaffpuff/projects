@@ -11,26 +11,24 @@ if (!class_exists('Projects_Award')) {
 class Projects_Award extends Projects_Taxonomy {
 	
 	public $external_key;
-	public $taxonomy;
-	public $installation;
+	public $taxonomy;	
+	
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		parent::__construct();
+		 
+		$this->external_key = 'award';
+		$this->taxonomy = $this->projects->get_internal_name($this->external_key);
+	}
 	
 	/**
 	 * Load the class hooks
 	 */
-	public function load() {
-		$this->external_key = 'award';
-		$this->taxonomy = $this->projects->get_internal_name($this->external_key);
-		$this->installation = new Projects_Installation();
-		
+	public function load() {		
 		add_action('init', array($this, 'hook_init'));
 		add_action('admin_init', array($this, 'hook_admin'));
-	}
-	
-	/**
-	 * Hook into the main hooks
-	 */
-	public function hook_init() {
-		$this->register_taxonomies();
 	}
 	
 	/**
@@ -39,6 +37,34 @@ class Projects_Award extends Projects_Taxonomy {
 	public function hook_admin() {
 		//add_action('generate_rewrite_rules', array($this, 'create_rewrite_rules'));			
 		//add_submenu_page('edit.php?post_type=' . Projects::$post_type, __('Awards 2', 'projects'), __('Awards 2', 'projects'), 'manage_options', $this->projects->get_internal_name('award2'), array($this, 'create_page'));
+		
+		if(!empty($_GET['taxonomy']) && $_GET['taxonomy'] == $this->taxonomy) {
+			add_filter('wp_dropdown_cats', array($this, 'remove_dropdown_child_terms'));
+		}
+	}
+		
+	/**
+	 * Display only root level terms in the admin form
+	 */
+	public function remove_dropdown_child_terms($output) {
+		$args = array(
+			'taxonomy' => $this->taxonomy,
+			'hide_empty' => false,
+			'parent' => 0,
+			'depth' => 1
+		);		
+
+		$terms = get_terms($this->taxonomy, $args);
+		
+		ob_start();
+		?>
+		<select name="parent" id="parent" class="postform">
+		<?php foreach($terms as $term) : ?>
+			<option class="level-0" value="<?php echo $term->term_id; ?>"><?php echo $term->name; ?></option>
+		<?php endforeach; ?>
+		</select>
+		<?php
+		return ob_get_clean();
 	}
 	
 	/**
@@ -54,57 +80,29 @@ class Projects_Award extends Projects_Taxonomy {
 		$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
 	}
 	*/
-		
+	
+	/**
+	 * Create page
+	 */
+	/*
+	public function create_page() {	
+		?>
+		<p>award page</p>
+		<?php
+	}
+	*/	
+	
 	/**
 	 * Register the taxonomies
 	 */
 	public function register_taxonomies() {		
 		$this->add_taxonomy(__('Awards', 'projects'), __('Award', 'projects'), $this->external_key);
 		
-		// name
-		$existing_term_id = term_exists('name', $this->taxonomy);
-		if(empty($existing_term_id)) {
-			$args = array(
-				'slug' => 'name'
-			);
-			$term = wp_insert_term(__('Name', 'projects'), $this->taxonomy, $args);
-		}
-		
-		// year
-		$existing_term_id = term_exists('year', $this->taxonomy);
-		if(empty($existing_term_id)) {
-			$args = array(
-				'slug' => 'year'
-			);
-			$term = wp_insert_term(__('Year', 'projects'), $this->taxonomy, $args);
-		}	
-		
-		// category
-		$existing_term_id = term_exists('category', $this->taxonomy);
-		if(empty($existing_term_id)) {
-			$args = array(
-				'slug' => 'category'
-			);
-			$term = wp_insert_term(__('Category', 'projects'), $this->taxonomy, $args);
-		}
-		
-		// rank
-		$existing_term_id = term_exists('rank', $this->taxonomy);
-		if(empty($existing_term_id)) {
-			$args = array(
-				'slug' => 'rank'
-			);
-			$term = wp_insert_term(__('Rank', 'projects'), $this->taxonomy, $args);
-		}
-	}
-	
-	/**
-	 * Create page
-	 */
-	public function create_page() {	
-		?>
-		<p>award page</p>
-		<?php
+		// add default terms
+		$this->add_default_term($this->taxonomy, __('Name', 'projects'), 'name');
+		$this->add_default_term($this->taxonomy, __('Year', 'projects'), 'year');
+		$this->add_default_term($this->taxonomy, __('Category', 'projects'), 'category');
+		$this->add_default_term($this->taxonomy, __('Rank', 'projects'), 'rank');
 	}
 	
 	/**

@@ -18,7 +18,6 @@ class Projects_Taxonomy {
 	 * Constructor
 	 */
 	public function __construct() {	
-		// instances
 		$this->projects = new Projects();
 		$this->installation = new Projects_Installation();
 	}
@@ -66,6 +65,13 @@ class Projects_Taxonomy {
 		$this->add_taxonomy(__('Agencies', 'projects'), __('Agency', 'projects'), 'agency');
 		$this->add_taxonomy(__('Clients', 'projects'), __('Client', 'projects'), 'client');
 		$this->add_taxonomy(__('Tags', 'projects'), __('Tag', 'projects'), 'tag', array('hierarchical' => false));
+		
+		// Create a hidden taxonomy for the project stati
+		$taxonomy = $this->projects->get_internal_name('status');
+		$this->add_taxonomy(__('Stati', 'projects'), __('Status', 'projects'), 'status', array('hierarchical' => false, 'show_ui' => false));
+		$this->add_default_term($taxonomy, __('Completed', 'projects'), 'completed');
+		$this->add_default_term($taxonomy, __('In Progress', 'projects'), 'inprogress');
+		$this->add_default_term($taxonomy, __('Planned', 'projects'), 'planned');
 	}
 	
 	/**
@@ -122,6 +128,24 @@ class Projects_Taxonomy {
 			if(taxonomy_exists($taxonomy)) {
 				unset($wp_taxonomies[$taxonomy]);
 			}
+		}
+	}
+
+	/**
+	 * Add a default term to a taxonomy
+	 */	
+	public function add_default_term($taxonomy, $label, $slug, $args = null) {
+		$existing_term_id = term_exists($slug, $taxonomy);
+		if(empty($existing_term_id)) {
+			$default_args = array(
+				'slug' => $slug
+			);
+			
+			// merge the default and additional args
+			$args = wp_parse_args($args, $default_args);
+			
+			// add the term
+			$term = wp_insert_term($label, $taxonomy, $args);
 		}
 	}
 

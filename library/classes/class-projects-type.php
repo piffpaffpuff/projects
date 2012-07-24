@@ -42,7 +42,6 @@ class Projects_Type {
 		
 		// set the content
 		$this->register_types();
-		$this->register_status();
 	}
 
 	/**
@@ -53,6 +52,7 @@ class Projects_Type {
 		add_action('manage_posts_custom_column', array($this, 'create_column_content'), 10, 2);
 		add_filter('manage_edit-' . Projects::$post_type . '_sortable_columns', array($this, 'add_sorting_columns'));	
 		add_filter('request', array($this, 'default_column_orderby'));
+		add_filter('views_edit-' . Projects::$post_type, array($this, 'add_content_views'));
 	}
 
 	/**
@@ -117,29 +117,29 @@ class Projects_Type {
 	}	
 	
 	/**
-	 * Register the post status
+	 * Add column views in the bulk edit zone
 	 */
-	public function register_status() {	
-		$this->add_status(__('Completed', 'projects'), 'completed');
-		$this->add_status(__('In Progress', 'projects'), 'inprogress');
-		$this->add_status(__('Planned', 'projects'), 'planned');
-	}
-	
-	/**
-	 * Create a custom post status
-	 */	
-	public function add_status($label, $key, $args = null) {
-		$status_name = $this->projects->get_internal_name($key);
+	public function add_content_views($views) {
+		global $wp_query, $current_user;
 		
-		$default_args = array(
-	    	'label' => __($label, 'projects'),
-			'label_count' => _n_noop($label . ' <span class="count">(%s)</span>', $label . ' <span class="count">(%s)</span>' )
+		// get the hidden status taxonomy
+		$args = array(
+			'hide_empty' => false
 		);
+		$taxonomy = $this->projects->get_internal_name('status');
+		$terms = get_terms($taxonomy, $args);
+		
+		// set the views
+		foreach($terms as $term) {
+			if(isset($_GET[$taxonomy]) && $_GET[$taxonomy] == $term->slug) {
+				$class = ' class="current"';
+			} else {
+				$class = '';
+			}
+			$views[$term->name] = sprintf(__('<a href="%s"' . $class . '>%s <span class="count">(%d)</span></a>', 'projects'), admin_url('edit.php?post_type=' . Projects::$post_type . '&' . $taxonomy . '=' . $term->slug), $term->name, $term->count);
+		}
 
-		// merge the default and additional args
-		$args = wp_parse_args($args, $default_args);
-
-		register_post_status($status_name, $args);
+		return $views;
 	}
 	
 	/**

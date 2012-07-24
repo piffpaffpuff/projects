@@ -378,15 +378,20 @@ class Projects_Writepanel {
 		</p>
 		<?php
 		$args = array(
-			'_builtin' => false
+			'hide_empty' => false
 		);
-		$stati = get_post_stati($args, 'objects');
+		$taxonomy = $this->projects->get_internal_name('status');
+		$terms = get_terms($taxonomy, $args);
 		?>
 		<p class="form-fieldset"><label><span><?php _e('Status:', 'projects'); ?></span></label><select name="projects[status]">
-			<?php foreach($stati as $status) : ?>
-				<?php if($this->projects->is_internal_name($status->name)) : ?>
-			<option value="<?php echo $status->name; ?>" <?php selected($status->name, $this->projects->get_project_meta('status')); ?>><?php echo $status->label; ?></option>
-				<?php endif; ?>
+			<?php foreach($terms as $term) : ?>
+				<?php 
+					$in_term = is_object_in_term($post->ID, $taxonomy, $term->term_id);
+					if(is_wp_error($in_term)) {
+						$in_term = false;
+					}			
+				?>
+				<option value="<?php echo $term->term_id; ?>" <?php selected(true, $in_term); ?>><?php echo $term->name; ?></option>
 			<?php endforeach; ?>
 		</select></p>
 		<?php $website = $this->projects->get_project_meta('website'); ?>
@@ -717,7 +722,14 @@ class Projects_Writepanel {
 				// relate terms
 				wp_set_object_terms($post_id, $award_ids, $taxonomy, false);
 			}
-
+			
+			// set the terms for the stati
+			if(!empty($_POST['projects']['status'])) {
+				// relate terms
+				$taxonomy = $this->projects->get_internal_name('status');
+				wp_set_object_terms($post_id, intval($_POST['projects']['status']), $taxonomy, false);
+			}
+			
 			// save the meta
 			foreach($_POST['projects'] as $key => $value) {
 				// save the key, including empty keys too, 
