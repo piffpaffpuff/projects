@@ -11,7 +11,14 @@
 }
 #icon-edit.icon32-posts-project {
 	background-image: url("../images/projects-32x32.png");
-	background-position: 0px -5px;
+	background-position: 2px -4px;
+}
+body.award-taxonomies .wrap #icon-edit.icon32,
+body.award-taxonomies .wrap h2 {
+	display: none;
+}
+body.award-taxonomies #icon-edit.icon32-posts-project {
+	background-position: 2px 0px;
 }
 
 /*

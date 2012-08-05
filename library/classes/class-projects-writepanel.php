@@ -17,6 +17,7 @@ class Projects_Writepanel {
 		$this->type_featured_media = 'featured';
 		$this->type_media = 'gallery';
 		$this->projects = new Projects();
+		$this->award = new Projects_Award();
 	}
 
 	/**
@@ -145,9 +146,8 @@ class Projects_Writepanel {
 	 * Save the media fields
 	 */
 	public function save_media_options($post, $attachment) {
-		// $attachment part of the form $_POST ($_POST[attachments][postID])
-		// $post attachments wp post array - will be saved after returned
-		// $post['post_type'] == 'attachment'
+		/* save the meta keys for the attachment
+		and return the attachment object. */
 		if(empty($attachment['projects_default_image_size'])) {
 			delete_post_meta($post['ID'], '_projects_default_image_size');
 		} else {
@@ -172,26 +172,13 @@ class Projects_Writepanel {
 		add_meta_box('projects-general-box', __('General', 'projects'), array($this, 'create_box_general'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-location-box', __('Locate', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-color-box', __('Color', 'projects'), array($this, 'create_box_color'), Projects::$post_type, 'side', 'default');
-	
-		// add the award box when the taxonomy exists
-		$taxonomy = $this->projects->get_internal_name('award');
-
-		if(taxonomy_exists($taxonomy)) {
-			add_meta_box('projects-awards-box', __('Awards', 'projects'), array($this, 'create_box_awards'), Projects::$post_type, 'side', 'default');
-		}
+		add_meta_box('projects-awards-box', __('Awards', 'projects'), array($this, 'create_box_awards'), Projects::$post_type, 'side', 'default');
 	}
 	
 	/**
-	 * Remove the meta boxes
+	 * Remove default meta boxes
 	 */
 	public function remove_boxes() {
-		// remove the default award box when the taxonomy exists
-		$taxonomy = $this->projects->get_internal_name('award');
-
-		if(taxonomy_exists($taxonomy)) {
-			remove_meta_box('tagsdiv-' . $taxonomy, Projects::$post_type, 'side');
-			remove_meta_box($taxonomy . 'div', Projects::$post_type, 'side');
-		}
 	}
 	
 	/**
@@ -269,20 +256,18 @@ class Projects_Writepanel {
 	/**
 	 * Create an award group item
 	 */
-	public function create_award_group_list_item($index, $meta = null) {
-		// Get the defined terms
-		$taxonomy = $this->projects->get_internal_name('award');
-		$slugs = array(
-			'name',
-			'year',
-			'rank',
-			'category'
-		);  
-		
+	public function create_award_group_list_item($index, $meta = null) {	
 		// create the title
 		$title_placeholder = __('Untitled', 'projects');
-		if(isset($meta) && isset($meta['name'])) {
-			$title_term = get_term($meta['name'], $taxonomy); 
+		$taxonomy_name = $this->projects->get_internal_name('award_name');
+		if(isset($meta) && isset($meta[$taxonomy_name])) {
+			$title_term = get_term($meta[$taxonomy_name], $taxonomy_name); 
+		} else {
+			$title_term = null;
+		}
+		
+		// set the title if the id returned a name
+		if(isset($title_term) && !is_wp_error($title_term)) {
 			$title = $title_term->name;
 		} else {
 			$title = $title_placeholder;
@@ -291,20 +276,20 @@ class Projects_Writepanel {
 		<div class="award-group">
 			<div class="award-group-options"><h4 title="<?php echo $title_placeholder; ?>"><?php echo $title; ?></h4><a href="#" class="remove-award-group"><?php _e('Delete', 'projects'); ?></a></div>
 			<div class="award-group-fields">
-			<?php foreach($slugs as $slug) : ?>
+			<?php
+			$taxonomies = $this->award->get_added_taxonomies();
+			foreach($taxonomies as $taxonomy) : ?>
 				<?php 
-				$term = get_term_by('slug', $slug, $taxonomy); 
 				$args = array(
-					'parent' => $term->term_id,
 					'hide_empty' => false
 				);
-				$child_terms = get_terms($taxonomy, $args);
-				$selected_child_term_id = (isset($meta) && isset($meta[$term->slug])) ? $meta[$term->slug] : null;
+				$terms = get_terms($taxonomy->name, $args);
+				$selected_term_id = (isset($meta) && isset($meta[$taxonomy->name])) ? $meta[$taxonomy->name] : null;
 				?>
-				<select name="projects[awards][<?php echo $index; ?>][<?php echo $term->slug; ?>]" class="award-select-<?php echo $term->slug; ?>">
-					<option value=""><?php printf(__('No %s', 'projects'), $term->name); ?></option>
-					<?php foreach($child_terms as $child_term) : ?>
-						<option value="<?php echo $child_term->term_id; ?>" <?php selected($selected_child_term_id, $child_term->term_id, true); ?>><?php echo $child_term->name; ?></option>
+				<select name="projects[awards][<?php echo $index; ?>][<?php echo $taxonomy->name; ?>]" class="award-select-<?php echo $taxonomy->name; ?>">
+					<option value=""><?php printf(__('No %s', 'projects'), $taxonomy->labels->singular_name); ?></option>
+					<?php foreach($terms as $term) : ?>
+						<option value="<?php echo $term->term_id; ?>" <?php selected($selected_term_id, $term->term_id, true); ?>><?php echo $term->name; ?></option>
 					<?php endforeach; ?>
 				</select>
 			<?php endforeach; ?>
@@ -532,7 +517,7 @@ class Projects_Writepanel {
 			$args['post_mime_type'] = $mime;
 		}
 		
-		// the the attachments
+		// get all the attachments
 		$attachments = get_children($args);
 		
 		// get the post thumbnail id
@@ -596,7 +581,7 @@ class Projects_Writepanel {
 		$taxonomy = $this->projects->get_internal_name($key);
 		$terms = wp_get_object_terms($post_id, $taxonomy, $args); 
 		
-		if(!isset($terms->errors) && sizeof($terms) > 0) {
+		if(!is_wp_error($terms) && sizeof($terms) > 0) {
 			// return the flat tree
 			if(!$hierarchical) {
 				return $terms;
@@ -632,16 +617,16 @@ class Projects_Writepanel {
 	public function save_box_data() {
 		global $post_id;
 
-		// verify this came from the our screen and with 
-		// proper authorization, because save_post can be 
-		// triggered at other times
+		/* verify this came from the our screen and with 
+		proper authorization, because save_post can be 
+		triggered at other times. */
 		if(empty($_POST['projects_nonce']) || !wp_verify_nonce( $_POST['projects_nonce'], Projects::$plugin_basename)) {
 			return $post_id;
 		}
   
-  		// verify if this is an auto save routine. If it is 
-  		// our form has not been submitted, so we dont want 
-  		// to do anything
+  		/* verify if this is an auto save routine. If it 
+  		is our form has not been submitted, so we dont 
+  		want to do anything. */
   		if(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
     		return $post_id;
     	}
@@ -657,12 +642,12 @@ class Projects_Writepanel {
 			}
 		}
 		
-		// we're authenticated: Now we need to find and 
-		// save the data.
+		/* we're authenticated: Now we need to find 
+		and save the data.*/
 
-		// save, update or delete the custom field of the post.
-		// split all array keys and save them as unique 
-		// meta to make them queryable by wordpress.
+		/* save, update or delete the custom field of the post.
+		split all array keys and save them as unique meta to 
+		make them queryable by wordpress. */
 		if(isset($_POST['projects'])) {
 			// create a date entry to make querying by month or year easy 
 			$_POST['projects']['date'] = mktime(0, 0, 0, $_POST['projects']['month'], 1, $_POST['projects']['year']);
@@ -686,6 +671,9 @@ class Projects_Writepanel {
 				if(!empty($json->results)) {
 					$_POST['projects']['lat'] = $json->results[0]->geometry->location->lat;
 					$_POST['projects']['lng'] = $json->results[0]->geometry->location->lng;
+				} else {
+					$_POST['projects']['lat'] = null;
+					$_POST['projects']['lng'] = null;
 				}
 			} else {
 				$_POST['projects']['lat'] = null;
@@ -693,34 +681,46 @@ class Projects_Writepanel {
 			}
 			
 			// set the terms for the awards
-			$taxonomy = $this->projects->get_internal_name('award');
+			$taxonomies = $this->award->get_added_taxonomies(null, 'names');
 			if(empty($_POST['projects']['awards'])) {
-				$_POST['projects']['awards'] = '';
+				$_POST['projects']['awards'] = null;
 				
 				// remove all related terms
-				wp_set_object_terms($post_id, null, $taxonomy, false);
+				foreach($taxonomies as $taxonomy) {
+					wp_set_object_terms($post_id, null, $taxonomy, false);
+				}
 			} else {
 				$awards = $_POST['projects']['awards'];
-				$award_ids = array();
+				$term_ids = array();
+				$taxonomy_name = $this->projects->get_internal_name('award_name');
 				
 				// clean up the awards array
-				foreach($awards as $key => $value) {
-					if(empty($value['name'])) {
+				foreach($awards as $key => $group) {
+					if(empty($group[$taxonomy_name])) {
 						// remove all awards that have no name set
 						unset($_POST['projects']['awards'][$key]);
 					} else {
-						// add all ids to a list to relate them to the post
-						foreach($value as $key => $id) {
-							if(!empty($id)) {
+						// add all ids to a list to relate them to the post.
+						// go through all taxonomies to catch empty ones too.
+						foreach($group as $taxonomy => $term_id) {
+							if(!empty($term_id) && empty($term_ids[$taxonomy][$term_id])) {
 								// add the id to the relation table
-								array_push($award_ids, (int)$id);
+								$term_ids[$taxonomy][$term_id] = intval($term_id);
 							}
 						}
 					}
 				}
-				
+
 				// relate terms
-				wp_set_object_terms($post_id, $award_ids, $taxonomy, false);
+				foreach($taxonomies as $taxonomy) {
+					if(!empty($term_ids[$taxonomy])) {
+						$term_id = $term_ids[$taxonomy];
+					} else {
+						// null the id to delete any relation
+						$term_id = null;
+					}
+					wp_set_object_terms($post_id, $term_id, $taxonomy, false);
+				}
 			}
 			
 			// set the terms for the stati
@@ -732,9 +732,10 @@ class Projects_Writepanel {
 			
 			// save the meta
 			foreach($_POST['projects'] as $key => $value) {
-				// save the key, including empty keys too, 
-				// otherwise wordpress can't query them.
-				// this is probably fixed in wordpress 3.4
+				/* save the key, including empty keys too, 
+				because wordpress can only query for empty 
+				key values but not for not existing keys.
+				this may be fixed in wordpress 3.4. */
 				update_post_meta($post_id, '_projects_' . $key, $value);
 				/*
 				if(empty($value)) {		
