@@ -144,6 +144,13 @@ class Projects_Award extends Projects_Taxonomy {
 	 * are grouped together.
 	 */
 	public function get_awards_from_meta($meta, $post_id) {
+		$objects = array();
+
+		// only start parsing when the meta is not empty
+		if(empty($meta)) {
+			return $objects;
+		}
+	
 		// create the list of ids. like this only one 
 		// database call is needed to get all terms.
 		if(empty($this->terms_by_id)) {
@@ -156,11 +163,8 @@ class Projects_Award extends Projects_Taxonomy {
 			}
 		}
 		
-		// build the objects list
-		$objects = array();
-		$awards = maybe_unserialize($meta);
-
 		// go through the meta array and construct
+		$awards = maybe_unserialize($meta);
 		foreach($awards as $award) {
 			$object = new stdClass();
 			
