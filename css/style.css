@@ -9,6 +9,10 @@
 #adminmenu #menu-posts-project:hover .wp-menu-image, #adminmenu #menu-posts-project.wp-menu-open .wp-menu-image {
 	background-position: 6px -16px;
 }
+#adminmenu #menu-posts-project .wp-submenu-wrap li a span.current {
+	color: #333;
+	font-weight: bold;
+}
 #icon-edit.icon32-posts-project {
 	background-image: url("../images/projects-32x32.png");
 	background-position: 2px -4px;

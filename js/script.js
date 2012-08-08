@@ -60,7 +60,7 @@ jQuery(document).ready(function($) {
 	});
 	
 	// set title of award groups
-	$('#projects-award-list .award-select-award_name').live('change', function() {
+	$('#projects-award-list .award-select-project_award_name').live('change', function() {
 		var h4 = $(this).closest('.award-group').find('h4');
 		var value = $('option:selected', this).val();	
 		if(value) {

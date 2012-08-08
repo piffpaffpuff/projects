@@ -542,23 +542,27 @@ function project_website($name = null, $target = '_blank') {
 }
 
 /**
- * Get awards
+ * Get all awards
  */
-function get_projects_awards($sort = null) {
+function get_projects_awards($group = true, $sort = array('project_award_year', 'project_award_name', 'project_award_category'), $order = array(-1, 1, 1)) {
 	global $projects;
-	if(is_array($sort) && !empty($sort)) {
-		return $projects->award->get_awards_sorted($sort);
-	} else {
-		return $projects->award->get_awards_sorted();
-	}
+	return $projects->award->get_sorted_awards($group, $sort, $order);
 }
 
 /**
- * Get term permalink
+ * Get project awards
  */
-function get_projects_award_permalink($term_id, $operator = '+') {
+function get_project_awards($post_id = null) {
 	global $projects;
-	return $projects->award->get_term_permalink($term_id, $operator);
+	return $projects->award->get_project_awards($post_id);
+}
+
+/**
+ * Get award permalink
+ */
+function get_projects_award_permalink($award) {
+	global $projects;
+	return $projects->award->get_award_permalink($award);
 }
 
 /**
