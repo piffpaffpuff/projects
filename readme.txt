@@ -8,7 +8,7 @@ Stable tag: 1.0
 License: GPLv3 or later
 License URI: http://www.opensource.org/licenses/gpl-license.php
 
-A plugin for creative people to manage and present their projects.
+A portfolio plugin for creative people to manage and present their projects.
 
 == Description ==
 

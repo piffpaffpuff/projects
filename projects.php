@@ -2,11 +2,11 @@
 
 /*
  * Plugin Name: Projects
- * Plugin URI: http://www.iwannegro.ch
- * Description: A projects system for graphics artists, architects, motion designers and all creative people.
+ * Plugin URI: https://github.com/piffpaffpuff/projects
+ * Description: A portfolio plugin for creative people to manage and present their projects.
  * Version: 1.0
- * Author: Iwan Negro
- * Author URI: http://www.iwannegro.ch
+ * Author: piffpaffpuff
+ * Author URI: https://github.com/piffpaffpuff
  * License: GPL3
  *
  * Copyright (C) 2011 Iwan Negro
