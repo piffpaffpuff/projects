@@ -38,6 +38,7 @@ class Projects_Writepanel {
 		add_filter('attachment_fields_to_edit', array($this, 'edit_media_options'), 15, 2);
 		add_filter('attachment_fields_to_save', array($this, 'save_media_options'), 15, 2);
 		add_filter('media_upload_tabs', array($this, 'remove_media_tabs'));
+		add_filter('media_upload_media_url', array($this, 'add_tab_media_url'));
 		add_action('wp_ajax_load_media_list', array($this, 'load_media_list_ajax'));
 		add_action('wp_ajax_add_award_group', array($this, 'add_award_group_ajax'));
 		add_filter('upload_mimes', array($this, 'add_mime_types'));
@@ -63,12 +64,33 @@ class Projects_Writepanel {
 	    if(isset($_REQUEST['post_id'])) {
 	        $post_type = get_post_type($_REQUEST['post_id']);
 	        if($post_type == Projects::$post_type) {
-	            unset($tabs['type_url']);
-	            unset($tabs['library']);
+	        	unset($tabs['type_url']);
+				unset($tabs['library']);
+	            unset($tabs['gallery']);
+				//$tabs['media_url'] = __('From URL', 'projects');
 	            $tabs['gallery'] = __('Project Media', 'projects');
 	        }
 	    }
 	    return $tabs;
+	}
+	
+	/**
+	 * Add a media uploader tab
+	 */
+	public function add_tab_media_url() {
+		return wp_iframe(array($this, 'media_tab_media_url'));
+	}
+	
+	/**
+	 * Create the media url tab. The function name
+	 * has to start with media to poperly enqueue
+	 * scripts and styles.
+	 */
+	public function media_tab_media_url() {
+	    media_upload_header();
+	    ?>
+	    <p>Hello</p>
+	    <?php
 	}
 
 	/**
