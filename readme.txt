@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=warta
 Tags: manage, projects, portfolio, design, architecture
 Requires at least: 3.4.1
 Tested up to: 3.4.1
-Stable tag: 1.0
+Stable tag: trunk
 License: GPLv3 or later
 License URI: http://www.opensource.org/licenses/gpl-license.php
 
