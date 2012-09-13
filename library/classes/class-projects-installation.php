@@ -48,6 +48,15 @@ class Projects_Installation {
 			KEY meta_key (meta_key) ) $collate;";
 			
 	    $wpdb->query($sql);
+		
+	    // install taxonomy term groups table, if it doesnt exist already
+	    $sql = "CREATE TABLE IF NOT EXISTS ". $wpdb->prefix . "term_groups" ." (
+	    	`term_group_id` bigint(20) unsigned NOT NULL auto_increment,
+	    	`term_id` bigint(20) unsigned NOT NULL default '0',
+	    	PRIMARY KEY (term_group_id),
+	    	KEY term_id (term_id) ) $collate;";
+	    	
+	    $wpdb->query($sql);
 	    
 		// create a page that serves as base slug for all projects
 		$page = get_page_by_path('projects');

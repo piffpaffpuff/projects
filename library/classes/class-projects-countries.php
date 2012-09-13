@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Countries class
  */

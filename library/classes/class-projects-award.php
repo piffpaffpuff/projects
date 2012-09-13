@@ -3,10 +3,6 @@
 /**
  * Award class
  */
-
-/**
- * Post type class
- */
 if (!class_exists('Projects_Award')) {
 class Projects_Award extends Projects_Taxonomy {	
 	
@@ -131,6 +127,7 @@ class Projects_Award extends Projects_Taxonomy {
 			'show_ui' => false, 
 			'show_in_nav_menus' => false
 		);
+
 		$this->add_taxonomy(__('Award Names', 'projects'), __('Award Name', 'projects'), 'award_name', $args);
 		$this->add_taxonomy(__('Award Years', 'projects'), __('Award Year', 'projects'), 'award_year', $args);
 		$this->add_taxonomy(__('Award Categories', 'projects'), __('Award Category', 'projects'), 'award_category', $args);
@@ -210,16 +207,12 @@ class Projects_Award extends Projects_Taxonomy {
 	
 		// get all award sets from the post meta table
 		$query = $wpdb->prepare(
-			"SELECT 
-				post_id, meta_value 
-			FROM 
-				$wpdb->postmeta 
-			WHERE
-				meta_key = %s
-			AND 
-				meta_value <> ''
-			AND
-				meta_value IS NOT NULL", $this->projects->get_internal_name('awards', true));
+			"SELECT post_id, meta_value 
+			FROM $wpdb->postmeta 
+			WHERE meta_key = %s
+			AND meta_value <> ''
+			AND meta_value IS NOT NULL", 
+		$this->projects->get_internal_name('awards', true));
 		
 		$metas = $wpdb->get_results($query);
 		$taxonomies = $this->get_added_taxonomies(null, 'names');	
@@ -261,12 +254,12 @@ class Projects_Award extends Projects_Taxonomy {
 	/**
 	 * Sort the awards objects array by an arbitrary number of fields
 	 */	
-	function sort_list(&$list, $fields, $order) {
+	function sort_list(&$list, $fields, $order) {		
 		// only sort when fields and order match
 		if(count($fields) !== count($order)) {
 			return;
 		}
-		
+				
 		// sort the array with closures
 		usort($list, function($a, $b) use ($fields, $order) {
 			for($i = 1; $i < count($fields); $i++) {
