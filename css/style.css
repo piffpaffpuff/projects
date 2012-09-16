@@ -17,11 +17,11 @@
 	background-image: url("../images/projects-32x32.png");
 	background-position: 2px -4px;
 }
-body.award-taxonomies .wrap #icon-edit.icon32,
-body.award-taxonomies .wrap h2 {
+body.taxonomy-group .wrap #icon-edit.icon32,
+body.taxonomy-group .wrap h2 {
 	display: none;
 }
-body.award-taxonomies #icon-edit.icon32-posts-project {
+body.taxonomy-group #icon-edit.icon32-posts-project {
 	background-position: 2px 0px;
 }
 

@@ -111,7 +111,7 @@ class Projects_Taxonomy {
 		// register
 		register_taxonomy($taxonomy_name, $args['post_type'], $args);
 	}
-	
+
 	/**
 	 * Remove a custom taxonomy
 	 */	

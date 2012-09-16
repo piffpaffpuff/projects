@@ -12,9 +12,15 @@ class Projects_Installation {
 	 * Constructor
 	 */
 	public function __construct() {
+		global $wpdb;
+		
 		// load the basepage to get the slug name
 		$page = get_post(get_option('projects_base_page_id')); 
 		$this->slug = $page->post_name;
+		
+		// set the table names
+		$wpdb->term_groups = $wpdb->prefix . 'term_groups';
+	    $wpdb->term_group_relationships = $wpdb->prefix . 'term_group_relationships';
 	}
 	
 	/**
@@ -36,24 +42,24 @@ class Projects_Installation {
 			if(!empty($wpdb->charset)) $collate = "DEFAULT CHARACTER SET $wpdb->charset";
 			if(!empty($wpdb->collate)) $collate .= " COLLATE $wpdb->collate";
 	    }
-	    
-		// install taxonomy term table, if it doesnt exist already
-		$sql = "CREATE TABLE IF NOT EXISTS ". $wpdb->prefix . "termmeta" ." (
-			`meta_id` bigint(20) unsigned NOT NULL auto_increment,
-			`term_id` bigint(20) unsigned NOT NULL default '0',
-			`meta_key` varchar(255) default NULL,
-			`meta_value` longtext,
-			PRIMARY KEY (meta_id),
-			KEY term_id (term_id),
-			KEY meta_key (meta_key) ) $collate;";
-			
-	    $wpdb->query($sql);
-		
-	    // install taxonomy term groups table, if it doesnt exist already
-	    $sql = "CREATE TABLE IF NOT EXISTS ". $wpdb->prefix . "term_groups" ." (
+
+	    // install taxonomy groups table, if it doesnt exist already
+	    $sql = "CREATE TABLE IF NOT EXISTS $wpdb->term_groups (
 	    	`term_group_id` bigint(20) unsigned NOT NULL auto_increment,
-	    	`term_id` bigint(20) unsigned NOT NULL default '0',
+	    	`taxonomy_group` varchar(32) default NULL,
+	    	`term_group_order` int(11) unsigned NOT NULL default '0',
 	    	PRIMARY KEY (term_group_id),
+	    	KEY taxonomy_group (taxonomy_group),
+	    	KEY term_group_order (term_group_order) ) $collate;";
+	    
+	    $wpdb->query($sql);
+	    
+	    // install term groups table, if it doesnt exist already
+	    $sql = "CREATE TABLE IF NOT EXISTS $wpdb->term_group_relationships (
+	    	`object_id` bigint(20) unsigned NOT NULL default '0',
+	    	`term_group_id` bigint(20) unsigned NOT NULL default '0',
+	    	`term_id` bigint(20) unsigned NOT NULL default '0',
+	    	PRIMARY KEY (object_id, term_group_id),
 	    	KEY term_id (term_id) ) $collate;";
 	    	
 	    $wpdb->query($sql);

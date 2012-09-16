@@ -18,6 +18,7 @@ class Projects_Writepanel {
 		$this->type_media = 'gallery';
 		$this->projects = new Projects();
 		$this->award = new Projects_Award();
+		$this->taxonomy_group = new Projects_Taxonomy_Group();
 	}
 
 	/**
@@ -40,7 +41,8 @@ class Projects_Writepanel {
 		add_filter('media_upload_tabs', array($this, 'remove_media_tabs'));
 		add_filter('media_upload_media_url', array($this, 'add_tab_media_url'));
 		add_action('wp_ajax_load_media_list', array($this, 'load_media_list_ajax'));
-		add_action('wp_ajax_add_award_group', array($this, 'add_award_group_ajax'));
+		add_action('wp_ajax_add_term_group', array($this, 'manage_term_group_ajax'));
+		add_action('wp_ajax_delete_term_group', array($this, 'manage_term_group_ajax'));
 		add_filter('upload_mimes', array($this, 'add_mime_types'));
 
 		add_action('save_post', array($this, 'save_box_data'));
@@ -194,7 +196,15 @@ class Projects_Writepanel {
 		add_meta_box('projects-general-box', __('General', 'projects'), array($this, 'create_box_general'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-location-box', __('Locate', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-color-box', __('Color', 'projects'), array($this, 'create_box_color'), Projects::$post_type, 'side', 'default');
-		add_meta_box('projects-awards-box', __('Awards', 'projects'), array($this, 'create_box_awards'), Projects::$post_type, 'side', 'default');
+		
+		// create the meta boxes for the taxonomy groups
+		$taxonomy_groups = $this->taxonomy_group->get_added_taxonomy_groups();
+		foreach($taxonomy_groups as $taxonomy_group) {
+			$args = array(
+				'taxonomy_group' => $taxonomy_group
+			);
+			add_meta_box('projects-' . $taxonomy_group->group . '-box', $taxonomy_group->plural_label, array($this, 'create_box_taxonomy_group'), Projects::$post_type, 'side', 'default', $args);
+		}
 	}
 	
 	/**
@@ -206,9 +216,7 @@ class Projects_Writepanel {
 	/**
 	 * Create the box content
 	 */
-	public function create_box_location() {
-		global $post;
-		
+	public function create_box_location($post, $metabox) {		
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		?>
@@ -249,9 +257,105 @@ class Projects_Writepanel {
 	/**
 	 * Create the box content
 	 */
-	public function create_box_awards() {		
+	public function create_box_taxonomy_group($post, $metabox) {
+		$taxonomy_group = $metabox['args']['taxonomy_group'];
+		
 		// Use nonce for verification
-  		wp_nonce_field(Projects::$plugin_basename, 'projects_award_nonce');
+		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
+
+		// output
+		$row_count = 0;
+		?>
+		<input type="hidden" name="projects_taxonomy_group" value="<?php echo $taxonomy_group->group; ?>">		
+		<div class="term-groups-list">
+			<?php //list ?>
+		</div>
+		<div class="term-groups-footer">
+			<a href="#" class="add-term-group"><?php printf(__('Add %s', 'projects'), $taxonomy_group->singular_label); ?></a>
+			<img src="<?php echo get_admin_url(); ?>images/wpspin_light.gif" class="term-group-loader" />
+		</div>
+		<?php
+	}
+
+	/**
+	 * Create a term group item
+	 */
+	public function create_term_group_list_item($taxonomy_group, $term_group_id) {	
+		// create the title
+		$title_placeholder = __('Untitled', 'projects');
+		/*$taxonomy_name = $this->projects->get_internal_name('award_name');
+		if(isset($meta) && isset($meta[$taxonomy_name])) {
+			$title_term = get_term($meta[$taxonomy_name], $taxonomy_name); 
+		} else {
+			$title_term = null;
+		}*/
+		
+		// set the title if the id returned a name
+		/*if(isset($title_term) && !is_wp_error($title_term)) {
+			$title = $title_term->name;
+		} else {
+			$title = $title_placeholder;
+		}*/
+		$title = $title_placeholder;
+		
+		?>
+		<div class="term-group" id="projects-term-group-<?php echo $taxonomy_group; ?>-<?php echo $term_group_id; ?>">
+			<input type="hidden" name="projects_term_group_id" value="<?php echo $term_group_id; ?>" />
+			<div class="term-group-options"><h4 title="<?php echo $title_placeholder; ?>"><?php echo $title; ?></h4><a href="#" class="delete-term-group"><?php _e('Delete', 'projects'); ?></a></div>
+			<div class="term-group-fields">
+			<?php $taxonomies_in_group = $this->taxonomy_group->get_added_taxonomies('names'); ?>
+			<?php foreach($taxonomies_in_group as $taxonomy_in_group) : ?>
+				<?php 
+				$taxonomy = get_taxonomy($taxonomy_in_group);
+				$args = array(
+					'hide_empty' => false
+				);
+				$terms = get_terms($taxonomy->name, $args);
+				$selected_term_id = (isset($meta) && isset($meta[$taxonomy->name])) ? $meta[$taxonomy->name] : null;
+				?>
+				<select name="projects[taxonomy_group][<?php echo $taxonomy_group; ?>][<?php echo $term_group_id; ?>][<?php echo $taxonomy->name; ?>]" class="taxonomy-group-select">
+					<option value=""><?php printf(__('No %s', 'projects'), $taxonomy->labels->singular_name); ?></option>
+					<?php foreach($terms as $term) : ?>
+						<option value="<?php echo $term->term_id; ?>" <?php selected($selected_term_id, $term->term_id, true); ?>><?php echo $term->name; ?></option>
+					<?php endforeach; ?>
+				</select>
+			<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
+		
+	}
+	
+	/**
+	 * Manage the term group item with ajax
+	 */
+	public function manage_term_group_ajax() {
+	    // Verify post data and nonce
+		if(empty($_POST) || empty($_POST['nonce']) || empty($_POST['taxonomy_group']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
+			wp_die(__('You do not have sufficient permissions to access this page.'));
+		}
+		
+		// Do the corresponding action
+		if($_POST['action'] == 'add_term_group') {
+			// add a new term group
+			$term_group_id = $this->taxonomy_group->add_term_group($_POST['taxonomy_group']);
+			
+			// create a group item
+			$this->create_term_group_list_item($_POST['taxonomy_group'], $term_group_id);
+		} elseif($_POST['action'] == 'delete_term_group') {
+			// delete a term group
+			$this->taxonomy_group->delete_term_group($_POST['term_group_id'], $_POST['taxonomy_group']);
+		}			
+			
+		exit;
+	}
+		
+	/**
+	 * Create the box content
+	 */
+	/*public function create_box_awards() {
+		// Use nonce for verification
+  		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 
   		// get the meta
   		$metas = $this->projects->get_project_meta('awards');
@@ -273,12 +377,12 @@ class Projects_Writepanel {
 			<img src="<?php echo get_admin_url(); ?>images/wpspin_light.gif" id="projects-award-loader" />
 		</div>
 		<?php
-	}
+	}*/
 	
 	/**
 	 * Create an award group item
 	 */
-	public function create_award_group_list_item($index, $meta = null) {	
+	/*public function create_award_group_list_item($index, $meta = null) {	
 		// create the title
 		$title_placeholder = __('Untitled', 'projects');
 		$taxonomy_name = $this->projects->get_internal_name('award_name');
@@ -318,12 +422,12 @@ class Projects_Writepanel {
 			</div>
 		</div>
 		<?php
-	}
+	}*/
 	
 	/**
 	 * Load the award item with ajax
 	 */
-	public function add_award_group_ajax() {
+	/*public function add_award_group_ajax() {
 	    // Verifiy post data and nonce
 		if(empty($_POST) || $_POST['index'] === null || empty($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
 			wp_die(__('You do not have sufficient permissions to access this page.'));
@@ -333,12 +437,12 @@ class Projects_Writepanel {
 		$this->create_award_group_list_item($_POST['index']);
 			
 		exit;
-	}
+	}*/
 	
 	/**
 	 * Create the box color
 	 */
-	public function create_box_color() {
+	public function create_box_color($post, $metabox) {
 		?>
 		<p class="form-fieldset"><label><span><?php _e('Background', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo $this->projects->get_project_meta('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
 		<p class="form-fieldset"><label><span><?php _e('Text', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo $this->projects->get_project_meta('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
@@ -348,9 +452,7 @@ class Projects_Writepanel {
 	/**
 	 * Create the box content
 	 */
-	public function create_box_general() {
-		global $post;
-
+	public function create_box_general($post, $metabox) {
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		
@@ -410,11 +512,9 @@ class Projects_Writepanel {
 	/**
 	 * Create the box content
 	 */
-	public function create_box_gallery_media() {
-		global $post;
-		
+	public function create_box_gallery_media($post, $metabox) {		
 		// Use nonce for verification
-  		wp_nonce_field(Projects::$plugin_basename, 'projects_media_nonce');
+  		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
   		
   		?>
 		<ul class="projects-media-list hide-if-no-js" id="projects-gallery-media-list">
@@ -427,11 +527,9 @@ class Projects_Writepanel {
 	/**
 	 * Create the box content
 	 */
-	public function create_box_featured_media() {
-		global $post;
-				
+	public function create_box_featured_media($post, $metabox) {				
 		// Use nonce for verification
-  		wp_nonce_field(Projects::$plugin_basename, 'projects_media_nonce');
+  		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
   		
   		?>
 		<ul class="projects-media-list hide-if-no-js" id="projects-featured-media-list">
@@ -702,6 +800,24 @@ class Projects_Writepanel {
 				$_POST['projects']['lng'] = null;
 			}
 			
+			// save the term groups
+			/*if(!empty($_POST['projects']['taxonomy_group'])) {
+								
+				foreach($_POST['projects']['taxonomy_group'] as $taxonomy_group) {
+					foreach($taxonomy_group as $term_group_id => $terms) {
+						
+						// terms are a key value pair with 'taxonomy' => 'term_id'
+						$this->taxonomy_group->add_object_term_group($post_id, $term_group_id, $terms);
+					}
+				}
+				
+				//die(print_r($terms));
+				
+				// unset the term groups to not save them ast meta
+				$_POST['projects']['taxonomy_group'] = null;
+			}
+			*/
+			/*
 			// set the terms for the awards
 			$taxonomies = $this->award->get_added_taxonomies(null, 'names');
 			if(empty($_POST['projects']['awards'])) {
@@ -744,6 +860,7 @@ class Projects_Writepanel {
 					wp_set_object_terms($post_id, $term_id, $taxonomy, false);
 				}
 			}
+			*/
 			
 			// set the terms for the stati
 			if(!empty($_POST['projects']['status'])) {

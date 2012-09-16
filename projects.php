@@ -42,6 +42,8 @@ class Projects {
 	public $installation;
 	public $type;
 	public $taxonomy;
+	public $award;
+	public $taxonomy_group;
 	public $writepanel;
 	public $settings;
 	
@@ -72,6 +74,8 @@ class Projects {
 		$this->taxonomy->load();
 		$this->award = new Projects_Award();
 		$this->award->load();
+		$this->taxonomy_group = new Projects_Taxonomy_Group();
+		$this->taxonomy_group->load();
 		$this->type = new Projects_Type();
 		$this->type->load();
 		$this->writepanel = new Projects_Writepanel();
@@ -94,6 +98,7 @@ class Projects {
 		require_once('library/classes/class-projects-type.php');	
 		require_once('library/classes/class-projects-taxonomy.php');	
 		require_once('library/classes/class-projects-award.php');	
+		require_once('library/classes/class-projects-taxonomy-group.php');	
 		require_once('library/classes/class-projects-walkers.php');
 		require_once('library/classes/class-projects-writepanel.php');	
 		require_once('library/classes/class-projects-settings.php');	
