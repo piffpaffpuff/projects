@@ -11,15 +11,11 @@ if (!class_exists('Projects_Taxonomy')) {
 class Projects_Taxonomy {
 
 	public $slug;	
-	public $projects;
-	public $installation;
 	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {	
-		$this->projects = new Projects();
-		$this->installation = new Projects_Installation();
 	}
 	
 	/**
@@ -67,8 +63,9 @@ class Projects_Taxonomy {
 		$this->add_taxonomy(__('Tags', 'projects'), __('Tag', 'projects'), 'tag', array('hierarchical' => false));
 		
 		// Create a hidden taxonomy for the project stati
-		$taxonomy = $this->projects->get_internal_name('status');
-		$this->add_taxonomy(__('Stati', 'projects'), __('Status', 'projects'), 'status', array('hierarchical' => false, 'show_ui' => false));
+		$projects = new Projects();
+		$taxonomy = $projects->get_internal_name('status');
+		$this->add_taxonomy(__('Stati', 'projects'), __('Status', 'projects'), 'status', array('hierarchical' => false, 'show_ui' => false, 'show_in_nav_menus' => false));
 		$this->add_default_term($taxonomy, __('Completed', 'projects'), 'completed');
 		$this->add_default_term($taxonomy, __('In Progress', 'projects'), 'inprogress');
 		$this->add_default_term($taxonomy, __('Planned', 'projects'), 'planned');
@@ -78,7 +75,9 @@ class Projects_Taxonomy {
 	 * Create a custom taxonomy
 	 */	
 	public function add_taxonomy($plural_label, $singular_label, $key, $args = null) {	
-		$taxonomy_name = $this->projects->get_internal_name($key);
+		$projects = new Projects();
+		$projects_installation = new Projects_Installation();
+		$taxonomy_name = $projects->get_internal_name($key);
 	
 		$labels = array(
 		    'name' => $plural_label,
@@ -99,7 +98,7 @@ class Projects_Taxonomy {
 		
 		$default_args = array(
 			'labels' => $labels,
-	    	'rewrite' => array('slug' => $this->installation->slug . '/' . sprintf(__('project-%s', 'projects'), $key), 'with_front' => true),
+	    	'rewrite' => array('slug' => $projects_installation->slug . '/' . sprintf(__('project-%s', 'projects'), $key), 'with_front' => true),
 	    	'hierarchical' => true,
 			'show_ui' => true,
 			'post_type' => Projects::$post_type
@@ -118,8 +117,9 @@ class Projects_Taxonomy {
 	public function remove_taxonomy($key) {
 		global $wp_taxonomies;
 		
+		$projects = new Projects();
 		$args = array(
-			'name' => $this->projects->get_internal_name($key)
+			'name' => $projects->get_internal_name($key)
 		);
 		
 		$taxonomies = $this->get_added_taxonomies($args, 'names');

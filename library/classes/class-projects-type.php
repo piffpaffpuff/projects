@@ -5,20 +5,11 @@
  */
 if (!class_exists('Projects_Type')) {
 class Projects_Type {
-	
-	public $projects;
-	public $taxonomy;
-	public $writepanel;
-	public $installation;
-	
+		
 	/**
 	 * Constructor
 	 */
 	public function __construct() {	
-		$this->projects = new Projects();
-		$this->taxonomy = new Projects_Taxonomy();
-		$this->writepanel = new Projects_Writepanel();
-		$this->installation = new Projects_Installation();
 	}
 	
 	/**
@@ -81,7 +72,9 @@ class Projects_Type {
 	/**
 	 * Create custom post type
 	 */
-	public function add_type($plural_label, $singular_label, $key, $args = null) {		
+	public function add_type($plural_label, $singular_label, $key, $args = null) {
+		$projects_installation = new Projects_Installation();
+		
 		$labels = array(
 			'name' => $plural_label,
 			'singular_name' => $singular_label,
@@ -103,7 +96,7 @@ class Projects_Type {
 	    	'public' => true,
 			'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'post-formats'),
 			'capability_type' => 'post',
-			'rewrite' => array('slug' => $this->installation->slug),
+			'rewrite' => array('slug' => $projects_installation->slug),
 			'menu_position' => 4,
 			'has_archive' => true
 		); 
@@ -125,7 +118,9 @@ class Projects_Type {
 		$args = array(
 			'hide_empty' => false
 		);
-		$taxonomy = $this->projects->get_internal_name('status');
+		
+		$projects = new Projects();
+		$taxonomy = $projects->get_internal_name('status');
 		$terms = get_terms($taxonomy, $args);
 		
 		// set the views
@@ -153,7 +148,8 @@ class Projects_Type {
 		$columns['title'] = __('Title', 'projects');
 		
 		// registered taxonomies
-		$taxonomies = $this->taxonomy->get_added_taxonomies();
+		$projects_taxonomy = new Projects_Taxonomy();
+		$taxonomies = $projects_taxonomy->get_added_taxonomies();
 
 		foreach($taxonomies as $taxonomy) {
 			$columns[$taxonomy->query_var] = __($taxonomy->labels->name, 'projects');
@@ -173,7 +169,8 @@ class Projects_Type {
 		$columns['year'] = 'year';
 		
 		// registered taxonomies
-		$taxonomies = $this->taxonomy->get_added_taxonomies(null, 'names');
+		$projects_taxonomy = new Projects_Taxonomy();
+		$taxonomies = $projects_taxonomy->get_added_taxonomies(null, 'names');
 		
 		foreach($taxonomies as $taxonomy) {
 			$columns[$taxonomy] = $taxonomy;
@@ -188,8 +185,9 @@ class Projects_Type {
 	public function default_column_orderby($args) {
 		if(isset($args['post_type']) && $args['post_type'] == Projects::$post_type) {
 			if(!isset($args['orderby']) || (isset($args['orderby']) && $args['orderby'] == 'year')) {
+				$projects = new Projects();
 				$args['orderby'] = 'meta_value_num';
-				$args['meta_key'] = $this->projects->get_internal_name('date', true);
+				$args['meta_key'] = $projects->get_internal_name('date', true);
 			}
 		}
 		return $args;
@@ -199,9 +197,12 @@ class Projects_Type {
 	 * Create column content
 	 */
 	public function create_column_content($column, $post_id) {		
-		if(isset($_GET['post_type']) && $_GET['post_type'] == Projects::$post_type) { 			
+		if(isset($_GET['post_type']) && $_GET['post_type'] == Projects::$post_type) { 	
+			$projects = new Projects();
+			$projects_taxonomy = new Projects_Taxonomy();
+			
 			// registered taxonomies
-			$taxonomies = $this->taxonomy->get_added_taxonomies(null, 'names');
+			$taxonomies = $projects_taxonomy->get_added_taxonomies(null, 'names');
 			
 			// default column content
 			switch ($column) {
@@ -209,9 +210,10 @@ class Projects_Type {
 					$thumbnail_id = null;
 					
 					// load the first attachment that is an image
-					$attachments = $this->writepanel->get_project_featured_media();					
+					$projects_writepanel = new Projects_Writepanel();
+					$attachments = $projects_writepanel->get_project_featured_media();					
 					foreach($attachments as $attachment) {
-						if($this->writepanel->is_web_image($attachment->post_mime_type)) {
+						if($projects_writepanel->is_web_image($attachment->post_mime_type)) {
 							$thumbnail_id = $attachment->ID;
 							break;
 						}
@@ -225,7 +227,7 @@ class Projects_Type {
 					break;
 					
 				case 'year':
-					echo date_i18n('M', $this->projects->get_project_meta('date', $post_id)) . ', ' . $this->projects->get_project_meta('year', $post_id);
+					echo date_i18n('M', $projects->get_project_meta('date', $post_id)) . ', ' . $projects->get_project_meta('year', $post_id);
 					break;
 			}
 			

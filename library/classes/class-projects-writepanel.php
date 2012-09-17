@@ -8,7 +8,6 @@ class Projects_Writepanel {
 	
 	public $type_featured_media;
 	public $type_media;
-	public $projects;
 	
 	/**
 	 * Constructor
@@ -16,9 +15,6 @@ class Projects_Writepanel {
 	public function __construct() {
 		$this->type_featured_media = 'featured';
 		$this->type_media = 'gallery';
-		$this->projects = new Projects();
-		$this->award = new Projects_Award();
-		$this->taxonomy_group = new Projects_Taxonomy_Group();
 	}
 
 	/**
@@ -41,8 +37,8 @@ class Projects_Writepanel {
 		add_filter('media_upload_tabs', array($this, 'remove_media_tabs'));
 		add_filter('media_upload_media_url', array($this, 'add_tab_media_url'));
 		add_action('wp_ajax_load_media_list', array($this, 'load_media_list_ajax'));
-		add_action('wp_ajax_add_term_group', array($this, 'manage_term_group_ajax'));
-		add_action('wp_ajax_delete_term_group', array($this, 'manage_term_group_ajax'));
+		add_action('wp_ajax_add_taxonomy_group_preset', array($this, 'manage_taxonomy_group_preset_ajax'));
+		add_action('wp_ajax_delete_taxonomy_group_preset', array($this, 'manage_taxonomy_group_preset_ajax'));
 		add_filter('upload_mimes', array($this, 'add_mime_types'));
 
 		add_action('save_post', array($this, 'save_box_data'));
@@ -110,7 +106,8 @@ class Projects_Writepanel {
 		$form_fields['image-size']['input'] = 'hidden';
 		
 		// add a thumbnail check field
-		$meta = $this->projects->get_project_meta('featured_media', $post->ID);		
+		$projects = new Projects();
+		$meta = $projects->get_project_meta('featured_media', $post->ID);		
 		$form_fields['projects_featured_media']['label'] = __('Featured Media', 'projects');
 		$form_fields['projects_featured_media']['input'] = 'html';
 		$form_fields['projects_featured_media']['html'] = '<label><input type="checkbox" name="attachments[' . $post->ID . '][projects_featured_media]" value="1" ' . checked($meta, 1, false) . ' /> ' . __('Use as featured media', 'projects') . '</label>';
@@ -118,7 +115,7 @@ class Projects_Writepanel {
 		// add a custom image size field
 		if(strpos($post->post_mime_type, 'image') !== false) {
 			$html = '';
-			$meta = $this->projects->get_project_meta('default_image_size', $post->ID);
+			$meta = $projects->get_project_meta('default_image_size', $post->ID);
 			$image_sizes = get_intermediate_image_sizes();
 			$image_sizes[] = 'full';
 			$form_name = 'attachments[' . $post->ID . '][projects_default_image_size]';
@@ -198,12 +195,14 @@ class Projects_Writepanel {
 		add_meta_box('projects-color-box', __('Color', 'projects'), array($this, 'create_box_color'), Projects::$post_type, 'side', 'default');
 		
 		// create the meta boxes for the taxonomy groups
-		$taxonomy_groups = $this->taxonomy_group->get_added_taxonomy_groups();
+		$projects_taxonomy_group = new Projects_Taxonomy_Group();
+		$taxonomy_groups = $projects_taxonomy_group->get_added_taxonomy_groups();
 		foreach($taxonomy_groups as $taxonomy_group) {
-			$args = array(
-				'taxonomy_group' => $taxonomy_group
-			);
-			add_meta_box('projects-' . $taxonomy_group->group . '-box', $taxonomy_group->plural_label, array($this, 'create_box_taxonomy_group'), Projects::$post_type, 'side', 'default', $args);
+			$taxonomy_group_object = get_post_type_object($taxonomy_group);
+			
+			// send the post type to the box content function and add the box
+			$args = array('taxonomy_group' => $taxonomy_group);
+			add_meta_box('projects-taxonomy-group-box-' . $taxonomy_group_object->name, $taxonomy_group_object->labels->name, array($this, 'create_box_taxonomy_group'), Projects::$post_type, 'side', 'default', $args);
 		}
 	}
 	
@@ -216,13 +215,15 @@ class Projects_Writepanel {
 	/**
 	 * Create the box content
 	 */
-	public function create_box_location($post, $metabox) {		
+	public function create_box_location($post, $metabox) {
+		$projects = new Projects();
+		
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		?>
 		<?php 
-			$lat = $this->projects->get_project_meta('lat');
-			$lng = $this->projects->get_project_meta('lng');
+			$lat = $projects->get_project_meta('lat');
+			$lng = $projects->get_project_meta('lng');
 			$zoom = 15;
 		?>
 		<?php if(!empty($lat) && !empty($lng)) : ?>
@@ -233,12 +234,12 @@ class Projects_Writepanel {
 		</div>
 		<?php endif; ?>
 		<div class="location">
-			<p class="form-fieldset"><label><span><?php _e('First Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo $this->projects->get_project_meta('first_name'); ?>" title="<?php _e('First Name', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Last Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo $this->projects->get_project_meta('last_name'); ?>" title="<?php _e('Last Name', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Company Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[company_name]" value="<?php echo $this->projects->get_project_meta('last_name'); ?>" title="<?php _e('Company Name', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Address', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo $this->projects->get_project_meta('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Postal Code', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo $this->projects->get_project_meta('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('City', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo $this->projects->get_project_meta('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('First Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo $projects->get_project_meta('first_name'); ?>" title="<?php _e('First Name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Last Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo $projects->get_project_meta('last_name'); ?>" title="<?php _e('Last Name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Company Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[company_name]" value="<?php echo $projects->get_project_meta('last_name'); ?>" title="<?php _e('Company Name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Address', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo $projects->get_project_meta('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Postal Code', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo $projects->get_project_meta('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('City', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo $projects->get_project_meta('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('Country', 'projects'); ?></span></label><select name="projects[country]">
 				<?php 
 				$countries = new Projects_Countries();
@@ -258,7 +259,9 @@ class Projects_Writepanel {
 	 * Create the box content
 	 */
 	public function create_box_taxonomy_group($post, $metabox) {
+		$projects_taxonomy_group = new Projects_Taxonomy_Group();
 		$taxonomy_group = $metabox['args']['taxonomy_group'];
+		$taxonomy_group_object = get_post_type_object($taxonomy_group);
 		
 		// Use nonce for verification
 		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
@@ -266,90 +269,111 @@ class Projects_Writepanel {
 		// output
 		$row_count = 0;
 		?>
-		<input type="hidden" name="projects_taxonomy_group" value="<?php echo $taxonomy_group->group; ?>">		
-		<div class="term-groups-list">
-			<?php //list ?>
+		<input type="hidden" name="projects_taxonomy_group" value="<?php echo $taxonomy_group_object->name; ?>">		
+		<div class="taxonomy-group-list">
+			<?php $presets = $projects_taxonomy_group->get_added_presets($post->ID, $taxonomy_group_object->name); ?>
+			<?php foreach($presets as $preset) : ?>
+				<?php $this->create_taxonomy_group_preset_list_item($preset->ID, $taxonomy_group_object->name); ?>
+			<?php endforeach; ?>
 		</div>
-		<div class="term-groups-footer">
-			<a href="#" class="add-term-group"><?php printf(__('Add %s', 'projects'), $taxonomy_group->singular_label); ?></a>
-			<img src="<?php echo get_admin_url(); ?>images/wpspin_light.gif" class="term-group-loader" />
+		<div class="taxonomy-group-footer">
+			<a href="#" class="add-preset"><?php printf(__('Add %s', 'projects'), $taxonomy_group_object->labels->singular_name); ?></a>
+			<img src="<?php echo get_admin_url(); ?>images/wpspin_light.gif" class="taxonomy-group-loader" />
 		</div>
 		<?php
 	}
 
 	/**
-	 * Create a term group item
+	 * Create a taxonomy group preset
 	 */
-	public function create_term_group_list_item($taxonomy_group, $term_group_id) {	
+	public function create_taxonomy_group_preset_list_item($preset_id, $taxonomy_group) {	
+		$projects_taxonomy_group = new Projects_Taxonomy_Group();
+
+		// retreive all taxonomies associated with the taxonomy group
+		$args = array(
+			'object_type' => array(Projects::$post_type, $taxonomy_group)
+		);
+		$taxonomies = $projects_taxonomy_group->get_added_taxonomies($args, 'names');		
+		
+		// get the presetted terms for a preset
+		$args = array(
+			'fields' => 'ids'
+		);
+		$preset_terms = wp_get_object_terms($preset_id, $taxonomies, $args);
+		
 		// create the title
 		$title_placeholder = __('Untitled', 'projects');
-		/*$taxonomy_name = $this->projects->get_internal_name('award_name');
-		if(isset($meta) && isset($meta[$taxonomy_name])) {
-			$title_term = get_term($meta[$taxonomy_name], $taxonomy_name); 
-		} else {
-			$title_term = null;
-		}*/
-		
-		// set the title if the id returned a name
-		/*if(isset($title_term) && !is_wp_error($title_term)) {
-			$title = $title_term->name;
+		if(!empty($taxonomies)) {
+			reset($taxonomies);
+			$taxonomy = key($taxonomies);
+			$args = array(
+				'fields' => 'names'
+			);
+			$title_term = wp_get_object_terms($preset_id, $taxonomy, $args);
+			
+			// set the title if it was found
+			if(!empty($title_term)) {
+				$title = $title_term[0];
+			} else {
+				$title = $title_placeholder;
+			}	
 		} else {
 			$title = $title_placeholder;
-		}*/
-		$title = $title_placeholder;
-		
+		}
+			
 		?>
-		<div class="term-group" id="projects-term-group-<?php echo $taxonomy_group; ?>-<?php echo $term_group_id; ?>">
-			<input type="hidden" name="projects_term_group_id" value="<?php echo $term_group_id; ?>" />
-			<div class="term-group-options"><h4 title="<?php echo $title_placeholder; ?>"><?php echo $title; ?></h4><a href="#" class="delete-term-group"><?php _e('Delete', 'projects'); ?></a></div>
-			<div class="term-group-fields">
-			<?php $taxonomies_in_group = $this->taxonomy_group->get_added_taxonomies('names'); ?>
-			<?php foreach($taxonomies_in_group as $taxonomy_in_group) : ?>
-				<?php 
-				$taxonomy = get_taxonomy($taxonomy_in_group);
-				$args = array(
-					'hide_empty' => false
-				);
-				$terms = get_terms($taxonomy->name, $args);
-				$selected_term_id = (isset($meta) && isset($meta[$taxonomy->name])) ? $meta[$taxonomy->name] : null;
-				?>
-				<select name="projects[taxonomy_group][<?php echo $taxonomy_group; ?>][<?php echo $term_group_id; ?>][<?php echo $taxonomy->name; ?>]" class="taxonomy-group-select">
-					<option value=""><?php printf(__('No %s', 'projects'), $taxonomy->labels->singular_name); ?></option>
-					<?php foreach($terms as $term) : ?>
-						<option value="<?php echo $term->term_id; ?>" <?php selected($selected_term_id, $term->term_id, true); ?>><?php echo $term->name; ?></option>
-					<?php endforeach; ?>
-				</select>
-			<?php endforeach; ?>
+		<div class="preset" id="projects-taxonomy-group-preset-<?php echo $taxonomy_group; ?>-<?php echo $preset_id; ?>">
+			<input type="hidden" name="projects_preset_id" value="<?php echo $preset_id; ?>" />
+			<div class="preset-options"><h4 title="<?php echo $title_placeholder; ?>"><?php echo $title; ?></h4><a href="#" class="delete-preset"><?php _e('Delete', 'projects'); ?></a></div>
+			<div class="preset-fields">			
+				<?php foreach($taxonomies as $taxonomy) : ?>
+					<?php 
+					$taxonomy_object = get_taxonomy($taxonomy);
+					
+					// get the terms for a taxonomy
+					$args = array(
+						'hide_empty' => false
+					);
+					$terms = get_terms($taxonomy_object->name, $args);
+					?>
+					<select name="projects[taxonomy_group][<?php echo $taxonomy_group; ?>][<?php echo $preset_id; ?>][<?php echo $taxonomy_object->name; ?>]" class="preset-select">
+						<option value=""><?php printf(__('No %s', 'projects'), $taxonomy_object->labels->singular_name); ?></option>
+						<?php foreach($terms as $term) : ?>
+							<?php $preset_term_id = (in_array($term->term_id, $preset_terms)) ? $term->term_id : null; ?>
+							<option value="<?php echo $term->term_id; ?>" <?php selected($preset_term_id, $term->term_id, true); ?>><?php echo $term->name; ?></option>
+						<?php endforeach; ?>
+					</select>
+				<?php endforeach; ?>
 			</div>
 		</div>
 		<?php
-		
 	}
 	
 	/**
 	 * Manage the term group item with ajax
 	 */
-	public function manage_term_group_ajax() {
+	public function manage_taxonomy_group_preset_ajax() {
 	    // Verify post data and nonce
-		if(empty($_POST) || empty($_POST['nonce']) || empty($_POST['taxonomy_group']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
+		if(empty($_POST) || empty($_POST['nonce']) || empty($_POST['post_id']) || empty($_POST['taxonomy_group']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
 			wp_die(__('You do not have sufficient permissions to access this page.'));
 		}
 		
 		// Do the corresponding action
-		if($_POST['action'] == 'add_term_group') {
-			// add a new term group
-			$term_group_id = $this->taxonomy_group->add_term_group($_POST['taxonomy_group']);
-			
-			// create a group item
-			$this->create_term_group_list_item($_POST['taxonomy_group'], $term_group_id);
-		} elseif($_POST['action'] == 'delete_term_group') {
-			// delete a term group
-			$this->taxonomy_group->delete_term_group($_POST['term_group_id'], $_POST['taxonomy_group']);
+		$projects_taxonomy_group = new Projects_Taxonomy_Group();
+		if($_POST['action'] == 'add_taxonomy_group_preset') {
+			// add a new preset
+			$preset_id = $projects_taxonomy_group->add_preset($_POST['taxonomy_group'], $_POST['post_id']);
+
+			// create a preset list item
+			$this->create_taxonomy_group_preset_list_item($preset_id, $_POST['taxonomy_group']);
+		} elseif($_POST['action'] == 'delete_taxonomy_group_preset') {
+			// delete a preset
+			$projects_taxonomy_group->delete_preset($_POST['preset_id']);
 		}			
 			
 		exit;
 	}
-		
+
 	/**
 	 * Create the box content
 	 */
@@ -358,7 +382,7 @@ class Projects_Writepanel {
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 
   		// get the meta
-  		$metas = $this->projects->get_project_meta('awards');
+  		$metas = $projects->get_project_meta('awards');
   		$index = 0;
   		?>
 		<div class="award-list" id="projects-award-list">
@@ -385,7 +409,7 @@ class Projects_Writepanel {
 	/*public function create_award_group_list_item($index, $meta = null) {	
 		// create the title
 		$title_placeholder = __('Untitled', 'projects');
-		$taxonomy_name = $this->projects->get_internal_name('award_name');
+		$taxonomy_name = $projects->get_internal_name('award_name');
 		if(isset($meta) && isset($meta[$taxonomy_name])) {
 			$title_term = get_term($meta[$taxonomy_name], $taxonomy_name); 
 		} else {
@@ -443,9 +467,11 @@ class Projects_Writepanel {
 	 * Create the box color
 	 */
 	public function create_box_color($post, $metabox) {
+		$projects = new Projects();
+		
 		?>
-		<p class="form-fieldset"><label><span><?php _e('Background', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo $this->projects->get_project_meta('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
-		<p class="form-fieldset"><label><span><?php _e('Text', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo $this->projects->get_project_meta('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
+		<p class="form-fieldset"><label><span><?php _e('Background', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo $projects->get_project_meta('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
+		<p class="form-fieldset"><label><span><?php _e('Text', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo $projects->get_project_meta('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
 		<?php
 	}
 	
@@ -453,16 +479,17 @@ class Projects_Writepanel {
 	 * Create the box content
 	 */
 	public function create_box_general($post, $metabox) {
+		$projects = new Projects();
+		
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
-		
 		?>
 		<p class="form-fieldset"><label><span><?php _e('Date', 'projects'); ?></span></label>
 			<span class="input-group">
 				<select class="select-date" name="projects[month]">
 					<?php 
 					$count = 1;
-					$month_meta = $this->projects->get_project_meta('month');
+					$month_meta = $projects->get_project_meta('month');
 					if(empty($month_meta)) {
 						$month_meta = date_i18n('n');
 					}
@@ -476,7 +503,7 @@ class Projects_Writepanel {
 					<?php 
 					$count = 0;
 					$year = date_i18n('Y');
-					$year_meta = $this->projects->get_project_meta('year');
+					$year_meta = $projects->get_project_meta('year');
 					?>
 					<?php while($count <= 100) : ?>
 					<option value="<?php echo $year - $count; ?>" <?php selected($year - $count, $year_meta); ?>><?php echo $year - $count; ?></option>						
@@ -489,7 +516,7 @@ class Projects_Writepanel {
 		$args = array(
 			'hide_empty' => false
 		);
-		$taxonomy = $this->projects->get_internal_name('status');
+		$taxonomy = $projects->get_internal_name('status');
 		$terms = get_terms($taxonomy, $args);
 		?>
 		<p class="form-fieldset"><label><span><?php _e('Status:', 'projects'); ?></span></label><select name="projects[status]">
@@ -503,8 +530,8 @@ class Projects_Writepanel {
 				<option value="<?php echo $term->term_id; ?>" <?php selected(true, $in_term); ?>><?php echo $term->name; ?></option>
 			<?php endforeach; ?>
 		</select></p>
-		<?php $website = $this->projects->get_project_meta('website'); ?>
-		<p class="form-fieldset"><label><span><?php _e('Reference No.', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo $this->projects->get_project_meta('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
+		<?php $website = $projects->get_project_meta('website'); ?>
+		<p class="form-fieldset"><label><span><?php _e('Reference No.', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo $projects->get_project_meta('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
 		<p class="form-fieldset"><label><span><?php _e('Website', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo $website; ?>" title="<?php _e('Address', 'projects'); ?>"><?php if(!empty($website)) : ?><a href="<?php echo $website; ?>" target="_blank" class="external"></a><?php endif; ?></p>
 		<?php
 	}
@@ -616,6 +643,8 @@ class Projects_Writepanel {
 	 * Get the media
 	 */
 	public function get_project_media($post_id = null, $mime = null, $type = null) {
+		$projects = new Projects();
+		
 		// default id
 		if(empty($post_id)) {
 			global $post;
@@ -650,8 +679,8 @@ class Projects_Writepanel {
 			
 			// add the default size
 			if($this->is_web_image($attachment->post_mime_type)) {		
-				$size = $this->projects->get_project_meta('default_image_size', $attachment->ID);
-				$meta = $this->projects->get_project_meta('featured_media', $attachment->ID);		
+				$size = $projects->get_project_meta('default_image_size', $attachment->ID);
+				$meta = $projects->get_project_meta('featured_media', $attachment->ID);		
 			}
 			
 			// set the default size property
@@ -697,8 +726,9 @@ class Projects_Writepanel {
 	/**
 	 * Get a project taxonomy
 	 */	
-	public function get_project_taxonomy($post_id, $key, $hierarchical = true, $args = null) {		
-		$taxonomy = $this->projects->get_internal_name($key);
+	public function get_project_taxonomy($post_id, $key, $hierarchical = true, $args = null) {	
+		$projects = new Projects();	
+		$taxonomy = $projects->get_internal_name($key);
 		$terms = wp_get_object_terms($post_id, $taxonomy, $args); 
 		
 		if(!is_wp_error($terms) && sizeof($terms) > 0) {
@@ -769,6 +799,8 @@ class Projects_Writepanel {
 		split all array keys and save them as unique meta to 
 		make them queryable by wordpress. */
 		if(isset($_POST['projects'])) {
+			$projects = new Projects();
+			
 			// create a date entry to make querying by month or year easy 
 			$_POST['projects']['date'] = mktime(0, 0, 0, $_POST['projects']['month'], 1, $_POST['projects']['year']);
 			
@@ -801,22 +833,27 @@ class Projects_Writepanel {
 			}
 			
 			// save the term groups
-			/*if(!empty($_POST['projects']['taxonomy_group'])) {
-								
-				foreach($_POST['projects']['taxonomy_group'] as $taxonomy_group) {
-					foreach($taxonomy_group as $term_group_id => $terms) {
-						
-						// terms are a key value pair with 'taxonomy' => 'term_id'
-						$this->taxonomy_group->add_object_term_group($post_id, $term_group_id, $terms);
+			if(!empty($_POST['projects']['taxonomy_group'])) {
+				// save the groups
+				$projects_taxonomy_group = new Projects_Taxonomy_Group();
+				foreach($_POST['projects']['taxonomy_group'] as $post_type => $presets) {
+					$order = 0;
+					foreach($presets as $preset_id => $taxonomies) {	
+						// set ordering
+						$projects_taxonomy_group->set_preset_order($preset_id, $post_id, $order);
+						$order++;
+
+						// relate the terms. taxonomies are a key value pair with 'taxonomy' => 'term_id'
+						foreach($taxonomies as $taxonomy => $term_id) {
+							$projects_taxonomy_group->set_preset_terms($preset_id, $post_id, intval($term_id), $taxonomy);
+						}
 					}
 				}
-				
-				//die(print_r($terms));
-				
+								
 				// unset the term groups to not save them ast meta
 				$_POST['projects']['taxonomy_group'] = null;
 			}
-			*/
+
 			/*
 			// set the terms for the awards
 			$taxonomies = $this->award->get_added_taxonomies(null, 'names');
@@ -830,7 +867,7 @@ class Projects_Writepanel {
 			} else {
 				$awards = $_POST['projects']['awards'];
 				$term_ids = array();
-				$taxonomy_name = $this->projects->get_internal_name('award_name');
+				$taxonomy_name = $projects->get_internal_name('award_name');
 				
 				// clean up the awards array
 				foreach($awards as $key => $group) {
@@ -865,7 +902,7 @@ class Projects_Writepanel {
 			// set the terms for the stati
 			if(!empty($_POST['projects']['status'])) {
 				// relate terms
-				$taxonomy = $this->projects->get_internal_name('status');
+				$taxonomy = $projects->get_internal_name('status');
 				wp_set_object_terms($post_id, intval($_POST['projects']['status']), $taxonomy, false);
 			}
 			

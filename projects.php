@@ -42,7 +42,6 @@ class Projects {
 	public $installation;
 	public $type;
 	public $taxonomy;
-	public $award;
 	public $taxonomy_group;
 	public $writepanel;
 	public $settings;
@@ -59,34 +58,8 @@ class Projects {
 		self::$plugin_directory_path = plugin_dir_path(self::$plugin_file_path);
 		self::$plugin_basename = plugin_basename(self::$plugin_file_path);
 		
+		// order projects by key
 		$this->order_sort_key = $this->get_internal_name('date', true);
-	}
-	
-	/**
-	 * Load the code
-	 */
-	public function load() {
-		$this->includes();
-		
-		$this->installation = new Projects_Installation();
-		$this->installation->load();
-		$this->taxonomy = new Projects_Taxonomy();
-		$this->taxonomy->load();
-		$this->award = new Projects_Award();
-		$this->award->load();
-		$this->taxonomy_group = new Projects_Taxonomy_Group();
-		$this->taxonomy_group->load();
-		$this->type = new Projects_Type();
-		$this->type->load();
-		$this->writepanel = new Projects_Writepanel();
-		$this->writepanel->load();
-		$this->settings = new Projects_Settings();
-		$this->settings->load();
-		
-		// load hooks
-		add_action('plugins_loaded', array($this, 'load_translation'));
-		add_action('init', array($this, 'hooks_init'));
-		add_action('admin_init', array($this, 'hooks_admin'));
 	}
 	
 	/**
@@ -97,13 +70,40 @@ class Projects {
 		require_once('library/classes/class-projects-installation.php');	
 		require_once('library/classes/class-projects-type.php');	
 		require_once('library/classes/class-projects-taxonomy.php');	
-		require_once('library/classes/class-projects-award.php');	
 		require_once('library/classes/class-projects-taxonomy-group.php');	
 		require_once('library/classes/class-projects-walkers.php');
 		require_once('library/classes/class-projects-writepanel.php');	
-		require_once('library/classes/class-projects-settings.php');	
+		require_once('library/classes/class-projects-settings.php');
 	}
 	
+	/**
+	 * Load the code
+	 */
+	public function load() {
+		// include the classes
+		$this->includes();
+		
+		// construct the instances 
+		$this->installation = new Projects_Installation();
+		$this->taxonomy = new Projects_Taxonomy();
+		$this->taxonomy_group = new Projects_Taxonomy_Group();
+		$this->type = new Projects_Type();
+		$this->writepanel = new Projects_Writepanel();
+		$this->settings = new Projects_Settings();
+	
+		// load all hooks of the instances		
+		$this->installation->load();
+		$this->taxonomy->load();
+		$this->taxonomy_group->load();
+		$this->type->load();
+		$this->writepanel->load();
+		$this->settings->load();
+		
+		// load hooks
+		add_action('plugins_loaded', array($this, 'load_translation'));
+		add_action('init', array($this, 'hooks_init'));
+		add_action('admin_init', array($this, 'hooks_admin'));
+	}
 
 	/**
 	 * Load the translations
@@ -545,30 +545,30 @@ function project_website($name = null, $target = '_blank') {
 		<?
 	}
 }
-
-/**
- * Get all awards
- */
-function get_projects_awards($group = true, $sort = array('project_award_year', 'project_award_name', 'project_award_category'), $order = array(-1, 1, 1)) {
-	global $projects;
-	return $projects->award->get_sorted_awards($group, $sort, $order);
-}
-
-/**
- * Get project awards
- */
-function get_project_awards($post_id = null) {
-	global $projects;
-	return $projects->award->get_project_awards($post_id);
-}
-
-/**
- * Get award permalink
- */
-function get_projects_award_permalink($award) {
-	global $projects;
-	return $projects->award->get_award_permalink($award);
-}
+//
+///**
+// * Get all awards
+// */
+//function get_projects_awards($group = true, $sort = array('project_award_year', 'project_award_name', 'project_award_category'), $order = array(-1, 1, 1)) {
+//	global $projects;
+//	return $projects->award->get_sorted_awards($group, $sort, $order);
+//}
+//
+///**
+// * Get project awards
+// */
+//function get_project_awards($post_id = null) {
+//	global $projects;
+//	return $projects->award->get_project_awards($post_id);
+//}
+//
+///**
+// * Get award permalink
+// */
+//function get_projects_award_permalink($award) {
+//	global $projects;
+//	return $projects->award->get_award_permalink($award);
+//}
 
 /**
  * Add taxonomy

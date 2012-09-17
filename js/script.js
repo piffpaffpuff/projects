@@ -43,21 +43,36 @@ jQuery(document).ready(function($) {
 	}
 	
 		
-	// add a term group 
-	$('.add-term-group').on('click', function(event) {
+	// add a preset
+	$('.add-preset').on('click', function(event) {
 		var taxonomy_group = $(this).closest('.inside').find('input[name="projects_taxonomy_group"]').val();
-		add_term_group(taxonomy_group);
+		add_taxonomy_group_preset(taxonomy_group);
+		event.preventDefault();
+	});
+
+	// delete a preset
+	$('.delete-preset').live('click', function(event) {
+		var preset_id = $(this).closest('.preset').find('input[name="projects_preset_id"]').val();
+		var taxonomy_group = $(this).closest('.inside').find('input[name="projects_taxonomy_group"]').val();
+		delete_taxonomy_group_preset(preset_id, taxonomy_group);
 		event.preventDefault();
 	});
 	
-	// delete a term group 
-	$('.delete-term-group').live('click', function(event) {
-		var term_group_id = $(this).closest('.term-group').find('input[name="projects_term_group_id"]').val();
-		var taxonomy_group = $(this).closest('.inside').find('input[name="projects_taxonomy_group"]').val();
-		
-		$('#projects-term-group-' + taxonomy_group + '-' + term_group_id).remove();		
-		delete_term_group(term_group_id, taxonomy_group);
-		event.preventDefault();
+	// sort presets
+	$('.taxonomy-group-list').sortable({
+		axis: 'y'
+	});
+	
+	// set title of presets
+	$('.taxonomy-group-list .preset select').live('change', function() {
+		var h4 = $(this).closest('.preset').find('h4');
+		var value = $('option:selected', this).val();	
+		if(value) {
+			var title = $('option:selected', this).html();
+		} else {
+			var title = h4.attr('title');
+		}
+		h4.html(title);
 	});
 /*
 	// sort award groups
@@ -108,41 +123,43 @@ jQuery(document).ready(function($) {
 	/**
 	 * add new term list group item
 	 */
-	function add_term_group(taxonomy_group) {
+	function add_taxonomy_group_preset(taxonomy_group) {
+		var box = $('#projects-taxonomy-group-box-' + taxonomy_group);
 		var data = {
-			action: 'add_term_group',
+			action: 'add_taxonomy_group_preset',
+			post_id: $('#post_ID').val(),
 			taxonomy_group: taxonomy_group,
 			nonce: $('#projects_nonce').val()
 		};
 		
 		// show the loader
-		$('.term-group-loader').css('visibility', 'visible');
+		$('.taxonomy-group-loader', box).css('visibility', 'visible');
 				
 		// send the request
 		$.post(ajaxurl, data, function(response) {
-			$('.term-group-loader').css('visibility', 'hidden');
-			$('.term-groups-list').append(response);
+			$('.taxonomy-group-loader', box).css('visibility', 'hidden');
+			$('.taxonomy-group-list', box).append(response);
 		});
 	}
 	
 	/**
 	 * delete new term list group item
 	 */
-	function delete_term_group(term_group_id, taxonomy_group) {
+	function delete_taxonomy_group_preset(preset_id, taxonomy_group) {
+		var box = $('#projects-taxonomy-group-box-' + taxonomy_group);
 		var data = {
-			action: 'delete_term_group',
+			action: 'delete_taxonomy_group_preset',
+			post_id: $('#post_ID').val(),
 			taxonomy_group: taxonomy_group,
-			term_group_id: term_group_id,
+			preset_id: preset_id,
 			nonce: $('#projects_nonce').val()
 		};
 		
-		// show the loader
-		//$('.term-group-loader').css('visibility', 'visible');
-				
+		// remove the item
+		$('#projects-taxonomy-group-preset-' + taxonomy_group + '-' + preset_id, box).remove();		
+	
 		// send the request
 		$.post(ajaxurl, data, function(response) {
-			//$('.term-group-loader').css('visibility', 'hidden');
-			//$('#projects-term-group-' + taxonomy_group + '-' + term_group_id).remove();
 		});
 	}
 	
