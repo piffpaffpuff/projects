@@ -19,16 +19,16 @@ class Projects_Award extends Projects_Taxonomy {
 	 * Load the class hooks
 	 */
 	public function load() {		
-		//add_action('init', array($this, 'hook_init'));
-		//add_action('admin_init', array($this, 'hook_admin'));
+		add_action('init', array($this, 'hook_init'));
+		add_action('admin_init', array($this, 'hook_admin'));
 	}
 	
 	/**
 	 * Hook into the init hooks
 	 */
 	public function hook_init() {
-		//add_action('admin_menu', array($this, 'add_page'));
-		//$this->register_taxonomies();
+		add_action('admin_menu', array($this, 'add_page'));
+		$this->register_taxonomies();
 	}
 
 	/**
