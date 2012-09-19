@@ -545,6 +545,14 @@ function project_website($name = null, $target = '_blank') {
 		<?
 	}
 }
+
+/**
+ * Get all taxonomy group presets
+ */
+function get_projects_taxonomy_group_presets($key, $join = true, $sort = array('project_award_year', 'project_award_name', 'project_award_category'), $order = array(-1, 1, 1)) {
+	global $projects;
+	$projects->taxonomy_group->get_added_presets_sorted($key, $join, $sort, $order);
+}
 //
 ///**
 // * Get all awards

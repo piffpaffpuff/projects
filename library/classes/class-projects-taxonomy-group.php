@@ -178,8 +178,8 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 
 		// register a post type for the taxonomy group
 		$args = array(
-			'show_ui' => false, 
-			'show_in_nav_menus' => false
+			'show_ui' => true, 
+			'show_in_nav_menus' => true
 		);
 		
 		$projects_type->add_type($plural_label, $singular_label, $post_type, $args);
@@ -193,11 +193,13 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 				continue;	
 			}
 			
-			// register taxonomy but add it to also the projects post type
+			// register taxonomy but add it to the projects post type and the
+			// post type create for the group. this makes it easy to get all 
+			// taxonomies that are part of a taxonomy group.
 			$default_args = array(
 				'hierarchical' => false, 
-				'show_ui' => false, 
-				'show_in_nav_menus' => false,
+				'show_ui' => true, 
+				'show_in_nav_menus' => true,
 				'rewrite' => array('slug' => $projects_installation->slug . '/' . sprintf(__('project-%s', 'projects'), $key . '-' . $group['key']), 'with_front' => true),
 				'post_type' => array(Projects::$post_type, $post_type)
 			);
@@ -238,28 +240,17 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 	}
 	
 	/**
-	 * Add a preset
+	 * Get all taxonomies that were registered in a group
 	 */	
-	public function add_preset($post_type, $post_parent) {
-		$post_type_object = get_post_type_object($post_type);
-		$post = array(
-			'post_parent' => $post_parent,
-			'post_title' => $post_type_object->labels->singular_name . ' for #' . $post_parent,
-			'post_type' => $post_type,
-			'post_status' => 'draft'
+	public function get_added_taxonomies_names($taxonomy_group, $type = 'names') {
+		$projects = new Projects();
+		$post_type = $projects->get_internal_name($taxonomy_group);
+		$args = array(
+			'object_type' => array(Projects::$post_type, $post_type)
 		);
-		$query = wp_insert_post($post);
-		return $query;
+		return $this->get_added_taxonomies($args, $type);
 	}
-	
-	/**
-	 * Delete a preset
-	 */	
-	public function delete_preset($post_id) {
-		$query = wp_delete_post($post_id, true);
-		return $query;
-	}
-	
+
 	/**
 	 * Get presets for a post id
 	 */	
@@ -267,33 +258,187 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 		$args = array(
 			'post_parent' => $post_parent,
 			'post_type' => $post_type,
-			'orderby' => 'menu_order',
+			'meta_key' => '_order',
+			'orderby' => 'meta_value',
 			'order' => 'ASC'
 		);
 		$query = get_children($args);
 		return $query;
 	}
 	
-	
 	/**
-	 * Set a preset order
+	 * Get all presetes sorted
 	 */	
-	public function set_preset_order($post_id, $post_parent, $menu_order = null) {
+	public function get_added_presets_sorted($key, $join = true, $order = array()) {
 		global $wpdb;
-		$query = $wpdb->update($wpdb->posts, array('menu_order' => $menu_order), array('ID' => $post_id, 'post_parent' => $post_parent), array('%d'), array('%d', '%d'));
-		return $query;
+		
+		$projects = new Projects();
+		$post_type = $projects->get_internal_name($key);
+				
+		// build the sql query to get the meta for all presets
+		$taxonomies = $this->get_added_taxonomies_names($post_type);
+		$count = 1;
+		$from = "";
+		$and = "";
+		$orderby = "";
+		foreach($taxonomies as $taxonomy) {
+			// select the meta sql query
+			$from .= ", $wpdb->postmeta posts_meta_$count";
+			
+			// compare the meta sql query
+			$and .= " AND child_posts.ID = posts_meta_$count.post_id AND posts_meta_$count.meta_key = '_$taxonomy'";
+			
+			// check if the current taxonomy is also an ordering field
+			foreach($order as $order_field) {
+				if($order_field['taxonomy'] == $taxonomy) {
+					$comma = "";
+					if(empty($orderby)) {
+						$orderby .= " ORDER BY ";
+					} else {
+						$comma = ", ";
+					}
+					if(isset($order_field['order'])) {
+						$sort = $order_field['order'];
+					} else {
+						$sort = "";
+					}
+					$orderby .= "$comma posts_meta_$count.meta_value $sort";
+					break;
+				}
+			}
+	
+			$count++;
+		}
+		
+		// query the posts
+		$sql = "
+			SELECT child_posts.ID, child_posts.post_parent, child_posts.post_type
+			FROM $wpdb->posts child_posts $from
+			WHERE child_posts.post_type = '$post_type'
+			$and
+			$orderby
+		";
+		
+		$results = $wpdb->get_results($sql);
+		
+		// build the presets with the terms
+		$presets = array();
+		foreach($results as $result) {
+			$preset = array();
+			$terms = wp_get_object_terms($result->post_parent, $taxonomies);
+			foreach($taxonomies as $taxonomy) {
+				//$preset[$taxonomy] = 
+			}
+			echo '<pre>';
+			print_r($terms);
+			echo '</pre>';
+			
+			$presets[] = $preset;
+		}
+	
+		return;
 	}
 	
 	/**
-	 * Relate the terms to the preset-post and the parent-post
+	 * Add a preset
 	 */	
-	public function set_preset_terms($post_id, $post_parent, $terms, $taxonomy) {
-		if(is_array($terms) && empty($terms)) {
-			$terms = null;
-		}
-		wp_set_object_terms($post_id, $terms, $taxonomy, false);
-		wp_set_object_terms($post_parent, $terms, $taxonomy, false);
+	public function add_preset($post_parent, $post_type) {
+		$post_type_object = get_post_type_object($post_type);
+		
+		// insert the post
+		$post = array(
+			'post_parent' => $post_parent,
+			'post_title' => $post_type_object->labels->singular_name . ' for #' . $post_parent,
+			'post_type' => $post_type,
+			'post_status' => 'draft'
+		);
+		$post_id = wp_insert_post($post);
+		
+		// add the meta because wordpress can't meta_query non-existing metas
+		$this->update_preset_metas($post_id, $post_type);
+		return $post_id;
 	}
+	
+	/**
+	 * Update meta data for the post query and set the order
+	 */	
+	public function update_preset($post_id, $post_parent, $post_type, $taxonomy_terms, $order) {
+		$this->update_preset_metas($post_id, $post_type, $taxonomy_terms, $order);
+	}
+	
+	/**
+	 * Delete a preset
+	 */	
+	public function delete_preset($post_id) {
+		$num_rows = wp_delete_post($post_id, true);
+		return $num_rows;
+	}	
+	
+	/**
+	 * Relate the terms to the parent-post
+	 */	
+	public function update_preset_metas($post_id, $post_type, $taxonomy_terms = array(), $order = 0) {
+		// update the order meta in the preset
+		update_post_meta($post_id, '_order', $order);
+		
+		// get all taxonomies associated with the post type
+		$taxonomies = $this->get_added_taxonomies_names($post_type, 'object');
+		
+		// check if a term is set for the taxonomy, otherwise set a default
+		foreach($taxonomies as $taxonomy) {
+			// look if the term is set, otherwise reset the meta 
+			if(is_array($taxonomy_terms) && !empty($taxonomy_terms[$taxonomy->name])) {
+				$term_object = get_term($taxonomy_terms[$taxonomy->name], $taxonomy->name);
+				$term_name = $term_object->name;
+				$term_id = intval($term_object->term_id);
+			} else {
+				$term_name = null;
+				$term_id = null;
+			}
+			
+			// update the meta to quickly meta_query the post
+			update_post_meta($post_id, '_' . $taxonomy->name, $term_name);				
+			update_post_meta($post_id, '_' . $taxonomy->name . '_term_id', $term_id);
+		}
+		return $post_id;		
+	}
+	
+	/**
+	 * Get the preset meta
+	 */	
+	public function get_preset_metas($post_id, $post_type) {
+		// get all taxonomies associated with the post type
+		$taxonomies = $this->get_added_taxonomies_names($post_type);
+		
+		$metas = array();
+		foreach($taxonomies as $taxonomy) {
+			$metas[$taxonomy]['term_name'] = get_post_meta($post_id, '_' . $taxonomy, true);
+			$metas[$taxonomy]['term_id'] = get_post_meta($post_id, '_' . $taxonomy . '_term_id', true);
+		}		
+		return $metas;
+	}
+	
+	/**
+	 * Relate the terms to the parent-post. taxonomy_terms is a
+	 * key value pair with taxonomy_name => terms. where terms
+	 * can be an array or an int.
+	 */	
+	public function set_terms($post_parent, $taxonomy_terms) {
+		foreach ($taxonomy_terms as $taxonomy => $terms) {
+			if(!empty($terms)) {
+				if(!is_array($terms)) {
+					$terms = array($terms);
+				}
+				
+				// convert all term ids to a number
+				$terms = array_map('intval', $terms);
+				$terms = array_unique($terms);
+			} 
+			wp_set_object_terms($post_parent, $terms, $taxonomy, false);	
+		}
+	}
+	
+
 	
 }
 }

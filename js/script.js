@@ -64,7 +64,7 @@ jQuery(document).ready(function($) {
 	});
 	
 	// set title of presets
-	$('.taxonomy-group-list .preset select').live('change', function() {
+	$('.taxonomy-group-list .preset select.preset-select-field-1').live('change', function() {
 		var h4 = $(this).closest('.preset').find('h4');
 		var value = $('option:selected', this).val();	
 		if(value) {

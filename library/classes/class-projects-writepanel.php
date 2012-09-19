@@ -288,47 +288,42 @@ class Projects_Writepanel {
 	 */
 	public function create_taxonomy_group_preset_list_item($preset_id, $taxonomy_group) {	
 		$projects_taxonomy_group = new Projects_Taxonomy_Group();
+		
+		$metas = $projects_taxonomy_group->get_preset_metas($preset_id, $taxonomy_group);
 
 		// retreive all taxonomies associated with the taxonomy group
-		$args = array(
-			'object_type' => array(Projects::$post_type, $taxonomy_group)
-		);
-		$taxonomies = $projects_taxonomy_group->get_added_taxonomies($args, 'names');		
+		$taxonomies = $projects_taxonomy_group->get_added_taxonomies_names($taxonomy_group);		
 		
-		// get the presetted terms for a preset
-		$args = array(
-			'fields' => 'ids'
-		);
-		$preset_terms = wp_get_object_terms($preset_id, $taxonomies, $args);
-		
-		// create the title
+		// create the title		
 		$title_placeholder = __('Untitled', 'projects');
 		if(!empty($taxonomies)) {
+			// get the first term of the first taxonomy
 			reset($taxonomies);
 			$taxonomy = key($taxonomies);
-			$args = array(
-				'fields' => 'names'
-			);
-			$title_term = wp_get_object_terms($preset_id, $taxonomy, $args);
+			$preset_term_id = $metas[$taxonomy]['term_id'];
 			
-			// set the title if it was found
-			if(!empty($title_term)) {
-				$title = $title_term[0];
+			if(!empty($preset_term_id)) {
+				// find the term name for the term id
+				$term = get_term(intval($preset_term_id), $taxonomy);
+				$title = $term->name;
 			} else {
 				$title = $title_placeholder;
-			}	
+			}
 		} else {
 			$title = $title_placeholder;
 		}
-			
 		?>
 		<div class="preset" id="projects-taxonomy-group-preset-<?php echo $taxonomy_group; ?>-<?php echo $preset_id; ?>">
 			<input type="hidden" name="projects_preset_id" value="<?php echo $preset_id; ?>" />
 			<div class="preset-options"><h4 title="<?php echo $title_placeholder; ?>"><?php echo $title; ?></h4><a href="#" class="delete-preset"><?php _e('Delete', 'projects'); ?></a></div>
-			<div class="preset-fields">			
+			<div class="preset-fields">
+				<?php $index = 1; ?>	
 				<?php foreach($taxonomies as $taxonomy) : ?>
 					<?php 
 					$taxonomy_object = get_taxonomy($taxonomy);
+					
+					// get the meta term_id for every taxonomy
+					$preset_term_id = $metas[$taxonomy]['term_id'];
 					
 					// get the terms for a taxonomy
 					$args = array(
@@ -336,13 +331,13 @@ class Projects_Writepanel {
 					);
 					$terms = get_terms($taxonomy_object->name, $args);
 					?>
-					<select name="projects[taxonomy_group][<?php echo $taxonomy_group; ?>][<?php echo $preset_id; ?>][<?php echo $taxonomy_object->name; ?>]" class="preset-select">
+					<select name="projects[taxonomy_group][<?php echo $taxonomy_group; ?>][<?php echo $preset_id; ?>][<?php echo $taxonomy_object->name; ?>]" class="preset-select preset-select-field-<?php echo $index; ?>">
 						<option value=""><?php printf(__('No %s', 'projects'), $taxonomy_object->labels->singular_name); ?></option>
 						<?php foreach($terms as $term) : ?>
-							<?php $preset_term_id = (in_array($term->term_id, $preset_terms)) ? $term->term_id : null; ?>
 							<option value="<?php echo $term->term_id; ?>" <?php selected($preset_term_id, $term->term_id, true); ?>><?php echo $term->name; ?></option>
 						<?php endforeach; ?>
 					</select>
+					<?php $index++; ?>
 				<?php endforeach; ?>
 			</div>
 		</div>
@@ -362,7 +357,7 @@ class Projects_Writepanel {
 		$projects_taxonomy_group = new Projects_Taxonomy_Group();
 		if($_POST['action'] == 'add_taxonomy_group_preset') {
 			// add a new preset
-			$preset_id = $projects_taxonomy_group->add_preset($_POST['taxonomy_group'], $_POST['post_id']);
+			$preset_id = $projects_taxonomy_group->add_preset($_POST['post_id'], $_POST['taxonomy_group']);
 
 			// create a preset list item
 			$this->create_taxonomy_group_preset_list_item($preset_id, $_POST['taxonomy_group']);
@@ -749,16 +744,18 @@ class Projects_Writepanel {
 				$projects_taxonomy_group = new Projects_Taxonomy_Group();
 				foreach($_POST['projects']['taxonomy_group'] as $post_type => $presets) {
 					$order = 0;
-					foreach($presets as $preset_id => $taxonomies) {	
-						// set ordering
-						$projects_taxonomy_group->set_preset_order($preset_id, $post_id, $order);
+					$collected_taxonomy_terms = array();
+					foreach($presets as $preset_id => $taxonomy_terms) {
+						// relate the terms. taxonomy_terms are a key value pair with 'taxonomy' => 'term_id'
+						$projects_taxonomy_group->update_preset($preset_id, $post_id, $post_type, $taxonomy_terms, $order);
 						$order++;
-
-						// relate the terms. taxonomies are a key value pair with 'taxonomy' => 'term_id'
-						foreach($taxonomies as $taxonomy => $term_id) {
-							$projects_taxonomy_group->set_preset_terms($preset_id, $post_id, intval($term_id), $taxonomy);
-						}
+						
+						// collect the taxonomies and term ids
+						$collected_taxonomy_terms = array_merge_recursive($collected_taxonomy_terms, $taxonomy_terms);
 					}
+					
+					// relate the terms to the post
+					$projects_taxonomy_group->set_terms($post_id, $collected_taxonomy_terms);
 				}
 								
 				// unset the term groups to not save them ast meta
