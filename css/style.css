@@ -146,13 +146,13 @@ table.wp-list-table .column-title {
 }
 
 /*
-   Award Meta Box
+   Taxonomy group Meta Box
 */
 
-.award-footer #projects-award-loader {
+.taxonomy-group-footer .taxonomy-group-loader {
 	visibility: hidden;
 }
-#projects-award-list .award-group {
+.taxonomy-group-list .preset {
 	cursor: move;
 	padding: 6px;
 	overflow: hidden;
@@ -178,22 +178,22 @@ table.wp-list-table .column-title {
 	box-shadow: 0 1px 0 white;
 	*/
 }
-#projects-award-list select {
+.taxonomy-group-list select {
 	width: 48%;
 	margin-bottom: 5px;
 }
-#projects-award-list .award-group-options {
+.taxonomy-group-list .preset-options {
 	overflow: hidden;
 	margin-bottom: 5px;
 }
-#projects-award-list .award-group-options h4 {
+.taxonomy-group-list .preset-options h4 {
 	margin: 0;
 	width: 60%;
 	float: left;
 	color: #333;
 	font-weight: bold;
 }
-#projects-award-list .award-group-options a {
+.taxonomy-group-list .preset-options a {
 	float: right;
 }
 

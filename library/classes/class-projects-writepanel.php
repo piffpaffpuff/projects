@@ -37,8 +37,7 @@ class Projects_Writepanel {
 		add_filter('media_upload_tabs', array($this, 'remove_media_tabs'));
 		add_filter('media_upload_media_url', array($this, 'add_tab_media_url'));
 		add_action('wp_ajax_load_media_list', array($this, 'load_media_list_ajax'));
-		add_action('wp_ajax_add_taxonomy_group_preset', array($this, 'manage_taxonomy_group_preset_ajax'));
-		add_action('wp_ajax_delete_taxonomy_group_preset', array($this, 'manage_taxonomy_group_preset_ajax'));
+		add_action('wp_ajax_add_taxonomy_group_preset', array($this, 'add_taxonomy_group_preset_ajax'));
 		add_filter('upload_mimes', array($this, 'add_mime_types'));
 
 		add_action('save_post', array($this, 'save_box_data'));
@@ -87,7 +86,7 @@ class Projects_Writepanel {
 	public function media_tab_media_url() {
 	    media_upload_header();
 	    ?>
-	    <p>Hello</p>
+	    <p>Not implemented</p>
 	    <?php
 	}
 
@@ -196,13 +195,11 @@ class Projects_Writepanel {
 		
 		// create the meta boxes for the taxonomy groups
 		$projects_taxonomy_group = new Projects_Taxonomy_Group();
-		$taxonomy_groups = $projects_taxonomy_group->get_added_taxonomy_groups();
-		foreach($taxonomy_groups as $taxonomy_group) {
-			$taxonomy_group_object = get_post_type_object($taxonomy_group);
-			
+		$taxonomy_groups = $projects_taxonomy_group->get_added_taxonomy_group();
+		foreach($taxonomy_groups as $taxonomy_group) {			
 			// send the post type to the box content function and add the box
 			$args = array('taxonomy_group' => $taxonomy_group);
-			add_meta_box('projects-taxonomy-group-box-' . $taxonomy_group_object->name, $taxonomy_group_object->labels->name, array($this, 'create_box_taxonomy_group'), Projects::$post_type, 'side', 'default', $args);
+			add_meta_box('projects-taxonomy-group-box-' . $taxonomy_group->name, $taxonomy_group->plural_label, array($this, 'create_box_taxonomy_group'), Projects::$post_type, 'side', 'default', $args);
 		}
 	}
 	
@@ -259,25 +256,49 @@ class Projects_Writepanel {
 	 * Create the box content
 	 */
 	public function create_box_taxonomy_group($post, $metabox) {
+		$projects = new Projects();
 		$projects_taxonomy_group = new Projects_Taxonomy_Group();
 		$taxonomy_group = $metabox['args']['taxonomy_group'];
-		$taxonomy_group_object = get_post_type_object($taxonomy_group);
 		
 		// Use nonce for verification
 		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
-
-		// output
-		$row_count = 0;
+		
+		// load presets and restructure from colmun to row based array
+		$meta_name = $projects->get_internal_name('taxonomy_group_' . $taxonomy_group->key, true);
+		$presets = get_post_meta($post->ID, $meta_name, true);
+		$rows = array();
+		if(!empty($presets)) {
+			$columns = $presets;			
+			foreach($columns as $key => $subarr) {
+				if(!empty($subarr)) {
+					foreach($subarr as $subkey => $subvalue) {
+						$rows[$subkey][$key] = $subvalue;
+					}
+				}
+			}
+		}
+		/*
+		echo('<pre>');
+		print_r($presets);
+		echo('</pre>');
+		*/
 		?>
-		<input type="hidden" name="projects_taxonomy_group" value="<?php echo $taxonomy_group_object->name; ?>">		
+		<input type="hidden" class="taxonomy-group-name" value="<?php echo $taxonomy_group->name; ?>">
+		<?php // reset the metadata when no presets were created ?>
+		<?php /*foreach($taxonomy_group->taxonomies as $taxonomy) : ?>
+			<input type="hidden" name="projects[taxonomy_groups][<?php echo $taxonomy_group->name; ?>][<?php echo $taxonomy->name; ?>]" value="" />
+		<?php endforeach;*/ ?>
+		<input type="hidden" name="projects[taxonomy_group_<?php echo $taxonomy_group->key; ?>]" value="" />
 		<div class="taxonomy-group-list">
-			<?php $presets = $projects_taxonomy_group->get_added_presets($post->ID, $taxonomy_group_object->name); ?>
-			<?php foreach($presets as $preset) : ?>
-				<?php $this->create_taxonomy_group_preset_list_item($preset->ID, $taxonomy_group_object->name); ?>
-			<?php endforeach; ?>
+			<?php // build the presets list ?>
+			<?php if(isset($rows)) : ?>
+				<?php foreach($rows as $row) : ?>
+					<?php $this->create_taxonomy_group_preset_list_item($taxonomy_group->name, $row); ?>
+				<?php endforeach; ?>
+			<?php endif; ?>
 		</div>
 		<div class="taxonomy-group-footer">
-			<a href="#" class="add-preset"><?php printf(__('Add %s', 'projects'), $taxonomy_group_object->labels->singular_name); ?></a>
+			<a href="#" class="add-preset"><?php printf(__('Add %s', 'projects'), $taxonomy_group->singular_label); ?></a>
 			<img src="<?php echo get_admin_url(); ?>images/wpspin_light.gif" class="taxonomy-group-loader" />
 		</div>
 		<?php
@@ -286,25 +307,23 @@ class Projects_Writepanel {
 	/**
 	 * Create a taxonomy group preset
 	 */
-	public function create_taxonomy_group_preset_list_item($preset_id, $taxonomy_group) {	
-		$projects_taxonomy_group = new Projects_Taxonomy_Group();
+	public function create_taxonomy_group_preset_list_item($taxonomy_group_name, $terms_by_taxonomy = null) {
+		global $post;
 		
-		$metas = $projects_taxonomy_group->get_preset_metas($preset_id, $taxonomy_group);
-
-		// retreive all taxonomies associated with the taxonomy group
-		$taxonomies = $projects_taxonomy_group->get_added_taxonomies_names($taxonomy_group);		
+		$projects_taxonomy_group = new Projects_Taxonomy_Group();
+		$taxonomies = $projects_taxonomy_group->get_added_taxonomies_by_group($taxonomy_group_name);
 		
 		// create the title		
 		$title_placeholder = __('Untitled', 'projects');
-		if(!empty($taxonomies)) {
+		if(!empty($terms_by_taxonomy)) {
 			// get the first term of the first taxonomy
-			reset($taxonomies);
-			$taxonomy = key($taxonomies);
-			$preset_term_id = $metas[$taxonomy]['term_id'];
+			reset($terms_by_taxonomy);
+			$first_taxonomy = key($terms_by_taxonomy);
+			$title_term_id = $terms_by_taxonomy[$first_taxonomy];
 			
-			if(!empty($preset_term_id)) {
+			if(!empty($title_term_id)) {
 				// find the term name for the term id
-				$term = get_term(intval($preset_term_id), $taxonomy);
+				$term = get_term(intval($title_term_id), $first_taxonomy);
 				$title = $term->name;
 			} else {
 				$title = $title_placeholder;
@@ -313,28 +332,24 @@ class Projects_Writepanel {
 			$title = $title_placeholder;
 		}
 		?>
-		<div class="preset" id="projects-taxonomy-group-preset-<?php echo $taxonomy_group; ?>-<?php echo $preset_id; ?>">
-			<input type="hidden" name="projects_preset_id" value="<?php echo $preset_id; ?>" />
+		<div class="preset" id="projects-taxonomy-group-preset-<?php echo $taxonomy_group_name; ?>">
 			<div class="preset-options"><h4 title="<?php echo $title_placeholder; ?>"><?php echo $title; ?></h4><a href="#" class="delete-preset"><?php _e('Delete', 'projects'); ?></a></div>
 			<div class="preset-fields">
 				<?php $index = 1; ?>	
 				<?php foreach($taxonomies as $taxonomy) : ?>
-					<?php 
-					$taxonomy_object = get_taxonomy($taxonomy);
-					
-					// get the meta term_id for every taxonomy
-					$preset_term_id = $metas[$taxonomy]['term_id'];
+					<?php
+					$selected_term_id = $terms_by_taxonomy[$taxonomy->name];
 					
 					// get the terms for a taxonomy
 					$args = array(
 						'hide_empty' => false
 					);
-					$terms = get_terms($taxonomy_object->name, $args);
+					$terms = get_terms($taxonomy->name, $args);
 					?>
-					<select name="projects[taxonomy_group][<?php echo $taxonomy_group; ?>][<?php echo $preset_id; ?>][<?php echo $taxonomy_object->name; ?>]" class="preset-select preset-select-field-<?php echo $index; ?>">
-						<option value=""><?php printf(__('No %s', 'projects'), $taxonomy_object->labels->singular_name); ?></option>
+					<select name="projects[taxonomy_group_<?php echo $taxonomy->group_key; ?>][<?php echo $taxonomy->name; ?>][]" class="preset-select preset-select-field-<?php echo $index; ?>">
+						<option value=""><?php printf(__('No %s', 'projects'), $taxonomy->singular_label); ?></option>
 						<?php foreach($terms as $term) : ?>
-							<option value="<?php echo $term->term_id; ?>" <?php selected($preset_term_id, $term->term_id, true); ?>><?php echo $term->name; ?></option>
+							<option value="<?php echo $term->term_id; ?>" <?php selected($selected_term_id, $term->term_id, true); ?>><?php echo $term->name; ?></option>
 						<?php endforeach; ?>
 					</select>
 					<?php $index++; ?>
@@ -347,24 +362,14 @@ class Projects_Writepanel {
 	/**
 	 * Manage the term group item with ajax
 	 */
-	public function manage_taxonomy_group_preset_ajax() {
+	public function add_taxonomy_group_preset_ajax() {
 	    // Verify post data and nonce
-		if(empty($_POST) || empty($_POST['nonce']) || empty($_POST['post_id']) || empty($_POST['taxonomy_group']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
+		if(empty($_POST) || empty($_POST['nonce']) || empty($_POST['post_id']) || empty($_POST['taxonomy_group_name']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
 			wp_die(__('You do not have sufficient permissions to access this page.'));
 		}
 		
-		// Do the corresponding action
-		$projects_taxonomy_group = new Projects_Taxonomy_Group();
-		if($_POST['action'] == 'add_taxonomy_group_preset') {
-			// add a new preset
-			$preset_id = $projects_taxonomy_group->add_preset($_POST['post_id'], $_POST['taxonomy_group']);
-
-			// create a preset list item
-			$this->create_taxonomy_group_preset_list_item($preset_id, $_POST['taxonomy_group']);
-		} elseif($_POST['action'] == 'delete_taxonomy_group_preset') {
-			// delete a preset
-			$projects_taxonomy_group->delete_preset($_POST['preset_id']);
-		}			
+		// create a preset list item
+		$this->create_taxonomy_group_preset_list_item($_POST['taxonomy_group_name']);
 			
 		exit;
 	}
@@ -448,7 +453,6 @@ class Projects_Writepanel {
 	public function create_box_gallery_media($post, $metabox) {		
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
-  		
   		?>
 		<ul class="projects-media-list hide-if-no-js" id="projects-gallery-media-list">
 		<?php $this->create_media_list(null, $this->type_media); ?>
@@ -463,7 +467,6 @@ class Projects_Writepanel {
 	public function create_box_featured_media($post, $metabox) {				
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
-  		
   		?>
 		<ul class="projects-media-list hide-if-no-js" id="projects-featured-media-list">
 		<?php $this->create_media_list(null, $this->type_featured_media); ?>
@@ -706,6 +709,7 @@ class Projects_Writepanel {
 		make them queryable by wordpress. */
 		if(isset($_POST['projects'])) {
 			$projects = new Projects();
+			$projects_taxonomy_group = new Projects_Taxonomy_Group();
 			
 			// create a date entry to make querying by month or year easy 
 			$_POST['projects']['date'] = mktime(0, 0, 0, $_POST['projects']['month'], 1, $_POST['projects']['year']);
@@ -738,28 +742,37 @@ class Projects_Writepanel {
 				$_POST['projects']['lng'] = null;
 			}
 			
-			// save the term groups
-			if(!empty($_POST['projects']['taxonomy_group'])) {
-				// save the groups
-				$projects_taxonomy_group = new Projects_Taxonomy_Group();
-				foreach($_POST['projects']['taxonomy_group'] as $post_type => $presets) {
-					$order = 0;
-					$collected_taxonomy_terms = array();
-					foreach($presets as $preset_id => $taxonomy_terms) {
-						// relate the terms. taxonomy_terms are a key value pair with 'taxonomy' => 'term_id'
-						$projects_taxonomy_group->update_preset($preset_id, $post_id, $post_type, $taxonomy_terms, $order);
-						$order++;
-						
-						// collect the taxonomies and term ids
-						$collected_taxonomy_terms = array_merge_recursive($collected_taxonomy_terms, $taxonomy_terms);
+			// save the terms of every taxonomy group
+			$taxonomy_groups = $projects_taxonomy_group->get_added_taxonomy_group();
+			if(!empty($taxonomy_groups)) {
+				foreach($taxonomy_groups as $taxonomy_group) {
+					// when the group is empty, reset all terms by 
+					// creating an empty taxonomy_name=>term_id array
+					if(empty($_POST['projects']['taxonomy_group_' . $taxonomy_group->key])) {
+						$taxonomies = array();
+						$taxonomies_objects = $projects_taxonomy_group->get_added_taxonomies_by_group($taxonomy_group->name);
+						foreach($taxonomies_objects as $taxonomy_object) {
+							$taxonomies[$taxonomy_object->name] = null;
+						}
+					} else {
+						$taxonomies = $_POST['projects']['taxonomy_group_' . $taxonomy_group->key];
+					}	
+					
+					// save the terms
+					foreach($taxonomies as $taxonomy => $terms) {
+						if(!empty($terms)) {
+							// convert all term ids to a number
+							$terms = array_map('intval', $terms);
+							$terms = array_unique($terms);
+						} else {
+							$terms = null;
+						}
+						wp_set_object_terms($post_id, $terms, $taxonomy, false);
 					}
 					
-					// relate the terms to the post
-					$projects_taxonomy_group->set_terms($post_id, $collected_taxonomy_terms);
+					// clear the transcient cache
+					$projects_taxonomy_group->clear_presets_meta_cache($taxonomy_group->key);
 				}
-								
-				// unset the term groups to not save them ast meta
-				$_POST['projects']['taxonomy_group'] = null;
 			}
 			
 			// set the terms for the stati
@@ -776,13 +789,6 @@ class Projects_Writepanel {
 				key values but not for not existing keys.
 				this may be fixed in wordpress 3.4. */
 				update_post_meta($post_id, '_projects_' . $key, $value);
-				/*
-				if(empty($value)) {		
-					delete_post_meta($post_id, '_projects_' . $key);
-				} else {
-					update_post_meta($post_id, '_projects_' . $key, $value);
-				}
-				*/
 			}
 		}
 	}

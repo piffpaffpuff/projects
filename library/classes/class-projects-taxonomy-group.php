@@ -10,7 +10,9 @@
 if (!class_exists('Projects_Taxonomy_Group')) {
 class Projects_Taxonomy_Group extends Projects_Taxonomy {
 
-	public static $post_types_by_key = array();
+	public static $taxonomy_groups = array();
+	public static $taxonomies = array();
+	public $terms_by_id;
 		
 	/**
 	 * Constructor
@@ -59,20 +61,19 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 	 * Add menu tabs
 	 */
 	public function add_menu_tabs() {
-		// get post type associated with taxonomy
-		$args = array(
-			'object_type' => get_taxonomy($_GET['taxonomy'])->object_type
-		);
-		
-		// get the taxonomies that are associated with the post type
-		$taxonomies = $this->get_added_taxonomies($args);
+		// check if the current taxonomy is part of a taxonomy group.
+		// if yes, show tabs for every taxonomy above the edit screen.
+		$taxonomy_group = $this->get_added_taxonomy_group_by_taxonomy($_GET['taxonomy']);
 		?>
-		<div id="icon-edit" class="icon32 icon32-posts-<?php echo Projects::$post_type; ?>"><br></div>
-		<h2 class="nav-tab-wrapper">
-		<?php foreach($taxonomies as $taxonomy) : ?>
-			<a href="<?php echo 'edit-tags.php?post_type=' . Projects::$post_type . '&taxonomy=' . $taxonomy->name; ?>" class="nav-tab<?php $this->menu_tab_selected($taxonomy->name); ?>"><?php echo $taxonomy->labels->singular_name; ?></a>
-		<?php endforeach; ?>
-		</h2>
+		<?php if(isset($taxonomy_group)) : ?>
+			<?php $taxonomies = $this->get_added_taxonomies_by_group($taxonomy_group->name); ?>
+			<div id="icon-edit" class="icon32 icon32-posts-<?php echo Projects::$post_type; ?>"><br></div>
+			<h2 class="nav-tab-wrapper">
+			<?php foreach($taxonomies as $taxonomy) : ?>
+				<a href="<?php echo 'edit-tags.php?post_type=' . Projects::$post_type . '&taxonomy=' . $taxonomy->name; ?>" class="nav-tab<?php $this->menu_tab_selected($taxonomy->name); ?>"><?php echo $taxonomy->singular_label; ?></a>
+			<?php endforeach; ?>
+			</h2>
+		<?php endif; ?>
 		<?php
 	}
 	
@@ -91,19 +92,16 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 	 * Check if one of the award taxonomy pages 
 	 * is currently displayed.
 	 */
-	public function is_taxonomy_group_tab() {		
+	public function is_taxonomy_group_tab() {				
 		if(!empty($_GET['taxonomy']) && !empty($_GET['post_type'])) {
-			$taxonomy = get_taxonomy($_GET['taxonomy']);
-			foreach(self::$post_types_by_key as $post_type) {
-				//$taxonomies = get_object_taxonomies($post_type);  && in_array($taxonomy->name, $taxonomies)
-				if(in_array($post_type, $taxonomy->object_type)) {
-					return true;
-				}
+			$taxonomy_group = $this->get_added_taxonomy_group_by_taxonomy($_GET['taxonomy']);			
+			if(isset($taxonomy_group)) {
+				return true;
+				// && isset($taxonomy_group->taxonomies[$_GET['taxonomy']])
 			}
 			return false;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	/**
@@ -112,29 +110,29 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 	public function add_pages() {		
 		$parent_slug = 'edit.php?post_type=' . Projects::$post_type;
 		
-		foreach (self::$post_types_by_key as $post_type_by_key) {
-			// get the post type object
-			$post_type_object = get_post_type_object($post_type_by_key);
-			
+		// add the taxonomy group page
+		foreach (self::$taxonomy_groups as $taxonomy_group) {			
 			// set the css class "current" of the menu item 
 			// with a span. like this the menu item can be styled 
 			// as "current". this is some kind of a hack because 
 			// there are no filters or actions to add custom css 
 			// classes to the submenu list items.
-			if($this->is_taxonomy_group_tab()) {
-				$menu_title = '<span class="current">' . $post_type_object->labels->name . '</span>';
+			if($this->is_taxonomy_group_tab() && isset($taxonomy_group->taxonomies[$_GET['taxonomy']])) {
+				$menu_title = '<span class="current">' . $taxonomy_group->plural_label . '</span>';
 			} else {
-				$menu_title = $post_type_object->labels->name;	
+				$menu_title = $taxonomy_group->plural_label;	
 			}
-			
-			// get the taxonomies that are part of the post type
-			$taxonomies = get_object_taxonomies($post_type_by_key);
-			
+		
+			// get the first taxonomy in the group to link to
+			$taxonomies = $taxonomy_group->taxonomies;
+			reset($taxonomies);
+			$first_taxonomy_name = key($taxonomies);	
+
 			// set the menu slug to the first taxonomy
-			$menu_slug = 'edit-tags.php?post_type=' . Projects::$post_type . '&taxonomy=' . $taxonomies[0];
+			$menu_slug = 'edit-tags.php?post_type=' . Projects::$post_type . '&taxonomy=' . $taxonomies[$first_taxonomy_name]->name;
 			
 			// add the page
-			add_submenu_page($parent_slug, $post_type_object->labels->name, $menu_title, 'manage_categories', $menu_slug);
+			add_submenu_page($parent_slug, $taxonomy_group->plural_label, $menu_title, 'manage_categories', $menu_slug);
 		}
 	}
 		
@@ -165,6 +163,20 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 			)
 		);	
 		$this->add_taxonomy_group(__('Awards', 'projects'), __('Award', 'projects'), $groups, 'award');
+		
+		$groups = array(
+			array(
+				'plural_label' => __('Foo Names', 'projects'),
+				'singular_label' => __('Foo Name', 'projects'),
+				'key' => 'name'
+			),
+			array(
+				'plural_label' => __('Foo Years', 'projects'),
+				'singular_label' => __('Foo Year', 'projects'),
+				'key' => 'year'
+			)
+		);
+		$this->add_taxonomy_group(__('Foos', 'projects'), __('Foo', 'projects'), $groups, 'foo');
 	}
 	
 	/**
@@ -174,18 +186,17 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 		$projects = new Projects();
 		$projects_type = new Projects_Type();
 		$projects_installation = new Projects_Installation();
-		$post_type = $projects->get_internal_name($key);
-
-		// register a post type for the taxonomy group
-		$args = array(
-			'show_ui' => true, 
-			'show_in_nav_menus' => true
-		);
-		
-		$projects_type->add_type($plural_label, $singular_label, $post_type, $args);
 		
 		// add the group to a keyed array to refind them
-		self::$post_types_by_key[$post_type] = $post_type;
+		$taxonomy_group_name = $projects->get_internal_name($key);
+		$taxonomy_group = new stdClass();
+		$taxonomy_group->name = $taxonomy_group_name;
+		$taxonomy_group->key = $key;
+		$taxonomy_group->plural_label = $plural_label;
+		$taxonomy_group->singular_label = $singular_label;
+		$taxonomy_group->position = $position;
+		$taxonomy_group->taxonomies = null;
+		self::$taxonomy_groups[$taxonomy_group_name] = $taxonomy_group;
 	
 		// create a taxonomy for every single taxonomy in the group
 		foreach ($groups as $group) {
@@ -193,253 +204,302 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 				continue;	
 			}
 			
-			// register taxonomy but add it to the projects post type and the
-			// post type create for the group. this makes it easy to get all 
-			// taxonomies that are part of a taxonomy group.
+			// register taxonomy
 			$default_args = array(
 				'hierarchical' => false, 
-				'show_ui' => true, 
-				'show_in_nav_menus' => true,
+				'show_ui' => false, 
+				'show_in_nav_menus' => false,
 				'rewrite' => array('slug' => $projects_installation->slug . '/' . sprintf(__('project-%s', 'projects'), $key . '-' . $group['key']), 'with_front' => true),
-				'post_type' => array(Projects::$post_type, $post_type)
+				'post_type' => array(Projects::$post_type)
 			);
 							
-			// merge the default and additional args but overwrite with default args
+			// merge the default and additional args
 			if(isset($group['args'])) {
 				$args = $group['args'];			
 			} else {
 				$args = array();
 			}
-			$args = wp_parse_args($default_args, $args);
+			$args = wp_parse_args($args, $default_args);
 			
-			// generate taxonomy name and register
-			$taxonomy = $projects->get_internal_name($key . '_' . $group['key']);
+			// generate taxonomy name and setup
+			$taxonomy_name = $projects->get_internal_name($key . '_' . $group['key']);
+			$taxonomy = new stdClass();
+			$taxonomy->group_name = $taxonomy_group_name;
+			$taxonomy->group_key = $key;
+			$taxonomy->name = $taxonomy_name;
+			$taxonomy->key = $key . '_' . $group['key'];
+			$taxonomy->plural_label = $group['plural_label'];
+			$taxonomy->singular_label = $group['singular_label'];
+			self::$taxonomies[$taxonomy_name] = $taxonomy;
 			
-			$this->add_taxonomy($group['plural_label'], $group['singular_label'], $taxonomy, $args);
+			// add the taxonomy to the group list for quicker finding
+			$taxonomy_group->taxonomies[$taxonomy_name] = &self::$taxonomies[$taxonomy_name];
+			
+			// register
+			$this->add_taxonomy($group['plural_label'], $group['singular_label'], $taxonomy_name, $args);
 		}
 	}
 
 	/**
-	 * Get all taxonomy groups
+	 * Get taxonomy group key/name
 	 */	
-	public function get_added_taxonomy_groups() {
-		return self::$post_types_by_key;
-	}
-
-	/**
-	 * Get all taxonomies that were registered in a group
-	 */	
-	public function get_added_taxonomies($args = null, $type = 'objects') {
-		$default_args = array(
-			'object_type' => array_merge(array(Projects::$post_type), self::$post_types_by_key)
-		);
-		// merge the default and additional args
-		$args = wp_parse_args($args, $default_args);
-
-		return get_taxonomies($args, $type);
-	}
-	
-	/**
-	 * Get all taxonomies that were registered in a group
-	 */	
-	public function get_added_taxonomies_names($taxonomy_group, $type = 'names') {
+	public function get_added_taxonomy_group($key = null) {
+		// return all
+		if(empty($key)) {
+			return self::$taxonomy_groups;
+		}
+		
+		// find a specific group
 		$projects = new Projects();
-		$post_type = $projects->get_internal_name($taxonomy_group);
-		$args = array(
-			'object_type' => array(Projects::$post_type, $post_type)
-		);
-		return $this->get_added_taxonomies($args, $type);
-	}
-
-	/**
-	 * Get presets for a post id
-	 */	
-	public function get_added_presets($post_parent, $post_type) {
-		$args = array(
-			'post_parent' => $post_parent,
-			'post_type' => $post_type,
-			'meta_key' => '_order',
-			'orderby' => 'meta_value',
-			'order' => 'ASC'
-		);
-		$query = get_children($args);
-		return $query;
-	}
-	
-	/**
-	 * Get all presetes sorted
-	 */	
-	public function get_added_presets_sorted($key, $join = true, $order = array()) {
-		global $wpdb;
-		
-		$projects = new Projects();
-		$post_type = $projects->get_internal_name($key);
-				
-		// build the sql query to get the meta for all presets
-		$taxonomies = $this->get_added_taxonomies_names($post_type);
-		$count = 1;
-		$from = "";
-		$and = "";
-		$orderby = "";
-		foreach($taxonomies as $taxonomy) {
-			// select the meta sql query
-			$from .= ", $wpdb->postmeta posts_meta_$count";
-			
-			// compare the meta sql query
-			$and .= " AND child_posts.ID = posts_meta_$count.post_id AND posts_meta_$count.meta_key = '_$taxonomy'";
-			
-			// check if the current taxonomy is also an ordering field
-			foreach($order as $order_field) {
-				if($order_field['taxonomy'] == $taxonomy) {
-					$comma = "";
-					if(empty($orderby)) {
-						$orderby .= " ORDER BY ";
-					} else {
-						$comma = ", ";
-					}
-					if(isset($order_field['order'])) {
-						$sort = $order_field['order'];
-					} else {
-						$sort = "";
-					}
-					$orderby .= "$comma posts_meta_$count.meta_value $sort";
-					break;
-				}
-			}
-	
-			$count++;
+		$taxonomy_group_name = $projects->get_internal_name($key);
+		if(isset(self::$taxonomy_groups[$taxonomy_group_name])) {
+			return self::$taxonomy_groups[$taxonomy_group_name];
 		}
-		
-		// query the posts
-		$sql = "
-			SELECT child_posts.ID, child_posts.post_parent, child_posts.post_type
-			FROM $wpdb->posts child_posts $from
-			WHERE child_posts.post_type = '$post_type'
-			$and
-			$orderby
-		";
-		
-		$results = $wpdb->get_results($sql);
-		
-		// build the presets with the terms
-		$presets = array();
-		foreach($results as $result) {
-			$preset = array();
-			$terms = wp_get_object_terms($result->post_parent, $taxonomies);
-			foreach($taxonomies as $taxonomy) {
-				//$preset[$taxonomy] = 
-			}
-			echo '<pre>';
-			print_r($terms);
-			echo '</pre>';
-			
-			$presets[] = $preset;
-		}
-	
 		return;
 	}
 	
 	/**
-	 * Add a preset
+	 * Get taxonomy group by taxonomy key/name
 	 */	
-	public function add_preset($post_parent, $post_type) {
-		$post_type_object = get_post_type_object($post_type);
-		
-		// insert the post
-		$post = array(
-			'post_parent' => $post_parent,
-			'post_title' => $post_type_object->labels->singular_name . ' for #' . $post_parent,
-			'post_type' => $post_type,
-			'post_status' => 'draft'
-		);
-		$post_id = wp_insert_post($post);
-		
-		// add the meta because wordpress can't meta_query non-existing metas
-		$this->update_preset_metas($post_id, $post_type);
-		return $post_id;
-	}
-	
-	/**
-	 * Update meta data for the post query and set the order
-	 */	
-	public function update_preset($post_id, $post_parent, $post_type, $taxonomy_terms, $order) {
-		$this->update_preset_metas($post_id, $post_type, $taxonomy_terms, $order);
-	}
-	
-	/**
-	 * Delete a preset
-	 */	
-	public function delete_preset($post_id) {
-		$num_rows = wp_delete_post($post_id, true);
-		return $num_rows;
-	}	
-	
-	/**
-	 * Relate the terms to the parent-post
-	 */	
-	public function update_preset_metas($post_id, $post_type, $taxonomy_terms = array(), $order = 0) {
-		// update the order meta in the preset
-		update_post_meta($post_id, '_order', $order);
-		
-		// get all taxonomies associated with the post type
-		$taxonomies = $this->get_added_taxonomies_names($post_type, 'object');
-		
-		// check if a term is set for the taxonomy, otherwise set a default
-		foreach($taxonomies as $taxonomy) {
-			// look if the term is set, otherwise reset the meta 
-			if(is_array($taxonomy_terms) && !empty($taxonomy_terms[$taxonomy->name])) {
-				$term_object = get_term($taxonomy_terms[$taxonomy->name], $taxonomy->name);
-				$term_name = $term_object->name;
-				$term_id = intval($term_object->term_id);
+	public function get_added_taxonomy_group_by_taxonomy($key, $type = 'objects') {		
+		$projects = new Projects();
+		$taxonomy_name = $projects->get_internal_name($key);
+		if(isset(self::$taxonomies[$taxonomy_name])) {
+			$taxonomy_group = self::$taxonomy_groups[self::$taxonomies[$taxonomy_name]->group_name];
+			if($type == 'names') {
+				return $taxonomy_group->name;
 			} else {
-				$term_name = null;
-				$term_id = null;
+				return $taxonomy_group;
 			}
-			
-			// update the meta to quickly meta_query the post
-			update_post_meta($post_id, '_' . $taxonomy->name, $term_name);				
-			update_post_meta($post_id, '_' . $taxonomy->name . '_term_id', $term_id);
 		}
-		return $post_id;		
+		return;
 	}
-	
-	/**
-	 * Get the preset meta
-	 */	
-	public function get_preset_metas($post_id, $post_type) {
-		// get all taxonomies associated with the post type
-		$taxonomies = $this->get_added_taxonomies_names($post_type);
-		
-		$metas = array();
-		foreach($taxonomies as $taxonomy) {
-			$metas[$taxonomy]['term_name'] = get_post_meta($post_id, '_' . $taxonomy, true);
-			$metas[$taxonomy]['term_id'] = get_post_meta($post_id, '_' . $taxonomy . '_term_id', true);
-		}		
-		return $metas;
-	}
-	
-	/**
-	 * Relate the terms to the parent-post. taxonomy_terms is a
-	 * key value pair with taxonomy_name => terms. where terms
-	 * can be an array or an int.
-	 */	
-	public function set_terms($post_parent, $taxonomy_terms) {
-		foreach ($taxonomy_terms as $taxonomy => $terms) {
-			if(!empty($terms)) {
-				if(!is_array($terms)) {
-					$terms = array($terms);
-				}
-				
-				// convert all term ids to a number
-				$terms = array_map('intval', $terms);
-				$terms = array_unique($terms);
-			} 
-			wp_set_object_terms($post_parent, $terms, $taxonomy, false);	
-		}
-	}
-	
 
+	/**
+	 * Get taxonmies by taxonomy group key/name
+	 */	
+	public function get_added_taxonomies_by_group($key, $type = 'objects') {
+		$projects = new Projects();
+		$taxonomy_group_name = $projects->get_internal_name($key);
+		if(isset(self::$taxonomy_groups[$taxonomy_group_name])) {
+			$taxonomies = self::$taxonomy_groups[$taxonomy_group_name]->taxonomies;
+			if($type == 'names') {
+				$names = null;
+				foreach($taxonomies as $taxonomy) {
+					$names[$taxonomy->name] = $taxonomy->name;
+				}
+				return $names;
+			} else {
+				return $taxonomies;
+			}
+		}
+		return;
+	}
 	
+	/**
+	 * Get project preset
+	 */	
+	public function get_project_preset($key, $post_id = null) {
+		if(empty($post_id)) {
+			global $post;
+			if(empty($post)) {
+				return;
+			}
+			$post_id = $post->ID;
+		}
+		
+		// check if the group exists and load it
+		$projects = new Projects();
+		$taxonomy_group_name = $projects->get_internal_name($key);
+		$taxonomy_group = $this->get_added_taxonomy_group($taxonomy_group_name);
+		
+		// do not continue if the group does not exists
+		if(!isset($taxonomy_group)) {
+			return;
+		}
+		
+		// get the presets for the post
+		$meta_name = $projects->get_internal_name('taxonomy_group_' . $taxonomy_group->key, true);
+		$presets = get_post_meta($post_id, $meta_name, true);
+		
+	}
+	
+	/**
+	 * Get all presets 
+	 */	
+	public function get_presets($key, $join = true, $sort = array()) {
+		global $wpdb;
+	
+		// check if the group exists and load it
+		$projects = new Projects();
+		$taxonomy_group_name = $projects->get_internal_name($key);
+		$taxonomy_group = $this->get_added_taxonomy_group($taxonomy_group_name);
+		
+		// do not continue if the group does not exists
+		if(!isset($taxonomy_group)) {
+			return;
+		}
+		
+		// get the presets for all posts from cache or query again 
+		$cache = get_transient('get_presets_meta_' . $key);
+		if($cache) {
+			$results = $cache;
+		} else {		
+			// get presets from all posts
+			$sql = $wpdb->prepare(
+				"SELECT post_id, meta_value 
+				FROM $wpdb->postmeta 
+				WHERE meta_key = %s
+				AND meta_value <> ''
+				AND meta_value IS NOT NULL", 
+			$projects->get_internal_name('taxonomy_group_' . $taxonomy_group->key, true));
+			
+			// query the meta
+			$results = $wpdb->get_results($sql);
+			
+			// cache the query
+	    	set_transient('get_presets_meta_' . $key, $results, 60*60*24);
+		}
+		
+		// create the list of term ids. like this only one 
+		// database call is needed to get all terms.
+		if(empty($this->terms_by_id)) {
+			$this->terms_by_id = array();
+			$taxonomies = $this->get_added_taxonomies_by_group($taxonomy_group_name, 'names');
+			$terms = get_terms($taxonomies);
+			foreach($terms as $term) {
+				$this->terms_by_id[$term->term_id] = $term;
+			}
+		}	
+				
+		// unify the preset array from every post into one
+		$presets_post_ids = array('post_id' => array());
+		$presets_merged = array();
+		foreach($results as $result) {
+			$presets = maybe_unserialize($result->meta_value);
+			$presets_merged = array_merge_recursive($presets_merged, $presets);
+			// push the post_id for the first taxonomy in the 
+			// preset into the post_ids array. the post_id is 
+			// used for the reversed sorting of the array.
+			reset($presets);
+			$first_preset_key = key($presets);
+			foreach($presets[$first_preset_key] as $term_ids) {
+				$presets_post_ids['post_id'][] = $result->post_id;
+			}
+		}
+		
+		// add the names to the names array to sort it. create
+		// in the posts array the same number of rows with the
+		// item information to mutilsort the posts array with 
+		// columns from the names array.
+		$presets_posts = array();
+		$presets_names = array();
+		foreach($presets_merged as $taxonomy => $term_ids) {
+			foreach($term_ids as $term_key => $term_id) {
+				// create the posts array
+				$presets_posts[$term_key]['post_id'] = array($presets_post_ids['post_id'][$term_key]);
+				$presets_posts[$term_key]['taxonomies'][$taxonomy]['term_id'] = $term_id;
+				$presets_posts[$term_key]['taxonomies'][$taxonomy]['name'] = '';
+				$presets_posts[$term_key]['taxonomies'][$taxonomy]['slug'] = '';
+				// create the names array
+				// replace the id with the name
+				$presets_names[$taxonomy][$term_key] = '';
+				if(!empty($this->terms_by_id[$term_id])) {
+					$presets_names[$taxonomy][$term_key] = $this->terms_by_id[$term_id]->name;
+					$presets_posts[$term_key]['taxonomies'][$taxonomy]['name'] = $this->terms_by_id[$term_id]->name;
+					$presets_posts[$term_key]['taxonomies'][$taxonomy]['slug'] = $this->terms_by_id[$term_id]->slug;
+				}
+			}
+		}
+	
+		// sort the posts array by coluns in the names array
+		array_multisort($presets_names['project_award_year'], SORT_DESC, $presets_names['project_award_name'], SORT_ASC, $presets_posts);
+		echo '<pre>';
+		print_r($presets_posts);
+		//print_r($presets_names);
+		echo '</pre>';
+		// group identical presets
+		if($join) {
+			//$taxonomies = $this->get_added_taxonomies_by_group($taxonomy_group_name);
+			$presets_grouped = array();
+			foreach($presets_posts as $presets_post) {
+				// create a unique key to identify the preset
+				$group_key = '';
+				foreach($presets_post['taxonomies'] as $key => $value) {
+					$group_key .= (string) $value['term_id'];
+				}				
+				// add the post_id to an existing group key 
+				// or add a completely new group key.
+				if(isset($presets_grouped[$group_key])) {
+					$presets_grouped[$group_key]['post_id'] = array_merge($presets_grouped[$group_key]['post_id'], $presets_post['post_id']);
+				} else {
+					$presets_grouped[$group_key] = $presets_post;
+					$presets_grouped[$group_key]['post_id'] = $presets_post['post_id'];
+				}
+			}
+			$presets_posts = $presets_grouped;
+		}		
+		
+		echo '<pre>';
+		print_r($presets_posts);
+		//print_r($presets_names);
+		echo '</pre>';
+		
+		// return sorted array
+		return $presets_posts;
+	}
+	
+	/**
+	 * Construct a preset object
+	 */
+	public function construct_presets_objects($key, $presets, $post_id) {
+			/*
+			$presets_posts = array();
+			$presets_names = array();
+			foreach($presets as $taxonomy => $term_ids) {
+				foreach($term_ids as $term_key => $term_id) {
+					// create the posts array
+					$presets_posts[$term_key]['post_id'] = array($presets_post_ids['post_id'][$term_key]);
+					$presets_posts[$term_key]['taxonomies'][$taxonomy]['term_id'] = $term_id;
+					$presets_posts[$term_key]['taxonomies'][$taxonomy]['name'] = '';
+					$presets_posts[$term_key]['taxonomies'][$taxonomy]['slug'] = '';
+					// create the names array
+					// replace the id with the name
+					$presets_names[$taxonomy][$term_key] = '';
+					if(!empty($this->terms_by_id[$term_id])) {
+						$presets_names[$taxonomy][$term_key] = $this->terms_by_id[$term_id]->name;
+						$presets_posts[$term_key]['taxonomies'][$taxonomy]['name'] = $this->terms_by_id[$term_id]->name;
+						$presets_posts[$term_key]['taxonomies'][$taxonomy]['slug'] = $this->terms_by_id[$term_id]->slug;
+					}
+				}
+			}
+			return $presets_posts;
+			*/
+	}
+	
+	
+	/**
+	 * Clear the meta query cache for presets
+	 */
+	public function clear_presets_meta_cache($key) {
+		return delete_transient('get_presets_meta_' . $key);
+	}
+	
+	/**
+	 * Get the permalink for the taxonomy group preset
+	 */
+	public function get_award_permalink($preset) {
+		/*if(count($preset['post_id']) > 1) {
+			$slugs = array();
+			foreach($preset['taxonomies'] as $key => $value) {
+				
+			}
+		//	$fields = $this->get_taxonomy_grouped_award_fields($award, 'slug');
+			return get_site_url() . '?' . http_build_query($fields);
+		} else {
+			return get_permalink($preset['post_id'][0]);
+		}*/
+	}
 }
 }
 
