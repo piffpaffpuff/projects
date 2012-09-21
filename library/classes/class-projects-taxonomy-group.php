@@ -163,20 +163,6 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 			)
 		);	
 		$this->add_taxonomy_group(__('Awards', 'projects'), __('Award', 'projects'), $groups, 'award');
-		
-		$groups = array(
-			array(
-				'plural_label' => __('Foo Names', 'projects'),
-				'singular_label' => __('Foo Name', 'projects'),
-				'key' => 'name'
-			),
-			array(
-				'plural_label' => __('Foo Years', 'projects'),
-				'singular_label' => __('Foo Year', 'projects'),
-				'key' => 'year'
-			)
-		);
-		$this->add_taxonomy_group(__('Foos', 'projects'), __('Foo', 'projects'), $groups, 'foo');
 	}
 	
 	/**
