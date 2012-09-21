@@ -308,15 +308,21 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 		$projects = new Projects();
 		$taxonomy_group_name = $projects->get_internal_name($key);
 		$taxonomy_group = $this->get_added_taxonomy_group($taxonomy_group_name);
+		$presets_objects = array();
 		
 		// do not continue if the group does not exists
 		if(!isset($taxonomy_group)) {
-			return;
+			return $presets_objects;
 		}
 		
 		// get the presets for the post
 		$result = $projects->get_project_meta('taxonomy_group_' . $taxonomy_group->key, $post_id);
-
+		
+		// stop when no results are available
+		if(empty($results)) {
+			return $presets_objects;
+		}
+		
 		// create the presets objects for the meta
 		$presets_objects = $this->construct_presets_objects($taxonomy_group_name, $result, $post_id);
 		
@@ -343,10 +349,11 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 		$projects = new Projects();
 		$taxonomy_group_name = $projects->get_internal_name($key);
 		$taxonomy_group = $this->get_added_taxonomy_group($taxonomy_group_name);
+		$presets_posts = array();
 		
 		// do not continue if the group does not exists
 		if(!isset($taxonomy_group)) {
-			return;
+			return $presets_posts;
 		}
 		
 		// get the presets for all posts from cache or query again 
@@ -369,12 +376,16 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 			// cache the query for 7 days
 	    	set_transient('get_presets_meta_' . $key, $results, 60*60*24*7);
 		}
+		
+		// stop when no results are available
+		if(empty($results)) {
+			return $presets_posts;
+		}
 					
 		// unify the preset array from every post into one.
 		// at the same time create a posts array where all 
 		// presets are regrouped by row.
 		$presets_merged = array();
-		$presets_posts = array();
 		foreach($results as $result) {
 			$presets = maybe_unserialize($result->meta_value);
 			// construct the prestes rows and merge it into the posts array
@@ -517,7 +528,7 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 			foreach($preset['taxonomies'] as $taxonomy => $term) {
 				$taxonomy_slugs[$taxonomy] = $term['slug'];
 			}
-			return get_site_url() . '?' . http_build_query($taxonomy_slugs);
+			return get_site_url() . '?' . urlencode(http_build_query($taxonomy_slugs));
 		} else {
 			return get_permalink($preset['post_id'][0]);
 		}
