@@ -299,7 +299,7 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 	/**
 	 * Get project preset
 	 */	
-	public function get_project_preset($key, $post_id = null) {
+	public function get_project_presets($key, $post_id = null) {
 		if(empty($post_id)) {
 			global $post;
 			if(empty($post)) {
@@ -319,15 +319,28 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 		}
 		
 		// get the presets for the post
-		$meta_name = $projects->get_internal_name('taxonomy_group_' . $taxonomy_group->key, true);
-		$presets = get_post_meta($post_id, $meta_name, true);
+		$result = $projects->get_project_meta('taxonomy_group_' . $taxonomy_group->key, $post_id);
+
+		// create the presets objects for the meta
+		$presets_objects = $this->construct_presets_objects($taxonomy_group_name, $result, $post_id);
 		
+		return $presets_objects;
 	}
 	
 	/**
-	 * Get all presets 
+	 * Get all presets. the sort must be a an array with the taxonomy
+	 * name as string by which should be. followed by one or more 
+	 * sort options as constant (not string!). read the docs about 
+	 * array_multisort for a complete list of sort options.
+	 *
+	 * 		$sort = array(
+	 *			'project_award_year',
+	 *			SORT_DESC,
+	 *			'project_award_name',
+	 *			SORT_ASC
+	 * 		);
 	 */	
-	public function get_presets($key, $join = true, $sort = array()) {
+	public function get_presets($key, $sort = null, $join = true) {
 		global $wpdb;
 	
 		// check if the group exists and load it
@@ -357,10 +370,109 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 			// query the meta
 			$results = $wpdb->get_results($sql);
 			
-			// cache the query
-	    	set_transient('get_presets_meta_' . $key, $results, 60*60*24);
+			// cache the query for 7 days
+	    	set_transient('get_presets_meta_' . $key, $results, 60*60*24*7);
+		}
+					
+		// unify the preset array from every post into one.
+		// at the same time create a posts array where all 
+		// presets are regrouped by row.
+		$presets_merged = array();
+		$presets_posts = array();
+		foreach($results as $result) {
+			$presets = maybe_unserialize($result->meta_value);
+			// construct the prestes rows and merge it into the posts array
+			$presets_objects = $this->construct_presets_objects($taxonomy_group_name, $presets, $result->post_id);
+			$presets_posts = array_merge($presets_posts, $presets_objects);
+			// merge the presets into one big column ordered array
+			$presets_merged = array_merge_recursive($presets_merged, $presets);
 		}
 		
+		// replace in the merged presets array all term ids
+		// with their corresponding name. those names are later 
+		// used to sort the columns.
+		$presets_names = array();
+		foreach($presets_merged as $taxonomy => $term_ids) {
+			foreach($term_ids as $term_key => $term_id) {
+				// replace the id with the name. it is important to
+				// also add wmpty values otherwise the column count
+				// is inconsistent for the sorting.
+				if(empty($this->terms_by_id[$term_id])) {
+					$presets_names[$taxonomy][$term_key] = '';
+				} else {
+					$presets_names[$taxonomy][$term_key] = $this->terms_by_id[$term_id]->name;
+				}
+			}
+		}
+		
+		// sort the array
+		if(isset($sort) && !empty($sort)) {
+			// parse the sort string, check if a the culmun 
+			// exists in the presets_names, then pass this 
+			// column to the array_multisort.
+			foreach($sort as $key => $value) {
+				if(is_string($value)) {
+					// generate the internal name in case the key was passed
+					$taxonomy_name = $projects->get_internal_name($value);
+					if(isset($presets_names[$taxonomy_name])) {
+						// pass the value as reference
+						$sort[$key] = &$presets_names[$taxonomy_name];
+					}
+				}
+			}
+			
+			
+			// pass the table that should be sorted as last 
+			// paramter by reference.
+			$sort[] = &$presets_posts;
+	
+			// sort the array with an array multisort. this is called
+			// as user function to pass dynamic parameters.
+			call_user_func_array('array_multisort', $sort);
+		}
+		
+		// group identical presets
+		if($join) {
+			//$taxonomies = $this->get_added_taxonomies_by_group($taxonomy_group_name);
+			$presets_grouped = array();
+			foreach($presets_posts as $presets_post) {
+				// create a unique key to identify the preset
+				$group_key = 'group';
+				foreach($presets_post['taxonomies'] as $key => $value) {
+					$group_key .= (string) $value['term_id'];
+				}				
+				// add the post_id to an existing group key 
+				// or add a completely new group key.
+				if(isset($presets_grouped[$group_key])) {
+					// combine the post_id value. also check if a 
+					// post id is added multiple times. mostly this 
+					// is the case when a single post has two times 
+					// equal presets (probably empty ones).
+					$presets_grouped[$group_key]['post_id'] = array_unique(array_merge($presets_grouped[$group_key]['post_id'], $presets_post['post_id']));
+				} else {
+					$presets_grouped[$group_key] = $presets_post;
+					$presets_grouped[$group_key]['post_id'] = $presets_post['post_id'];
+				}
+			}
+			$presets_posts = $presets_grouped;
+		}		
+
+		// free some memory and return the sorted array
+		$presets_merged = null;
+		$presets_names = null;
+		/*echo '<pre>';
+		print_r($presets_posts);
+		echo '</pre>';*/
+		return $presets_posts;
+	}
+	
+	/**
+	 * Construct a preset object
+	 */
+	public function construct_presets_objects($key, $presets, $post_id) {
+		$projects = new Projects();
+		$taxonomy_group_name = $projects->get_internal_name($key);
+	
 		// create the list of term ids. like this only one 
 		// database call is needed to get all terms.
 		if(empty($this->terms_by_id)) {
@@ -371,115 +483,30 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 				$this->terms_by_id[$term->term_id] = $term;
 			}
 		}	
-				
-		// unify the preset array from every post into one
-		$presets_post_ids = array('post_id' => array());
-		$presets_merged = array();
-		foreach($results as $result) {
-			$presets = maybe_unserialize($result->meta_value);
-			$presets_merged = array_merge_recursive($presets_merged, $presets);
-			// push the post_id for the first taxonomy in the 
-			// preset into the post_ids array. the post_id is 
-			// used for the reversed sorting of the array.
-			reset($presets);
-			$first_preset_key = key($presets);
-			foreach($presets[$first_preset_key] as $term_ids) {
-				$presets_post_ids['post_id'][] = $result->post_id;
-			}
-		}
-		
-		// add the names to the names array to sort it. create
-		// in the posts array the same number of rows with the
-		// item information to mutilsort the posts array with 
-		// columns from the names array.
-		$presets_posts = array();
-		$presets_names = array();
-		foreach($presets_merged as $taxonomy => $term_ids) {
+	
+		// create the rows array. in the presets array the
+		// fields are grouped by taxonomy column. in the rows
+		// array they are regrouped by row. 
+		$presets_objects = array();
+		foreach($presets as $taxonomy => $term_ids) {
 			foreach($term_ids as $term_key => $term_id) {
 				// create the posts array
-				$presets_posts[$term_key]['post_id'] = array($presets_post_ids['post_id'][$term_key]);
-				$presets_posts[$term_key]['taxonomies'][$taxonomy]['term_id'] = $term_id;
-				$presets_posts[$term_key]['taxonomies'][$taxonomy]['name'] = '';
-				$presets_posts[$term_key]['taxonomies'][$taxonomy]['slug'] = '';
-				// create the names array
-				// replace the id with the name
-				$presets_names[$taxonomy][$term_key] = '';
+				$presets_objects[$term_key]['post_id'] = array($post_id);
+				$presets_objects[$term_key]['taxonomies'][$taxonomy]['term_id'] = $term_id;
+				$presets_objects[$term_key]['taxonomies'][$taxonomy]['name'] = '';
+				$presets_objects[$term_key]['taxonomies'][$taxonomy]['slug'] = '';
 				if(!empty($this->terms_by_id[$term_id])) {
-					$presets_names[$taxonomy][$term_key] = $this->terms_by_id[$term_id]->name;
-					$presets_posts[$term_key]['taxonomies'][$taxonomy]['name'] = $this->terms_by_id[$term_id]->name;
-					$presets_posts[$term_key]['taxonomies'][$taxonomy]['slug'] = $this->terms_by_id[$term_id]->slug;
+					$presets_objects[$term_key]['taxonomies'][$taxonomy]['name'] = $this->terms_by_id[$term_id]->name;
+					$presets_objects[$term_key]['taxonomies'][$taxonomy]['slug'] = $this->terms_by_id[$term_id]->slug;
 				}
 			}
 		}
-	
-		// sort the posts array by coluns in the names array
-		array_multisort($presets_names['project_award_year'], SORT_DESC, $presets_names['project_award_name'], SORT_ASC, $presets_posts);
-		echo '<pre>';
-		print_r($presets_posts);
-		//print_r($presets_names);
-		echo '</pre>';
-		// group identical presets
-		if($join) {
-			//$taxonomies = $this->get_added_taxonomies_by_group($taxonomy_group_name);
-			$presets_grouped = array();
-			foreach($presets_posts as $presets_post) {
-				// create a unique key to identify the preset
-				$group_key = '';
-				foreach($presets_post['taxonomies'] as $key => $value) {
-					$group_key .= (string) $value['term_id'];
-				}				
-				// add the post_id to an existing group key 
-				// or add a completely new group key.
-				if(isset($presets_grouped[$group_key])) {
-					$presets_grouped[$group_key]['post_id'] = array_merge($presets_grouped[$group_key]['post_id'], $presets_post['post_id']);
-				} else {
-					$presets_grouped[$group_key] = $presets_post;
-					$presets_grouped[$group_key]['post_id'] = $presets_post['post_id'];
-				}
-			}
-			$presets_posts = $presets_grouped;
-		}		
-		
-		echo '<pre>';
-		print_r($presets_posts);
-		//print_r($presets_names);
-		echo '</pre>';
-		
-		// return sorted array
-		return $presets_posts;
-	}
-	
-	/**
-	 * Construct a preset object
-	 */
-	public function construct_presets_objects($key, $presets, $post_id) {
-			/*
-			$presets_posts = array();
-			$presets_names = array();
-			foreach($presets as $taxonomy => $term_ids) {
-				foreach($term_ids as $term_key => $term_id) {
-					// create the posts array
-					$presets_posts[$term_key]['post_id'] = array($presets_post_ids['post_id'][$term_key]);
-					$presets_posts[$term_key]['taxonomies'][$taxonomy]['term_id'] = $term_id;
-					$presets_posts[$term_key]['taxonomies'][$taxonomy]['name'] = '';
-					$presets_posts[$term_key]['taxonomies'][$taxonomy]['slug'] = '';
-					// create the names array
-					// replace the id with the name
-					$presets_names[$taxonomy][$term_key] = '';
-					if(!empty($this->terms_by_id[$term_id])) {
-						$presets_names[$taxonomy][$term_key] = $this->terms_by_id[$term_id]->name;
-						$presets_posts[$term_key]['taxonomies'][$taxonomy]['name'] = $this->terms_by_id[$term_id]->name;
-						$presets_posts[$term_key]['taxonomies'][$taxonomy]['slug'] = $this->terms_by_id[$term_id]->slug;
-					}
-				}
-			}
-			return $presets_posts;
-			*/
+		return $presets_objects;
 	}
 	
 	
 	/**
-	 * Clear the meta query cache for presets
+	 * Clear the meta query cache for the presets
 	 */
 	public function clear_presets_meta_cache($key) {
 		return delete_transient('get_presets_meta_' . $key);
@@ -488,17 +515,16 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 	/**
 	 * Get the permalink for the taxonomy group preset
 	 */
-	public function get_award_permalink($preset) {
-		/*if(count($preset['post_id']) > 1) {
-			$slugs = array();
-			foreach($preset['taxonomies'] as $key => $value) {
-				
+	public function get_preset_permalink($preset) {
+		if(count($preset['post_id']) > 1) {
+			$taxonomy_slugs = array();
+			foreach($preset['taxonomies'] as $taxonomy => $term) {
+				$taxonomy_slugs[$taxonomy] = $term['slug'];
 			}
-		//	$fields = $this->get_taxonomy_grouped_award_fields($award, 'slug');
-			return get_site_url() . '?' . http_build_query($fields);
+			return get_site_url() . '?' . http_build_query($taxonomy_slugs);
 		} else {
 			return get_permalink($preset['post_id'][0]);
-		}*/
+		}
 	}
 }
 }

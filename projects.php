@@ -549,34 +549,26 @@ function project_website($name = null, $target = '_blank') {
 /**
  * Get all taxonomy group presets
  */
-/*function get_projects_taxonomy_group_presets($key, $join = true, $sort = array('project_award_year', 'project_award_name', 'project_award_category'), $order = array(-1, 1, 1)) {
+function get_projects_taxonomy_group_presets($taxonomy_group, $sort = null, $join = null) {
 	global $projects;
-	$projects->taxonomy_group->get_added_presets_sorted($key, $join, $sort, $order);
-}*/
-//
-///**
-// * Get all awards
-// */
-//function get_projects_awards($group = true, $sort = array('project_award_year', 'project_award_name', 'project_award_category'), $order = array(-1, 1, 1)) {
-//	global $projects;
-//	return $projects->award->get_sorted_awards($group, $sort, $order);
-//}
-//
-///**
-// * Get project awards
-// */
-//function get_project_awards($post_id = null) {
-//	global $projects;
-//	return $projects->award->get_project_awards($post_id);
-//}
-//
-///**
-// * Get award permalink
-// */
-//function get_projects_award_permalink($award) {
-//	global $projects;
-//	return $projects->award->get_award_permalink($award);
-//}
+	return $projects->taxonomy_group->get_presets($taxonomy_group, $sort, $join);
+}
+
+/**
+ * Get project taxonomy group presets
+ */
+function get_project_taxonomy_group_presets($taxonomy_group, $post_id = null) {
+	global $projects;
+	return $projects->taxonomy_group->get_project_presets($taxonomy_group, $post_id);
+}
+
+/**
+ * Get taxonomy group preset permalink
+ */
+function get_projects_taxonomy_group_preset_permalink($preset) {
+	global $projects;
+	return $projects->taxonomy_group->get_preset_permalink($preset);
+}
 
 /**
  * Add taxonomy

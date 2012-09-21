@@ -264,8 +264,7 @@ class Projects_Writepanel {
 		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		
 		// load presets and restructure from colmun to row based array
-		$meta_name = $projects->get_internal_name('taxonomy_group_' . $taxonomy_group->key, true);
-		$presets = get_post_meta($post->ID, $meta_name, true);
+		$presets = $projects->get_project_meta('taxonomy_group_' . $taxonomy_group->key, $post->ID);
 		$rows = array();
 		if(!empty($presets)) {
 			$columns = $presets;			
@@ -285,9 +284,6 @@ class Projects_Writepanel {
 		?>
 		<input type="hidden" class="taxonomy-group-name" value="<?php echo $taxonomy_group->name; ?>">
 		<?php // reset the metadata when no presets were created ?>
-		<?php /*foreach($taxonomy_group->taxonomies as $taxonomy) : ?>
-			<input type="hidden" name="projects[taxonomy_groups][<?php echo $taxonomy_group->name; ?>][<?php echo $taxonomy->name; ?>]" value="" />
-		<?php endforeach;*/ ?>
 		<input type="hidden" name="projects[taxonomy_group_<?php echo $taxonomy_group->key; ?>]" value="" />
 		<div class="taxonomy-group-list">
 			<?php // build the presets list ?>
