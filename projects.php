@@ -85,16 +85,16 @@ class Projects {
 		
 		// construct the instances 
 		$this->installation = new Projects_Installation();
-		$this->taxonomy = new Projects_Taxonomy();
 		$this->taxonomy_group = new Projects_Taxonomy_Group();
+		$this->taxonomy = new Projects_Taxonomy();
 		$this->type = new Projects_Type();
 		$this->writepanel = new Projects_Writepanel();
 		$this->settings = new Projects_Settings();
 	
 		// load all hooks of the instances		
 		$this->installation->load();
-		$this->taxonomy->load();
 		$this->taxonomy_group->load();
+		$this->taxonomy->load();
 		$this->type->load();
 		$this->writepanel->load();
 		$this->settings->load();

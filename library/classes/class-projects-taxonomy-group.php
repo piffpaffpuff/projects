@@ -12,6 +12,7 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 
 	public static $taxonomy_groups = array();
 	public static $taxonomies = array();
+	
 	public $terms_by_id;
 		
 	/**
@@ -36,6 +37,15 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 		add_action('admin_menu', array($this, 'add_pages'));
 		$this->register_taxonomy_groups();
 	}	
+	
+	/**
+	 * Flush the permalinks to enable 
+	 * the correct rewrite rules.
+	 */
+	public function add_rewrite_rules() {
+		$this->register_taxonomy_groups();
+		flush_rewrite_rules();
+	}
 	
 	/**
 	 * Hook into the admin hooks

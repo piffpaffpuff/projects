@@ -16,7 +16,9 @@ class Projects_Installation {
 		
 		// load the basepage to get the slug name
 		$page = get_post(get_option('projects_base_page_id')); 
-		$this->slug = $page->post_name;
+		if(isset($page)) {
+			$this->slug = $page->post_name;
+		}
 	}
 	
 	/**
@@ -34,7 +36,6 @@ class Projects_Installation {
 					    
 		// create a page that serves as base slug for all projects
 		$page = get_page_by_path('projects');
-		$page_id = null;
 		
 		// add a projects page when it doesn't exist
 		if(empty($page)) {
@@ -46,16 +47,20 @@ class Projects_Installation {
 				'post_author' => 1,
 				'post_type' => 'page'
 			);
-			$page_id = wp_insert_post($args);
-		} else {
-			$page_id = $page->ID;
+			$page = get_post(wp_insert_post($args));
+		} 
+		
+		// check if the saved page id exists
+		$page_option_id = get_option('projects_base_page_id');
+		if(isset($page_option_id)) {
+			$saved_page = get_post($page_option_id); 
+			if(!empty($saved_page)) {
+				$page = $saved_page;
+			}
 		}
 		
-		// set the base page
-		if(!get_option('projects_base_page_id')) {
-			add_option('projects_base_page_id', $page_id);
-		}
-				
+		// save the page id
+		update_option('projects_base_page_id', $page->ID);
 		$this->slug = $page->post_name;
 	}
 }

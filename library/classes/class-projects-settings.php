@@ -89,10 +89,10 @@ class Projects_Settings {
 							<td>
 								<select name="projects_selected_country">
 									<?php 
-									$countries = new Projects_Countries();
+									$projects_countries = new Projects_Countries();
 									$option = get_option('projects_selected_country');
 									?>
-									<?php foreach($countries->world as $code => $name) : ?>
+									<?php foreach($projects_countries->world as $code => $name) : ?>
 										<option value="<?php echo $code; ?>" <?php selected($code, $option); ?>><?php printf(__('%s', 'projects'), $name); ?></option>
 									<?php endforeach; ?>
 								</select>
@@ -132,11 +132,12 @@ class Projects_Settings {
 		
 		/* rehook the post types and taxonomies, then 
 		flush the permalinks to make the new slug work. */
-		$taxonomy = new Projects_Taxonomy(); 
-		$taxonomy->add_rewrite_rules();
-		$type = new Projects_Type(); 
-		$type->add_rewrite_rules();
-		
+		$projects_taxonomy_group = new Projects_Taxonomy_Group(); 
+		$projects_taxonomy_group->add_rewrite_rules();
+		$projects_taxonomy = new Projects_Taxonomy(); 
+		$projects_taxonomy->add_rewrite_rules();
+		$projects_type = new Projects_Type(); 
+		$projects_type->add_rewrite_rules();
 	}
 
 }
