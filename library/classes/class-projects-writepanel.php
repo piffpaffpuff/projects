@@ -39,7 +39,7 @@ class Projects_Writepanel {
 		add_action('wp_ajax_load_media_list', array($this, 'load_media_list_ajax'));
 		add_action('wp_ajax_add_taxonomy_group_preset', array($this, 'add_taxonomy_group_preset_ajax'));
 		add_filter('upload_mimes', array($this, 'add_mime_types'));
-
+		
 		add_action('save_post', array($this, 'save_box_data'));
 	}
 	
@@ -206,7 +206,7 @@ class Projects_Writepanel {
 	/**
 	 * Remove default meta boxes
 	 */
-	public function remove_boxes() {
+	public function remove_boxes($post_type) {
 	}
 	
 	/**
