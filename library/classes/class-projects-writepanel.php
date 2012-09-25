@@ -233,7 +233,7 @@ class Projects_Writepanel {
 		<div class="location">
 			<p class="form-fieldset"><label><span><?php _e('First Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo $projects->get_project_meta('first_name'); ?>" title="<?php _e('First Name', 'projects'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('Last Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo $projects->get_project_meta('last_name'); ?>" title="<?php _e('Last Name', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Company Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[company_name]" value="<?php echo $projects->get_project_meta('last_name'); ?>" title="<?php _e('Company Name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Company Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[company_name]" value="<?php echo $projects->get_project_meta('company_name'); ?>" title="<?php _e('Company Name', 'projects'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('Address', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo $projects->get_project_meta('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('Postal Code', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo $projects->get_project_meta('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('City', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo $projects->get_project_meta('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
@@ -669,9 +669,7 @@ class Projects_Writepanel {
 	/**
 	 * Save the box data
 	 */
-	public function save_box_data() {
-		global $post_id;
-
+	public function save_box_data($post_id) {
 		/* verify this came from the our screen and with 
 		proper authorization, because save_post can be 
 		triggered at other times. */
