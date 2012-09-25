@@ -670,16 +670,16 @@ class Projects_Writepanel {
 	 * Save the box data
 	 */
 	public function save_box_data($post_id) {
-		/* verify this came from the our screen and with 
-		proper authorization, because save_post can be 
-		triggered at other times. */
+		// Verify this came from the our screen and with 
+		// proper authorization, because save_post can be 
+		// triggered at other times.
 		if(empty($_POST['projects_nonce']) || !wp_verify_nonce( $_POST['projects_nonce'], Projects::$plugin_basename)) {
 			return $post_id;
 		}
   
-  		/* verify if this is an auto save routine. If it 
-  		is our form has not been submitted, so we dont 
-  		want to do anything. */
+  		// Verify if this is an auto save routine. If it 
+  		// is our form has not been submitted, so we dont 
+  		// want to do anything.
   		if(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
     		return $post_id;
     	}
@@ -695,12 +695,12 @@ class Projects_Writepanel {
 			}
 		}
 		
-		/* we're authenticated: Now we need to find 
-		and save the data.*/
+		// We're authenticated: Now we need to find 
+		// and save the data.
 
-		/* save, update or delete the custom field of the post.
-		split all array keys and save them as unique meta to 
-		make them queryable by wordpress. */
+		// Save, update or delete the custom field of the post.
+		// split all array keys and save them as unique meta to 
+		// make them queryable by wordpress.
 		if(isset($_POST['projects'])) {
 			$projects = new Projects();
 			$projects_taxonomy_group = new Projects_Taxonomy_Group();
@@ -776,12 +776,12 @@ class Projects_Writepanel {
 				wp_set_object_terms($post_id, intval($_POST['projects']['status']), $taxonomy, false);
 			}
 			
-			// save the meta
+			// Save the meta
 			foreach($_POST['projects'] as $key => $value) {
-				/* save the key, including empty keys too, 
-				because wordpress can only query for empty 
-				key values but not for not existing keys.
-				this may be fixed in wordpress 3.4. */
+				// Save the key, including empty keys too, 
+				// because wordpress can only query for empty 
+				// key values but not for not existing keys.
+				// This may be different in WordPress 3.5.
 				update_post_meta($post_id, '_projects_' . $key, $value);
 			}
 		}
