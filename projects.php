@@ -115,9 +115,7 @@ class Projects {
 	/**
 	 * Load the main hooks
 	 */
-	public function hooks_init() {
-		remove_post_type_support(self::$post_type, 'thumbnail');
-		
+	public function hooks_init() {		
 		add_filter('get_previous_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_next_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_previous_post_sort', array($this, 'adjacent_post_previous_sort'));

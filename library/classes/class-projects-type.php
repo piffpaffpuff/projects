@@ -65,7 +65,7 @@ class Projects_Type {
 	/**
 	 * Create custom post types
 	 */
-	public function register_types() {		
+	public function register_types() {
 		$this->add_type(__('Projects', 'projects'), __('Project', 'projects'), Projects::$post_type);
 	}
 	
@@ -94,7 +94,7 @@ class Projects_Type {
 		$default_args = array(
 	    	'labels' => $labels,
 	    	'public' => true,
-			'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'post-formats'),
+			'supports' => array('title', 'editor', 'excerpt', 'post-formats'),
 			'capability_type' => 'post',
 			'rewrite' => array('slug' => $projects_installation->slug),
 			'menu_position' => 4,
