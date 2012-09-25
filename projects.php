@@ -191,12 +191,12 @@ class Projects {
 	 */
 	public function build_query_args($args = null) {
 		global $wp_query;
-		
-		/* pagination support for the projects page. 
-		in wordpress 3.0.2 the 'paged' option was 
-		renamed to 'page'. check for both cases because
-		the archive uses the new and the page the old
-		option name. */
+
+		// pagination support for the projects page. 
+		// in wordpress 3.0.2 the 'paged' option was 
+		// renamed to 'page'. check for both cases because
+		// the archive uses the new and the page the old
+		// option name.
 		if($wp_query->get('paged')) {
 		    $paged = $wp_query->get('paged');
 		} else if($wp_query->get('page')) {
@@ -205,10 +205,9 @@ class Projects {
 		    $paged = 1;
 		}
 		
-		/* set the default args. posts with the 
-		same date are ordered by title DESC because 
-		wordpress doesn't support multiple ordering 
-		yet. */
+		// set the default args. posts with the date 
+		// are ordered by title DESC because wordpress 
+		// doesn't support multiple ordering yet.
 		$default_args = array(
 			'post_type' => self::$post_type,
 			'meta_key' => $this->order_sort_key,
@@ -234,11 +233,11 @@ class Projects {
     			$wp_query->set($key, $value);
     		}
 			
-			/* set the page type to is_archive if the 
-			projects page is also the front page. */
+			// set the page type to is_archive because it
+			// makes the page consistant with archives.
 			$wp_query->set('page_id', 0);
 			$wp_query->is_page = '';
-        	$wp_query->is_singular = '';		
+        	$wp_query->is_singular = '';
         	$wp_query->is_archive = 1;		
         	$wp_query->is_post_type_archive = 1;
 		}
@@ -248,7 +247,7 @@ class Projects {
 	/**
 	 * Query projects
 	 */
-	public function query_projects($args = null) {		 
+	public function query_projects($args = null) {	
 		$args = $this->build_query_args($args);
 		return query_posts($args);
 	}
@@ -339,8 +338,8 @@ class Projects {
 	 * Is single project item
 	 */
 	public function is_project() {
-		global $post;
-		if(isset($post) && is_single($post) && $post->post_type == self::$post_type) {
+		global $wp_query;
+		if($wp_query->is_single == true && $wp_query->get('post_type') == self::$post_type) {
 			return true;
 		}
 		return false;
@@ -351,7 +350,7 @@ class Projects {
 	 */
 	public function is_projects_page() {
 		global $wp_query;
-		if($wp_query->get('page_id') == get_option('projects_base_page_id') || $wp_query->get('page_id') == get_option('page_on_front') || is_post_type_archive(self::$post_type)) {
+		if(($wp_query->get('page_id') == get_option('projects_base_page_id') || $wp_query->get('page_id') == get_option('page_on_front')) && !$this->is_project()) {
 			return true;
 		}
 		return false;
