@@ -3,26 +3,26 @@
 */
 
 #adminmenu #menu-posts-project .wp-menu-image {
-	background-image: url("../images/projects-icon.png");
-	background-position: 6px 6px;
+	background-image: url("../images/menu.png");
+	background-position: 0px -3px;
 }
 #adminmenu #menu-posts-project:hover .wp-menu-image, #adminmenu #menu-posts-project.wp-menu-open .wp-menu-image {
-	background-position: 6px -16px;
+	background-position: 0px -35px;
 }
 #adminmenu #menu-posts-project .wp-submenu-wrap li a span.current {
 	color: #333;
 	font-weight: bold;
 }
 #icon-edit.icon32-posts-project {
-	background-image: url("../images/projects-32x32.png");
-	background-position: 2px -4px;
+	background-image: url("../images/screen.png");
+	background-position: -4px -7px;
 }
 body.taxonomy-group .wrap #icon-edit.icon32,
 body.taxonomy-group .wrap h2 {
 	display: none;
 }
 body.taxonomy-group #icon-edit.icon32-posts-project {
-	background-position: 2px 0px;
+	background-position: -4px -3px;
 }
 
 /*
