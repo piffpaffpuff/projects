@@ -160,7 +160,7 @@ class Projects {
 		wp_enqueue_script('jquery-ui-core');
 		wp_enqueue_script('jquery-ui-sortable');
 		wp_enqueue_script('minicolors', self::$plugin_directory_url . 'js/jquery.miniColors.min.js', array('jquery'));
-		wp_enqueue_script('projects', self::$plugin_directory_url . 'js/script.js', array('jquery'));
+		wp_enqueue_script('projects', self::$plugin_directory_url . 'js/script.js', array('jquery', 'jquery-ui-core', 'jquery-ui-sortable', 'minicolors'));
 	}
 
 	/**
