@@ -97,7 +97,7 @@ class Projects_Type {
 			'supports' => array('title', 'editor', 'excerpt', 'post-formats'),
 			'capability_type' => 'post',
 			'rewrite' => array('slug' => $projects_installation->slug),
-			'menu_position' => 4,
+			'menu_position' => 5,
 			'has_archive' => true
 		); 
 		
