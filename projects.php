@@ -226,7 +226,7 @@ class Projects {
 	 * Hook into the main query to get projects
 	 */
 	public function projects_page_query($wp_query) {
-    	if($wp_query->is_main_query() && $this->is_projects_page()) {
+ 		if($wp_query->is_main_query() && $this->is_projects_page()) {
     		// set the default query args
     		$args = $this->build_query_args();
     		foreach($args as $key => $value) {
@@ -234,7 +234,8 @@ class Projects {
     		}
 			
 			// set the page type to is_archive because it
-			// makes the page consistant with archives.
+			// makes the projects page consistant with 
+			// post type archives.
 			$wp_query->set('page_id', 0);
 			$wp_query->is_page = '';
         	$wp_query->is_singular = '';
@@ -350,7 +351,8 @@ class Projects {
 	 */
 	public function is_projects_page() {
 		global $wp_query;
-		if(($wp_query->get('page_id') == get_option('projects_base_page_id') || $wp_query->get('page_id') == get_option('page_on_front')) && !$this->is_project()) {
+		$page_id = $wp_query->get('page_id');
+ 		if((isset($page_id) && $page_id == get_option('projects_base_page_id')) || is_post_type_archive(self::$post_type)) {
 			return true;
 		}
 		return false;
