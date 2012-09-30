@@ -66,6 +66,7 @@ class Projects {
 	 * Include the classes
 	 */
 	public function includes() {
+		require_once(ABSPATH . WPINC . '/class-oembed.php');
 		require_once('library/classes/class-projects-countries.php');	
 		require_once('library/classes/class-projects-installation.php');	
 		require_once('library/classes/class-projects-type.php');	
@@ -470,6 +471,9 @@ function project_gallery_media($size = 'large', $post_id = null, $mime = null) {
 				?>
 				<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
 				<img src="<?php echo $attachment_src[0]; ?>" />
+			</li><?php elseif($projects->writepanel->is_mime_type($attachment->post_mime_type, 'embed')) : ?>
+			<li>
+				<?php echo $projects->writepanel->get_embed_html($attachment->embed_url); ?>
 			</li><?php elseif($projects->writepanel->is_mime_type($attachment->post_mime_type, 'video|m4v|mp4|ogv|webm')) : ?>
 			<li>
 				<video src="<?php echo wp_get_attachment_url($attachment->ID); ?>" controls></video>
@@ -484,7 +488,7 @@ function project_gallery_media($size = 'large', $post_id = null, $mime = null) {
 }
 
 /**
- * Show the featured image
+ * Show the featured image. It displays only web images.
  */
 function project_featured_media($size = 'thumbnail', $post_id = null) {
 	global $projects;
@@ -492,8 +496,8 @@ function project_featured_media($size = 'thumbnail', $post_id = null) {
 	$attachments = get_project_featured_media($post_id);
 
 	?>
- 	<?php foreach($attachments as $attachment) : ?><?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
- 		<img src="<?php echo $attachment_src[0]; ?>" /><?php endforeach; ?>
+ 	<?php foreach($attachments as $attachment) : ?><?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?><?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
+ 		<img src="<?php echo $attachment_src[0]; ?>" /><?php endif; ?><?php endforeach; ?>
 	<?php
 }
 
