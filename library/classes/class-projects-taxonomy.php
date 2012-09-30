@@ -163,7 +163,44 @@ class Projects_Taxonomy {
 
 		return get_taxonomies($args, $type);
 	}
-
+	
+	/**
+	 * Get a project taxonomy
+	 */	
+	public function get_project_taxonomy($post_id, $key, $hierarchical = true, $args = null) {	
+		$projects = new Projects();	
+		$taxonomy = $projects->get_internal_name($key);
+		$terms = wp_get_object_terms($post_id, $taxonomy, $args); 
+		
+		if(!is_wp_error($terms) && sizeof($terms) > 0) {
+			// return the flat tree
+			if(!$hierarchical) {
+				return $terms;
+			}
+			
+			// return the hierarchical tree		
+			$childs = array();
+		
+			// find all childs
+			foreach($terms as $term) {
+				$childs[$term->parent][] = $term;
+			}
+		
+			// cascade all childs
+			foreach($terms as $term) {
+				if (isset($childs[$term->term_id])) {
+					$term->childs = $childs[$term->term_id];
+				}
+			}
+		
+			// flat the childs tree by its base node
+			$tree = $childs[0];
+			
+			return $tree;
+		}
+	
+		return;
+	}
 }
 }
 

@@ -44,6 +44,7 @@ class Projects {
 	public $taxonomy;
 	public $taxonomy_group;
 	public $writepanel;
+	public $media;
 	public $settings;
 	
 	public $order_sort_key;
@@ -74,6 +75,7 @@ class Projects {
 		require_once('library/classes/class-projects-taxonomy-group.php');	
 		require_once('library/classes/class-projects-walkers.php');
 		require_once('library/classes/class-projects-writepanel.php');	
+		require_once('library/classes/class-projects-media.php');	
 		require_once('library/classes/class-projects-settings.php');
 	}
 	
@@ -90,6 +92,7 @@ class Projects {
 		$this->taxonomy = new Projects_Taxonomy();
 		$this->type = new Projects_Type();
 		$this->writepanel = new Projects_Writepanel();
+		$this->media = new Projects_Media();
 		$this->settings = new Projects_Settings();
 	
 		// load all hooks of the instances		
@@ -98,6 +101,7 @@ class Projects {
 		$this->taxonomy->load();
 		$this->type->load();
 		$this->writepanel->load();
+		$this->media->load();
 		$this->settings->load();
 		
 		// load hooks
@@ -450,7 +454,7 @@ function get_projects($args = null) {
  */
 function get_project_gallery_media($post_id = null, $mime = null) {
 	global $projects;
-	return $projects->writepanel->get_project_gallery_media($post_id, $mime);
+	return $projects->media->get_project_gallery_media($post_id, $mime);
 }
 
 /**
@@ -458,7 +462,7 @@ function get_project_gallery_media($post_id = null, $mime = null) {
  */
 function get_project_featured_media($post_id = null, $mime = null) {
 	global $projects;
-	return $projects->writepanel->get_project_featured_media($post_id, $mime);
+	return $projects->media->get_project_featured_media($post_id, $mime);
 }
 
 /**
@@ -471,7 +475,7 @@ function project_gallery_media($size = 'large', $post_id = null, $mime = null) {
 	
 	?>
 	<ul class="project-gallery-media">
-		<?php foreach($attachments as $attachment) : ?><?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?><li>
+		<?php foreach($attachments as $attachment) : ?><?php if($projects->media->is_web_image($attachment->post_mime_type)) : ?><li>
 				<?php 				
 				// overwrite the size when the attachment has set a custom one
 				if(!empty($attachment->default_size)) {
@@ -482,13 +486,13 @@ function project_gallery_media($size = 'large', $post_id = null, $mime = null) {
 				?>
 				<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
 				<img src="<?php echo $attachment_src[0]; ?>" />
-			</li><?php elseif($projects->writepanel->is_mime_type($attachment->post_mime_type, 'embed')) : ?>
+			</li><?php elseif($projects->media->is_mime_type($attachment->post_mime_type, 'embed')) : ?>
 			<li>
-				<?php echo $projects->writepanel->get_embed_html($attachment->embed_url); ?>
-			</li><?php elseif($projects->writepanel->is_mime_type($attachment->post_mime_type, 'video|m4v|mp4|ogv|webm')) : ?>
+				<?php echo $projects->media->get_embed_html($attachment->embed_url); ?>
+			</li><?php elseif($projects->media->is_mime_type($attachment->post_mime_type, 'video|m4v|mp4|ogv|webm')) : ?>
 			<li>
 				<video src="<?php echo wp_get_attachment_url($attachment->ID); ?>" controls></video>
-			</li><?php elseif($projects->writepanel->is_mime_type($attachment->post_mime_type, 'audio|m4a|mp3|oga|wav')) : ?>
+			</li><?php elseif($projects->media->is_mime_type($attachment->post_mime_type, 'audio|m4a|mp3|oga|wav')) : ?>
 			<li>
 				<audio src="<?php echo wp_get_attachment_url($attachment->ID); ?>" controls></audio>
 			</li><?php else : ?>
@@ -507,7 +511,7 @@ function project_featured_media($size = 'thumbnail', $post_id = null) {
 	$attachments = get_project_featured_media($post_id);
 
 	?>
- 	<?php foreach($attachments as $attachment) : ?><?php if($projects->writepanel->is_web_image($attachment->post_mime_type)) : ?><?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
+ 	<?php foreach($attachments as $attachment) : ?><?php if($projects->media->is_web_image($attachment->post_mime_type)) : ?><?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
  		<img src="<?php echo $attachment_src[0]; ?>" /><?php endif; ?><?php endforeach; ?>
 	<?php
 }
@@ -517,7 +521,7 @@ function project_featured_media($size = 'thumbnail', $post_id = null) {
  */
 function get_project_taxonomy($key, $hierarchical = true, $args = null) {
 	global $projects, $post;
-	$terms = $projects->writepanel->get_project_taxonomy($post->ID, $key, $hierarchical, $args);
+	$terms = $projects->taxonomy->get_project_taxonomy($post->ID, $key, $hierarchical, $args);
 	return $terms;
 }
 
