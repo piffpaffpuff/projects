@@ -379,6 +379,17 @@ class Projects {
 	}
 	
 	/**
+	 * Set the meta value from a key
+	 */
+	public function set_project_meta($key, $value, $post_id = null) {
+		if(empty($post_id)) {
+			global $post;
+			$post_id = $post->ID;
+		}
+		return update_post_meta($post_id, $this->get_internal_name($key, true), $value);
+	}
+	
+	/**
 	 * Check if the key is prefixed with a 'project' string
 	 */	
 	public function is_internal_name($key) {

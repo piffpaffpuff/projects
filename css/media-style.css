@@ -2,7 +2,9 @@
 #media-items .savesend input[type=submit] {
     display:none;
 }
-
+#media-items .describe .del-link {
+	padding-left: 0px;
+}
 .projects-featured-media-state {
 	color: #333;
 	float: right;

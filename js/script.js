@@ -4,17 +4,7 @@ jQuery(document).ready(function($) {
 			
 	// color picker
 	$('input.minicolors').miniColors();
-	
-	// make the images clickable. maybe this will be later replaced. 
-	$('#projects-gallery-media-list').on('click', function(event) {
-		$('#projects-gallery-media-add').trigger('click');		
-		event.preventDefault();
-	});
-	$('#projects-featured-media-list').on('click', function(event) {
-		$('#projects-featured-media-add').trigger('click');
-		event.preventDefault();
-	});
-	
+		
 	// reload the media list on thickbox close 
 	$('#TB_overlay, #TB_closeWindowButton').live('mouseup', function(event) {
 		load_media_list('featured');

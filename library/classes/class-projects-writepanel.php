@@ -48,7 +48,20 @@ class Projects_Writepanel {
 		add_action('wp_ajax_validate_media_url_item', array($this, 'validate_media_url_item_ajax'));
 		add_filter('upload_mimes', array($this, 'add_mime_types'));
 		
+		add_filter('icon_dir', array($this, 'attachment_mime_icons_path'));
+		add_filter('icon_dir_uri', array($this, 'attachment_mime_icons_url'));
+		
 		add_action('save_post', array($this, 'save_box_data'));
+	}
+	
+	/**
+	 * Replace the default file icons with some nicer ones
+	 */
+	function attachment_mime_icons_path($directory) {
+		return Projects::$plugin_directory_path . '/images/icons'; 
+	}
+	function attachment_mime_icons_url($directory) {
+		return Projects::$plugin_directory_url . '/images/icons'; 
 	}
 	
 	/**
@@ -95,7 +108,7 @@ class Projects_Writepanel {
 		// Save the attachment
 		$error = false;
 		if(!empty($_POST) && isset($_POST['projects_media_url_add'])) {
-			if(empty($_POST['projects_media_url_source']) || $this->get_embed_data($_POST['projects_media_url_source']) === false) {
+			if(empty($_POST['projects_media_url_source']) || $this->get_embed($_POST['projects_media_url_source']) == false) {
 				$error = true;
 			} else {
 				$this->create_media_url_item($_POST['post_id'], $_POST['projects_media_url_source']);
@@ -155,7 +168,7 @@ class Projects_Writepanel {
 		}
 
 		// Get the oembed
-		$data = $this->get_embed_data($_POST['url']);		
+		$data = $this->get_embed($_POST['url']);
 		if(empty($data)) {
 			die();
 		}
@@ -165,56 +178,56 @@ class Projects_Writepanel {
 	}
 	
 	/**
-	 * Validate a media url item
+	 * Return the data of an oembed item instead of the html
 	 */
-	public function get_embed_data($url = null) {	
+	public function parse_oembed_data($html, $data, $url) {
+		return $data;
+	}
+	
+	/**
+	 * Get an oembed data object or html
+	 */
+	public function get_embed($url = null, $html = false) {		
 		// Internally oEmbed is used to embed media
 		// http://codex.wordpress.org/Embeds
 		// Use wp_oembed_add_provider() to add more
 		// providers to the whitelist.
-	
+		
 		// Check if the url is set
 		if(empty($url)) {
 			return false;
 		}
 		
-		// Check if the media url can be embedded
-		$oembed = _wp_oembed_get_object();
-		$provider = false;
-		$args = array(
-			'discover' => true
-		);
-		foreach($oembed->providers as $matchmask => $data) {
-			list($providerurl, $regex) = $data;
-			// Turn the asterisk-type provider URLs into regex
-			if(!$regex) {
-				$matchmask = '#' . str_replace('___wildcard___', '(.+)', preg_quote(str_replace('*', '___wildcard___', $matchmask), '#' )) . '#i';
+		// Check if the media url can be embedded,
+		// when the url can't be embedded:
+		// $data is false when returned as object
+		// or an empty string when returned as html.
+		if($html) {
+			// Get the html from the cache
+			$projects = new Projects();
+			$cache = $projects->get_project_meta('embed_' . md5($url));
+			if($cache) {
+				return $cache;
 			}
-			if(preg_match($matchmask, $url)) {
-				// JSON is easier to deal with than XML
-				$provider = str_replace('{format}', 'json', $providerurl);
-				break;
-			}
+			
+			// Get the html from discovery
+			$data = wp_oembed_get($url);
+			return $data;
+		} else {
+			// Get the data object
+			add_filter('oembed_dataparse', array($this, 'parse_oembed_data'), 10, 3);
+			$data = wp_oembed_get($url);
+			remove_filter('oembed_dataparse', array($this, 'parse_oembed_data'), 10, 3);
+			return $data;
 		}
-		if (!$provider) {
-			$provider = $oembed->discover($url);
-		}
-		
-		// create the data
-		$data = $oembed->fetch($provider, $url, $args);
-		if(!$provider || $data === false) {
-			return false;
-		}
-		return $data;
+		return false;
 	}
 	
 	/**
-	 * Create oembed html
+	 * Get an oembed html
 	 */
-	public function get_embed_html($url) {	
-		$data = $this->get_embed_data($url);
-		$oembed = _wp_oembed_get_object();
-		return $oembed->data2html($data, $url);
+	public function get_embed_html($url) {
+		return $this->get_embed($url, true);
 	}
 	
 	/**
@@ -222,7 +235,7 @@ class Projects_Writepanel {
 	 */
 	public function create_media_url_item($parent_post_id, $url) {	
 		// Check if the media can be embedded
-		$data = $this->get_embed_data($url);
+		$data = $this->get_embed($url);
 		if(empty($data)) {
 			return;
 		}
@@ -242,8 +255,14 @@ class Projects_Writepanel {
 		$args = wp_parse_args($args, $default_args);
 		
 		// Create meta and attachment
+		$projects = new Projects();
 		$attachment_id = wp_insert_attachment($args, false, $parent_post_id);
-		update_post_meta($attachment_id, '_projects_embed_url', $url);
+		$projects->set_project_meta('embed_url', $url, $attachment_id);
+		
+		// Create cache
+		$oembed = _wp_oembed_get_object();
+		$html = $oembed->data2html($data, $url);
+		$projects->set_project_meta('embed_' . md5($url), $html, $parent_post_id);
 	}	
 	
 	/**
@@ -316,10 +335,12 @@ class Projects_Writepanel {
 		}
 
 		// add the embed url
-		$meta = $projects->get_project_meta('embed_url', $post->ID);		
-		$form_fields['projects_embed_url']['label'] = __('Embed URL', 'projects');
-		$form_fields['projects_embed_url']['input'] = 'text';
-		$form_fields['projects_embed_url']['value'] = $meta;
+		if(strpos($post->post_mime_type, 'embed') !== false) {
+			$meta = $projects->get_project_meta('embed_url', $post->ID);		
+			$form_fields['projects_embed_url']['label'] = __('Embed URL', 'projects');
+			$form_fields['projects_embed_url']['input'] = 'html';
+			$form_fields['projects_embed_url']['html'] = '<a href="' . $meta . '" target="_blank">' . $meta . '</a>';
+		}
 		
 		return $form_fields;
 	}
@@ -341,12 +362,6 @@ class Projects_Writepanel {
 		} else {
 			update_post_meta($post['ID'], '_projects_featured_media', $attachment['projects_featured_media']);
   		}
-  		
-  		if($attachment['projects_embed_url'] != get_post_meta($post['ID'], '_projects_embed_url', false)) {
-  			if($this->get_embed_data($attachment['projects_embed_url']) !== false) {
-  				update_post_meta($post['ID'], '_projects_embed_url', $attachment['projects_embed_url']);
-  			}
-  		} 
 		
 		return $post;
 	}
@@ -621,7 +636,7 @@ class Projects_Writepanel {
 		<ul class="projects-media-list hide-if-no-js" id="projects-gallery-media-list">
 		<?php $this->create_media_list(null, self::$media_type_gallery); ?>
 		</ul>
-		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=1" id="projects-gallery-media-add" class="thickbox projects-media-add"><?php _e('Manage Media', 'projects'); ?></a></p>
+		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-gallery-media-add" class="thickbox projects-media-add"><?php _e('Add Media', 'projects'); ?></a></p>
 		<?php
 	}
 	
@@ -635,7 +650,7 @@ class Projects_Writepanel {
 		<ul class="projects-media-list hide-if-no-js" id="projects-featured-media-list">
 		<?php $this->create_media_list(null, self::$media_type_featured); ?>
 		</ul>
-		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=1" id="projects-featured-media-add" class="thickbox projects-media-add"><?php _e('Manage featured Media', 'projects'); ?></a></p>
+		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-featured-media-add" class="thickbox projects-media-add"><?php _e('Add featured Media', 'projects'); ?></a></p>
 		<?php
 	}
 	
@@ -654,15 +669,11 @@ class Projects_Writepanel {
 				$mime = explode('/', strtolower($attachment->post_mime_type)); 
 				$meta = wp_get_attachment_metadata($attachment->ID); ?>
 				<li class="projects-media-item mime-<?php echo $mime[1]; ?> <?php if($mime[0] != 'image') : ?>mime-placeholder<?php endif; ?>">
-					<span class="media-options"></span>
-					<span class="media-content">
-					<?php if($mime[0] == 'image' && $mime[1] != 'embed') : ?>
-						<?php $image = wp_get_attachment_image($attachment->ID, 'project-media-manager'); ?>  		   
-						<?php echo $image; ?>
-					<?php else : ?>
-						<span class="media-type"><?php echo basename(get_attached_file($attachment->ID)); ?></span>
-					<?php endif; ?>
-					</span>
+					<a href="media-upload.php?post_id=<?php echo $post_id; ?>&amp;tab=gallery&amp;TB_iframe=true" class="thickbox">
+						<span class="media-options"></span>
+						<span class="media-content"><?php echo wp_get_attachment_image($attachment->ID, 'project-media-manager', true); ?></span>
+						<span class="media-title"><?php echo esc_html($attachment->post_title); ?></span>
+					</a>
 				</li>
 				<?php
 			}
