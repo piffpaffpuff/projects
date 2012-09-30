@@ -91,8 +91,8 @@ class Projects {
 		$this->taxonomy_group = new Projects_Taxonomy_Group();
 		$this->taxonomy = new Projects_Taxonomy();
 		$this->type = new Projects_Type();
-		$this->writepanel = new Projects_Writepanel();
 		$this->media = new Projects_Media();
+		$this->writepanel = new Projects_Writepanel();
 		$this->settings = new Projects_Settings();
 	
 		// load all hooks of the instances		
@@ -100,8 +100,8 @@ class Projects {
 		$this->taxonomy_group->load();
 		$this->taxonomy->load();
 		$this->type->load();
-		$this->writepanel->load();
 		$this->media->load();
+		$this->writepanel->load();
 		$this->settings->load();
 		
 		// load hooks

@@ -210,10 +210,10 @@ class Projects_Type {
 					$thumbnail_id = null;
 					
 					// load the first attachment that is an image
-					$projects_writepanel = new Projects_Writepanel();
-					$attachments = $projects_writepanel->get_project_featured_media();					
+					$projects_media = new Projects_Media();
+					$attachments = $projects_media->get_project_featured_media();					
 					foreach($attachments as $attachment) {
-						if($projects_writepanel->is_web_image($attachment->post_mime_type)) {
+						if($projects_media->is_web_image($attachment->post_mime_type)) {
 							$thumbnail_id = $attachment->ID;
 							break;
 						}
