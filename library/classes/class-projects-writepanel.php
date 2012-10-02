@@ -88,10 +88,13 @@ class Projects_Writepanel {
 			<p class="form-fieldset"><label><span><?php _e('Country', 'projects'); ?></span></label><select name="projects[country]">
 				<?php 
 				$countries = new Projects_Countries();
-				$option = get_option('projects_selected_country'); 
+				$meta = $projects->get_project_meta('country');
+				if(empty($meta)) {
+					$meta = get_option('projects_selected_country'); 
+				}
 				?>
 				<?php foreach($countries->world as $code => $name) : ?>
-					<option value="<?php echo $code; ?>" <?php selected($code, $option); ?>><?php printf(__('%s', 'projects'), $name); ?></option>
+					<option value="<?php echo $code; ?>" <?php selected($code, $meta); ?>><?php printf(__('%s', 'projects'), $name); ?></option>
 				<?php endforeach; ?>
 			</select></p>
 			<input type="hidden" name="projects[lat]" value="<?php echo $lat; ?>">
@@ -403,33 +406,20 @@ class Projects_Writepanel {
 			// create a date entry to make querying by month or year easy 
 			$_POST['projects']['date'] = mktime(0, 0, 0, $_POST['projects']['month'], 1, $_POST['projects']['year']);
 			
-			// query map service to geocode the location			
-			if(!empty($_POST['projects']['address']) && !empty($_POST['projects']['postal_code']) && !empty($_POST['projects']['city'])) {
+			// query map service to geocode the location		
+			$projects_geocode = new Projects_Geocode();	
+			if(!empty($_POST['projects']['address']) || !empty($_POST['projects']['postal_code']) || !empty($_POST['projects']['city'])) {
 				$address = urlencode($_POST['projects']['address'] . ', ' . $_POST['projects']['postal_code'] . ' ' . $_POST['projects']['city']);
-				$url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=' . $address;
-				$curl = curl_init();
-				
-				// query the api and read the json file
-				curl_setopt ($curl, CURLOPT_URL, $url);
-				curl_setopt ($curl, CURLOPT_RETURNTRANSFER, 1);
-				curl_setopt ($curl, CURLOPT_CONNECTTIMEOUT, 5);
-				$json = curl_exec($curl);
-				curl_close($curl);
-				
-				$json = json_decode($json);
+				$geocode = $projects_geocode->geocode_address($address);
 				
 				// set lat lng
-				if(!empty($json->results)) {
-					$_POST['projects']['lat'] = $json->results[0]->geometry->location->lat;
-					$_POST['projects']['lng'] = $json->results[0]->geometry->location->lng;
-				} else {
-					$_POST['projects']['lat'] = null;
-					$_POST['projects']['lng'] = null;
-				}
+				$_POST['projects']['latitude_longitude'] = array($geocode->latitude, $geocode->longitude);
 			} else {
-				$_POST['projects']['lat'] = null;
-				$_POST['projects']['lng'] = null;
+				$_POST['projects']['latitude_longitude'] = null;
 			}
+			
+			// clear the transcient cache
+			$projects_geocode->clear_geocodes_meta_cache();
 			
 			// save the terms of every taxonomy group
 			$taxonomy_groups = $projects_taxonomy_group->get_added_taxonomy_group();

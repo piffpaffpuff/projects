@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Writepanel class
+ * Media class
  */
 if (!class_exists('Projects_Media')) {
 class Projects_Media {
@@ -45,6 +45,7 @@ class Projects_Media {
 		add_filter('media_upload_media_url', array($this, 'add_tab_media_url'));
 		add_filter('attachment_fields_to_edit', array($this, 'edit_media_options'), 15, 2);
 		add_filter('attachment_fields_to_save', array($this, 'save_media_options'), 15, 2);
+		add_action('delete_attachment', array($this, 'delete_embed_thumbnail'));
 		
 		add_action('wp_ajax_validate_media_url_item', array($this, 'validate_media_url_item_ajax'));
 	}
@@ -138,7 +139,7 @@ class Projects_Media {
 		$form_action_url = admin_url('media-upload.php?tab=media_url&post_id=' . $post_id);
 		$form_class = 'media-url-form type-form validate';
 	    ?>
-	    <form enctype="multipart/form-data" method="post" action="<?php echo esc_attr($form_action_url); ?>" class="<?php echo $form_class; ?>" id="<?php echo $type; ?>-form">
+	    <form method="post" action="<?php echo esc_attr($form_action_url); ?>" class="<?php echo $form_class; ?>" id="<?php echo $type; ?>-form">
 		    <input type="hidden" name="post_id" id="post_id" value="<?php echo (int) $post_id; ?>" />
 		    <?php wp_nonce_field(Projects::$plugin_basename, 'projects_media_url_nonce'); ?>
 		    <h3 class="media-title"><?php _e('Add media from another website', 'projects'); ?></h3>
@@ -186,6 +187,7 @@ class Projects_Media {
 
 		// Get the oembed
 		$data = $this->get_embed($_POST['url']);
+		print_r($data);
 		if(empty($data)) {
 			die();
 		}
@@ -268,18 +270,57 @@ class Projects_Media {
 			'post_status' => 'inherit'
 		);
 
-		// merge the default and additional args
+		// Merge the default and additional args
 		$args = wp_parse_args($args, $default_args);
 		
-		// Create meta and attachment
-		$projects = new Projects();
+		// Create attachment
 		$attachment_id = wp_insert_attachment($args, false, $parent_post_id);
-		$projects->set_project_meta('embed_url', $url, $attachment_id);
 		
-		// Create cache
+		// Do not continue when the attachment couldn't be created
+		if(is_wp_error($attachment_id)) {
+			return;
+		}
+		
+		// Potenitally save a thumbnail as child of the
+		// embedded attachment item.
+		/*if(isset($data->thumbnail_url)) {
+			if(isset($data->url)) {
+				$url = $data->url;
+			} else {
+				$url = $data->thumbnail_url;
+			}
+			$tmp = download_url($url);
+		
+			// Set variables for storage
+			$path = parse_url($url, PHP_URL_PATH);
+			$basename = pathinfo($path, PATHINFO_BASENAME);			
+			$file_array['name'] = $basename;
+			$file_array['tmp_name'] = $tmp;
+		
+			// If error storing temporarily, unlink
+			if(is_wp_error($tmp)) {
+				@unlink($file_array['tmp_name']);
+				$file_array['tmp_name'] = '';
+			}
+		
+			// Do the validation and storage stuff
+			$thumbnail_id = media_handle_sideload($file_array, $attachment_id);
+		
+			// If error storing permanently, unlink
+			if(is_wp_error($thumbnail_id)) {
+				@unlink($file_array['tmp_name']);
+				return;
+			}
+		}*/
+		
+		// Create meta and cache
 		$oembed = _wp_oembed_get_object();
 		$html = $oembed->data2html($data, $url);
+		$projects = new Projects();
 		$projects->set_project_meta('embed_' . md5($url), $html, $parent_post_id);
+		$projects->set_project_meta('embed_url', $url, $attachment_id);
+		$projects->set_project_meta('embed_type', $data->type, $attachment_id);
+		//$projects->set_project_meta('embed_thumbnail_id', $thumbnail_id, $attachment_id);
 	}	
 	
 	/**
@@ -352,11 +393,22 @@ class Projects_Media {
 		}
 
 		// add the embed url
-		if(strpos($post->post_mime_type, 'embed') !== false) {
-			$meta = $projects->get_project_meta('embed_url', $post->ID);		
+		$embed_url = $projects->get_project_meta('embed_url', $post->ID);
+		if($embed_url) {
 			$form_fields['projects_embed_url']['label'] = __('Embed URL', 'projects');
 			$form_fields['projects_embed_url']['input'] = 'html';
-			$form_fields['projects_embed_url']['html'] = '<a href="' . $meta . '" target="_blank">' . $meta . '</a>';
+			$form_fields['projects_embed_url']['html'] = '<a href="' . $embed_url . '" target="_blank">' . $embed_url . '</a>';
+			
+			$embed_type = $projects->get_project_meta('embed_type', $post->ID);
+			$form_fields['projects_embed_type']['label'] = __('Embed Type', 'projects');
+			$form_fields['projects_embed_type']['input'] = 'html';
+			$form_fields['projects_embed_type']['html'] = '<label>' . ucfirst($embed_type) . '</label>';
+			
+			// generate thumbnail to display
+			//$embed_thumbnail_id = $projects->get_project_meta('embed_thumbnail_id', $post->ID);
+			//$form_fields['projects_embed_thumbnail']['label'] = __('Embed Thumbnail', 'projects');
+			//$form_fields['projects_embed_thumbnail']['input'] = 'html';
+			//$form_fields['projects_embed_thumbnail']['html'] = wp_get_attachment_link($embed_thumbnail_id, array(200, 200), true);
 		}
 		
 		return $form_fields;
@@ -381,6 +433,25 @@ class Projects_Media {
   		}
 		
 		return $post;
+	}
+	
+	/**
+	 * Delete the media item child posts
+	 */
+	public function delete_embed_thumbnail($post_id) {
+		$args = array( 
+		    'post_parent' => $post_id,
+		    'post_type'   => 'attachment', 
+		    'numberposts' => -1, 
+		    'post_status' => 'inherit'
+		);
+		$posts = get_children($args);
+		if(is_array($posts) && count($posts) > 0) {
+		    // Delete all the children of the attachment
+		    foreach($posts as $post) {
+		        wp_delete_post($post->ID, true);
+		    }
+		}
 	}
 	
 	/**
@@ -438,9 +509,12 @@ class Projects_Media {
 			// set the default properties
 			if($this->is_web_image($attachment->post_mime_type)) {		
 				$attachment->default_size = $projects->get_project_meta('default_image_size', $attachment->ID);
+			} else {
+				$attachment->default_size = null;
 			}
 			$attachment->featured = (bool) $projects->get_project_meta('featured_media', $attachment->ID);		
 			$attachment->embed_url = $projects->get_project_meta('embed_url', $attachment->ID);
+			//$attachment->embed_thumbnail_id = $projects->get_project_meta('embed_thumbnail_id', $attachment->ID);
 
 			// remove images
 			if(!empty($type) && $type == Projects_Media::$media_type_featured) {
@@ -478,6 +552,7 @@ class Projects_Media {
 
 		return $attachments;
 	}
+	
 }
 }
 

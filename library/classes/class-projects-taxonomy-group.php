@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Taxonomy class
+ * Taxonomy group class
  */
 
 /**

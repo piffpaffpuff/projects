@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Load class
+ * Installation class
  */
 if (!class_exists('Projects_Installation')) {
 class Projects_Installation {

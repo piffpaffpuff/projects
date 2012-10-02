@@ -41,6 +41,7 @@ class Projects {
 	
 	public $installation;
 	public $type;
+	public $geocode;
 	public $taxonomy;
 	public $taxonomy_group;
 	public $writepanel;
@@ -71,6 +72,7 @@ class Projects {
 		require_once('library/classes/class-projects-countries.php');	
 		require_once('library/classes/class-projects-installation.php');	
 		require_once('library/classes/class-projects-type.php');	
+		require_once('library/classes/class-projects-geocode.php');	
 		require_once('library/classes/class-projects-taxonomy.php');	
 		require_once('library/classes/class-projects-taxonomy-group.php');	
 		require_once('library/classes/class-projects-walkers.php');
@@ -88,6 +90,7 @@ class Projects {
 		
 		// construct the instances 
 		$this->installation = new Projects_Installation();
+		$this->geocode = new Projects_Geocode();
 		$this->taxonomy_group = new Projects_Taxonomy_Group();
 		$this->taxonomy = new Projects_Taxonomy();
 		$this->type = new Projects_Type();
@@ -97,6 +100,7 @@ class Projects {
 	
 		// load all hooks of the instances		
 		$this->installation->load();
+		$this->geocode->load();
 		$this->taxonomy_group->load();
 		$this->taxonomy->load();
 		$this->type->load();
@@ -562,6 +566,18 @@ function project_website($name = null, $target = '_blank') {
 		<a href="<?php echo $url; ?>" title="<?php esc_attr($name); ?>" <?php echo $url_target; ?>><?php echo $name; ?></a>
 		<?
 	}
+}
+
+/**
+ * Get geocode from project
+ */
+function get_project_geocode() {
+}
+
+/**
+ * Get all geocodes from all projects
+ */
+function get_projects_geocodes() {
 }
 
 /**
