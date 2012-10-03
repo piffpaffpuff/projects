@@ -579,9 +579,9 @@ function get_project_geocode() {
 /**
  * Get all geocodes from all projects
  */
-function get_projects_feed_georss_url() {
+function get_projects_georss_feed_url() {
 	global $projects;
-	return get_site_url() . '/?feed=' . $projects->geocode->feed_name; 
+	return $projects->geocode->feed_url; 
 }
 
 /**

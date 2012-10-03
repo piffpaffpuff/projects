@@ -7,13 +7,15 @@ if (!class_exists('Projects_Geocode')) {
 class Projects_Geocode {
 	
 	public $feed_name;
+	public $feed_url;
 	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		// http://www.domain.com/?feed=georss
-		$this->feed_name = 'projects_georss';
+		// http://www.domain.com/?feed=georss&post_type=project
+		$this->feed_name = 'georss';
+		$this->feed_url = esc_url(get_site_url() . '/?feed=' . $this->feed_name . '&post_type=' . Projects::$post_type);
 	}
 
 	/**
@@ -27,9 +29,9 @@ class Projects_Geocode {
 	 * Hook into the main hooks
 	 */
 	public function hook_init() {
-   		add_action('pre_get_posts', array($this, 'edit_feed_query'), 20);
+		add_feed( $this->feed_name, array( $this, 'generate_georss' ) );
+		add_action('pre_get_posts', array($this, 'edit_feed_query'), 20);
    		add_filter('post_limits', array($this, 'edit_feed_posts_per_page'));
-		add_feed($this->feed_name, array($this, 'generate_georss'));	
 	}	
 	
 	/**
@@ -38,7 +40,7 @@ class Projects_Geocode {
 	 * lon as meta.
 	 */
 	public function edit_feed_query($wp_query) {
-		if(!is_admin() && $wp_query->is_main_query() && $wp_query->is_feed == true && $wp_query->get('feed') == $this->feed_name) {
+		if($this->is_projects_georss_feed()) {
 			$projects = new Projects();
 			
 			// query posts with lat lon meta
@@ -96,14 +98,13 @@ class Projects_Geocode {
 		      xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
 		      xmlns:georss="http://www.georss.org/georss"
 		      xmlns:woe="http://where.yahooapis.com/v1/schema.rng"
+		      xmlns:flickr="urn:flickr:user"
 		      xmlns:media="http://search.yahoo.com/mrss/">
-			<title><?php echo get_post(get_option('projects_base_page_id'))->post_title; echo ' - '; bloginfo_rss('name'); ?></title>
+		    
+		    <title><?php echo get_post(get_option('projects_base_page_id'))->post_title; echo ' - '; bloginfo_rss('name'); ?></title>
 			<subtitle><?php the_category_rss(); ?></subtitle>
-			<link href="<?php self_link(); ?>" />
+			<link rel="alternate" type="text/html" href="<?php echo $this->feed_url; ?>" />
 			<updated><?php echo mysql2date('D, d M Y H:i:s +0000', get_lastpostmodified('GMT'), false); ?></updated>
-			<author>
-				<name><?php bloginfo('name'); ?></name>
-			</author>
 			<?php while( have_posts()) : the_post(); ?>
 				<?php 
 				global $post;
@@ -114,10 +115,10 @@ class Projects_Geocode {
 				<?php if($latitude && $longitude) : ?>
 				<entry>
 					<title><?php the_title_rss() ?></title>
-					<link href="<?php the_permalink_rss() ?>"/>
+					<link rel="alternate" type="text/html" href="<?php the_permalink_rss() ?>"/>
 					<published><?php echo mysql2date('r', get_the_time('Y-m-d H:i:s')); ?></published>
 					<updated><?php echo mysql2date('r', get_the_modified_time('Y-m-d H:i:s')); ?></updated>
-					<content type="html"><![CDATA[<div class="window"><a href="<?php the_permalink_rss() ?>"><?php _e('Read original', 'projects'); ?></a></div>]]></content>
+					<content type="html"><![CDATA[Inhalt]]></content>
 					<georss:point><?php echo $latitude_longitude ?></georss:point>
 					<geo:lat><?php echo $latitude ?></geo:lat>
 					<geo:long><?php echo $longitude ?></geo:long>
@@ -126,6 +127,17 @@ class Projects_Geocode {
 			<?php endwhile; ?>
 		</feed>
 		<?php
+	}
+	
+	/**
+	 * Check if projects georss feed
+	 */
+	function is_projects_georss_feed() {
+		global $wp_query;
+		if(!is_admin() && $wp_query->is_main_query() && $wp_query->is_feed == true && $wp_query->get('feed') == $this->feed_name && $wp_query->get('post_type') == Projects::$post_type) {
+			return true;
+		} 
+		return false;
 	}
 	
 	/**
