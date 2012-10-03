@@ -5,31 +5,127 @@
  */
 if (!class_exists('Projects_Geocode')) {
 class Projects_Geocode {
-
+	
+	public $feed_name;
+	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
+		// http://www.domain.com/?feed=georss
+		$this->feed_name = 'projects_georss';
 	}
 
 	/**
 	 * Load the class hooks
 	 */
 	public function load() {
-		//add_action('init', array($this, 'hook_init'));
-		//add_action('admin_init', array($this, 'hook_admin'));
+		add_action('init', array($this, 'hook_init'));
 	}
 	
 	/**
 	 * Hook into the main hooks
 	 */
 	public function hook_init() {
+   		add_action('pre_get_posts', array($this, 'edit_feed_query'), 20);
+   		add_filter('post_limits', array($this, 'edit_feed_posts_per_page'));
+		add_feed($this->feed_name, array($this, 'generate_georss'));	
 	}	
 	
 	/**
-	 * Hook into the admin hooks
+	 * Modfy the feed query to return an unpaged feed
+	 * with all projects that have a non empty lat and
+	 * lon as meta.
 	 */
-	public function hook_admin() {		
+	public function edit_feed_query($wp_query) {
+		if(!is_admin() && $wp_query->is_main_query() && $wp_query->is_feed == true && $wp_query->get('feed') == $this->feed_name) {
+			$projects = new Projects();
+			
+			// query posts with lat lon meta
+			$default_args = array(
+				'paged' => false,
+				'posts_per_page' => -1,
+				'meta_query' => array(
+					'relation' => 'AND',
+					array(
+						'key' => $projects->get_internal_name('latitude', true),
+						'value' => '',
+						'compare' => '!='
+					),
+					array(
+						'key' => $projects->get_internal_name('longitude', true),
+						'value' => '',
+						'compare' => '!='
+					)
+				)
+			);
+			
+			// set the default query args
+			$args = $projects->build_query_args($default_args);
+			foreach($args as $key => $value) {
+				$wp_query->set($key, $value);
+			}
+		}
+		return $wp_query;
+	}
+	
+	/**
+	 * Display all posts and do not use the syndication setting.
+	 * This has to be done with a filter because wordpress 
+	 * overwrites the wp_query posts_per_page with the default 
+	 * setting. see:
+	 * http://core.trac.wordpress.org/ticket/17853
+	 */
+	public function edit_feed_posts_per_page($limit) {
+		global $wp_query;
+		if(!is_admin() && $wp_query->is_main_query() && $wp_query->is_feed == true && $wp_query->get('feed') == $this->feed_name) {
+			return '';
+		}
+		return $limit;
+	}
+	
+	/**
+	 * Get all lat lon from all projects
+	 */
+	public function generate_georss() {
+		$projects = new Projects();
+		?>
+		<?php echo '<?xml version="1.0" encoding="' . get_option('blog_charset') . '">'; ?>
+		<feed xmlns="http://www.w3.org/2005/Atom"
+		      xmlns:dc="http://purl.org/dc/elements/1.1/"
+		      xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+		      xmlns:georss="http://www.georss.org/georss"
+		      xmlns:woe="http://where.yahooapis.com/v1/schema.rng"
+		      xmlns:media="http://search.yahoo.com/mrss/">
+			<title><?php echo get_post(get_option('projects_base_page_id'))->post_title; echo ' - '; bloginfo_rss('name'); ?></title>
+			<subtitle><?php the_category_rss(); ?></subtitle>
+			<link href="<?php self_link(); ?>" />
+			<updated><?php echo mysql2date('D, d M Y H:i:s +0000', get_lastpostmodified('GMT'), false); ?></updated>
+			<author>
+				<name><?php bloginfo('name'); ?></name>
+			</author>
+			<?php while( have_posts()) : the_post(); ?>
+				<?php 
+				global $post;
+				$latitude = $projects->get_project_meta('latitude', $post->ID);
+				$longitude = $projects->get_project_meta('longitude', $post->ID);
+				$latitude_longitude = $latitude . ' ' . $longitude;
+				?>
+				<?php if($latitude && $longitude) : ?>
+				<entry>
+					<title><?php the_title_rss() ?></title>
+					<link href="<?php the_permalink_rss() ?>"/>
+					<published><?php echo mysql2date('r', get_the_time('Y-m-d H:i:s')); ?></published>
+					<updated><?php echo mysql2date('r', get_the_modified_time('Y-m-d H:i:s')); ?></updated>
+					<content type="html"><![CDATA[<div class="window"><a href="<?php the_permalink_rss() ?>"><?php _e('Read original', 'projects'); ?></a></div>]]></content>
+					<georss:point><?php echo $latitude_longitude ?></georss:point>
+					<geo:lat><?php echo $latitude ?></geo:lat>
+					<geo:long><?php echo $longitude ?></geo:long>
+				</entry>
+				<?php endif; ?>
+			<?php endwhile; ?>
+		</feed>
+		<?php
 	}
 	
 	/**
@@ -38,82 +134,27 @@ class Projects_Geocode {
 	public function get_project_geocode($post_id = null) {
 		if(empty($post_id)) {
 			global $post;
-			if(empty($post)) {
-				return;
-			}
 			$post_id = $post->ID;
 		}
-		
+				
 		// get the lat lon for the post
 		$projects = new Projects();
-		$geocode = $projects->get_project_meta('latitude_longitude', $post_id);
-		if(!empty($geocode)) {
-			$geocode = $this->construct_geocode_object($geocode, $post_id);
+		$latitude = $projects->get_project_meta('latitude', $post_id);
+		$longitude = $projects->get_project_meta('longitude', $post_id);
+		$lat_lon = new stdClass();
+		$lat_lon->latitude = null;
+		$lat_lon->longitude = null;
+		if($latitude && $longitude) {
+			$lat_lon->latitude = $latitude;
+			$lat_lon->longitude = $longitude;
 		}
-		return $geocode;		
+		return $lat_lon;		
 	}
-	
-	/**
-	 * Get all lat lon from all projects
-	 */
-	public function get_geocodes() {
-		global $wpdb;
-				
-		// get the geocodes for all posts from cache or query again 
-		$projects = new Projects();
-		$cache = get_transient('get_geocodes_meta');
-		if($cache) {
-			$results = $cache;
-		} else {		
-			// get presets from all posts
-			$sql = $wpdb->prepare(
-				"SELECT post_id, meta_value 
-				FROM $wpdb->postmeta 
-				WHERE meta_key = %s 
-				AND meta_value <> ''
-				AND meta_value IS NOT NULL
-				GROUP BY post_id", 
-			$projects->get_internal_name('latitude_longitude', true));
-			
-			// query the meta
-			$results = $wpdb->get_results($sql);
-			
-			// cache the query for 7 days
-			set_transient('get_geocodes_meta', $results, 60*60*24*7);
-		}
-		
-		// create a unified geocode element
-		$geocodes = array();
-		foreach($results as $result) {
-			$geocodes[] = $this->construct_geocode_object($result->meta_value, $result->post_id);
-		}
-		return $geocodes;
-	}
-	
-	/**
-	 * Construct unified geocode object
-	 */
-	public function construct_geocode_object($geocode, $post_id) {	
-		$geocode = maybe_unserialize($geocode);
-		$data = array(
-			'post_id' => $post_id,
-			'latitude' => $geocode[0],
-			'longitude' => $geocode[1]
-		);
-		return $data;
-	}	
-	
-	/**
-	 * Clear the meta query cache for the presets
-	 */
-	public function clear_geocodes_meta_cache() {
-		return delete_transient('get_geocodes_meta');
-	}
-		
+
 	/**
 	 * Get lat lon from address
 	 */
-	public function geocode_address($address) {	
+	public function locate_address($address) {	
 		$lat_lon = new stdClass();
 		$lat_lon->latitude = null;
 		$lat_lon->longitude = null;

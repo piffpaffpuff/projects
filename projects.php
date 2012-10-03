@@ -235,7 +235,7 @@ class Projects {
 	 * Hook into the main query to get projects
 	 */
 	public function projects_page_query($wp_query) {
- 		if($wp_query->is_main_query() && $this->is_projects_page()) {
+  		if(!is_admin() && $wp_query->is_main_query() && $this->is_projects_page()) {
     		// set the default query args
     		$args = $this->build_query_args();
     		foreach($args as $key => $value) {
@@ -572,12 +572,16 @@ function project_website($name = null, $target = '_blank') {
  * Get geocode from project
  */
 function get_project_geocode() {
+	global $projects;
+	return $projects->geocode->get_project_geocode();
 }
 
 /**
  * Get all geocodes from all projects
  */
-function get_projects_geocodes() {
+function get_projects_feed_georss_url() {
+	global $projects;
+	return get_site_url() . '/?feed=' . $projects->geocode->feed_name; 
 }
 
 /**

@@ -410,16 +410,15 @@ class Projects_Writepanel {
 			$projects_geocode = new Projects_Geocode();	
 			if(!empty($_POST['projects']['address']) || !empty($_POST['projects']['postal_code']) || !empty($_POST['projects']['city'])) {
 				$address = urlencode($_POST['projects']['address'] . ', ' . $_POST['projects']['postal_code'] . ' ' . $_POST['projects']['city']);
-				$geocode = $projects_geocode->geocode_address($address);
+				$geocode = $projects_geocode->locate_address($address);
 				
 				// set lat lng
-				$_POST['projects']['latitude_longitude'] = array($geocode->latitude, $geocode->longitude);
+				$_POST['projects']['latitude'] = $geocode->latitude;
+				$_POST['projects']['longitude'] = $geocode->longitude;
 			} else {
-				$_POST['projects']['latitude_longitude'] = null;
+				$_POST['projects']['latitude'] = null;
+				$_POST['projects']['longitude'] = null;
 			}
-			
-			// clear the transcient cache
-			$projects_geocode->clear_geocodes_meta_cache();
 			
 			// save the terms of every taxonomy group
 			$taxonomy_groups = $projects_taxonomy_group->get_added_taxonomy_group();
