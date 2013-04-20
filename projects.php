@@ -9,7 +9,7 @@
  * Author URI: https://github.com/piffpaffpuff
  * License: GPL3
  *
- * Copyright (C) 2011 Iwan Negro
+ * Copyright (C) 2013 Triggvy Gunderson
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
