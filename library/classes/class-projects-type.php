@@ -130,7 +130,7 @@ class Projects_Type {
 			} else {
 				$class = '';
 			}
-			$views[$term->name] = sprintf(__('<a href="%s"' . $class . '>%s <span class="count">(%d)</span></a>', 'projects'), admin_url('edit.php?post_type=' . Projects::$post_type . '&' . $taxonomy . '=' . $term->slug), $term->name, $term->count);
+			$views[$term->name] = '<a href="' . admin_url('edit.php?post_type=' . Projects::$post_type . '&' . $taxonomy . '=' . $term->slug) . '"' . $class . '>' . $term->name . ' <span class="count">(' . $term->count . ')</span></a>';
 		}
 
 		return $views;

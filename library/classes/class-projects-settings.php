@@ -93,7 +93,7 @@ class Projects_Settings {
 									$option = get_option('projects_selected_country');
 									?>
 									<?php foreach($projects_countries->world as $code => $name) : ?>
-										<option value="<?php echo $code; ?>" <?php selected($code, $option); ?>><?php printf(__('%s', 'projects'), $name); ?></option>
+										<option value="<?php echo $code; ?>" <?php selected($code, $option); ?>><?php echo $name; ?></option>
 									<?php endforeach; ?>
 								</select>
 							</td>

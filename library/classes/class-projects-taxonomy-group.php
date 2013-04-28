@@ -152,23 +152,23 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 	public function register_taxonomy_groups() {
 		$groups = array(
 			array(
-				'plural_label' => __('Award Names', 'projects'),
-				'singular_label' => __('Award Name', 'projects'),
+				'plural_label' => __('Names', 'projects'),
+				'singular_label' => __('Name', 'projects'),
 				'key' => 'name'
 			),
 			array(
-				'plural_label' => __('Award Years', 'projects'),
-				'singular_label' => __('Award Year', 'projects'),
+				'plural_label' => __('Years', 'projects'),
+				'singular_label' => __('Year', 'projects'),
 				'key' => 'year'
 			),
 			array(
-				'plural_label' => __('Award Categories', 'projects'),
-				'singular_label' => __('Award Category', 'projects'),
+				'plural_label' => __('Categories', 'projects'),
+				'singular_label' => __('Category', 'projects'),
 				'key' => 'category'
 			),
 			array(
-				'plural_label' => __('Award Ranks', 'projects'),
-				'singular_label' => __('Award Rank', 'projects'),
+				'plural_label' => __('Ranks', 'projects'),
+				'singular_label' => __('Rank', 'projects'),
 				'key' => 'rank'
 			)
 		);	
@@ -205,7 +205,7 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 				'hierarchical' => false, 
 				'show_ui' => false, 
 				'show_in_nav_menus' => false,
-				'rewrite' => array('slug' => $projects_installation->slug . '/' . sprintf(__('project-%s', 'projects'), $key . '-' . $group['key']), 'with_front' => true),
+				'rewrite' => array('slug' => $projects_installation->slug . '/' . Projects::$post_type . '-' . $key . '-' . $group['key'], 'with_front' => true),
 				'post_type' => array(Projects::$post_type)
 			);
 							
@@ -330,7 +330,7 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 	}
 	
 	/**
-	 * Get all presets. the sort must be a an array with the taxonomy
+	 * Get all presets. the sort must be an array with the taxonomy
 	 * name as string by which should be. followed by one or more 
 	 * sort options as constant (not string!). read the docs about 
 	 * array_multisort for a complete list of sort options.
@@ -528,7 +528,7 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 			foreach($preset['taxonomies'] as $taxonomy => $term) {
 				$taxonomy_slugs[$taxonomy] = $term['slug'];
 			}
-			return get_site_url() . '?' . urlencode(http_build_query($taxonomy_slugs));
+			return get_site_url() . '?' . http_build_query($taxonomy_slugs);
 		} else {
 			return get_permalink($preset['post_id'][0]);
 		}

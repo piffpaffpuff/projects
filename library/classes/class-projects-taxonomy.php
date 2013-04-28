@@ -98,7 +98,7 @@ class Projects_Taxonomy {
 		
 		$default_args = array(
 			'labels' => $labels,
-	    	'rewrite' => array('slug' => $projects_installation->slug . '/' . sprintf(__('project-%s', 'projects'), $key), 'with_front' => true),
+	    	'rewrite' => array('slug' => $projects_installation->slug . '/' . Projects::$post_type . '-' . $key, 'with_front' => true),
 	    	'hierarchical' => true,
 			'show_ui' => true,
 			'post_type' => Projects::$post_type

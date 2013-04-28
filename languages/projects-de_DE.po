@@ -2,273 +2,530 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Projects\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-09 18:06+0100\n"
-"PO-Revision-Date: 2012-05-09 18:21+0100\n"
+"POT-Creation-Date: 2013-04-28 12:07+0100\n"
+"PO-Revision-Date: 2013-04-28 12:07+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-KeywordsList: __;gettext\n"
+"X-Poedit-KeywordsList: __:1,2c;_e:1,2c;_x:1,2c;esc_html_e:1,2c;esc_attr_e:1,2c\n"
 "X-Poedit-Basepath: .\n"
-"X-Poedit-SearchPath-0: /Users/negro/Projekte/iwannegro/201211 portfolio/website/programming/wp-content/plugins/projects\n"
+"X-Poedit-SearchPath-0: ..\n"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:105
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:117
-msgid "Projects"
-msgstr "Projekte"
+#: ../projects.php:193
+msgctxt "projects"
+msgid "Featured"
+msgstr "Featured"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:106
-msgid "Project"
-msgstr "Projekt"
+#: ../library/classes/class-projects-media.php:57
+#: ../library/classes/class-projects-media.php:343
+#: ../library/classes/class-projects-writepanel.php:38
+msgctxt "projects"
+msgid "Featured Media"
+msgstr "Featured Medien"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:107
-msgid "Add New"
-msgstr ""
+#: ../library/classes/class-projects-media.php:58
+#: ../library/classes/class-projects-writepanel.php:39
+msgctxt "projects"
+msgid "Media"
+msgstr "Medien"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:108
-msgid "Add New Project"
-msgstr ""
+#: ../library/classes/class-projects-media.php:106
+msgctxt "projects"
+msgid "From URL"
+msgstr "Aus URL"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:109
-msgid "Edit Project"
-msgstr ""
+#: ../library/classes/class-projects-media.php:107
+msgctxt "projects"
+msgid "Project Media"
+msgstr "Projektmedien"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:110
-msgid "New Project"
-msgstr ""
+#: ../library/classes/class-projects-media.php:145
+msgctxt "projects"
+msgid "Add media from another website"
+msgstr "Medien von einer anderen Webseite hinzufügen"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:111
-msgid "All Projects"
-msgstr ""
+#: ../library/classes/class-projects-media.php:152
+msgctxt "projects"
+msgid "URL"
+msgstr "URL"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:112
-msgid "View Project"
-msgstr ""
+#: ../library/classes/class-projects-media.php:160
+msgctxt "projects"
+msgid "Enter an URL from YouTube, Vimeo or Flickr."
+msgstr "Eine URL von YouTube, Vimeo oder Flickr eingeben."
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:113
-msgid "Search Projects"
-msgstr ""
+#: ../library/classes/class-projects-media.php:168
+msgctxt "projects"
+msgid "Add media"
+msgstr "Medien hinzufügen"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:114
-msgid "No Projects found"
-msgstr ""
+#: ../library/classes/class-projects-media.php:268
+#: ../library/classes/class-projects-type.php:148
+msgctxt "projects"
+msgid "Title"
+msgstr "Titel"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:115
-msgid "No Projects found in Trash"
-msgstr ""
+#: ../library/classes/class-projects-media.php:345
+msgctxt "projects"
+msgid "Use as featured media"
+msgstr "Als Vorschau benutzen"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:137
-msgid "Types"
-msgstr "Typen"
+#: ../library/classes/class-projects-media.php:363
+#: ../library/classes/class-projects-type.php:225
+msgctxt "projects"
+msgid "None"
+msgstr "Keine"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:137
-msgid "Type"
-msgstr "Typ"
+#: ../library/classes/class-projects-media.php:390
+msgctxt "projects"
+msgid "Default Size"
+msgstr "Grösse"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:138
-msgid "Techniques"
-msgstr ""
+#: ../library/classes/class-projects-media.php:398
+msgctxt "projects"
+msgid "Embed URL"
+msgstr "Embed URL"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:138
-msgid "Technique"
-msgstr ""
+#: ../library/classes/class-projects-media.php:403
+msgctxt "projects"
+msgid "Embed Type"
+msgstr "Embed Typ"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:139
-msgid "Tasks"
-msgstr ""
+#: ../library/classes/class-projects-settings.php:60
+msgctxt "projects"
+msgid "Projects Settings"
+msgstr "Projekte Einstellungen"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:139
-msgid "Task"
-msgstr ""
+#: ../library/classes/class-projects-settings.php:62
+msgctxt "projects"
+msgid "Page options"
+msgstr "Seitenoptionen"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:140
-msgid "Agencies"
-msgstr ""
+#: ../library/classes/class-projects-settings.php:67
+msgctxt "projects"
+msgid "Projects base-page"
+msgstr "Projekte Basisseite"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:140
-msgid "Agency"
-msgstr ""
+#: ../library/classes/class-projects-settings.php:82
+msgctxt "projects"
+msgid "Location"
+msgstr "Ort"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:141
-msgid "Clients"
-msgstr ""
+#: ../library/classes/class-projects-settings.php:87
+msgctxt "projects"
+msgid "Default Country"
+msgstr "Standard Land"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:141
-msgid "Client"
-msgstr ""
+#: ../library/classes/class-projects-taxonomy-group.php:155
+msgctxt "projects"
+msgid "Names"
+msgstr "Namen"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:142
+#: ../library/classes/class-projects-taxonomy-group.php:156
+msgctxt "projects"
+msgid "Name"
+msgstr "Name"
+
+#: ../library/classes/class-projects-taxonomy-group.php:160
+msgctxt "projects"
+msgid "Years"
+msgstr "Jahre"
+
+#: ../library/classes/class-projects-taxonomy-group.php:161
+msgctxt "projects"
+msgid "Year"
+msgstr "Jahr"
+
+#: ../library/classes/class-projects-taxonomy-group.php:165
+msgctxt "projects"
+msgid "Categories"
+msgstr "Kategorien"
+
+#: ../library/classes/class-projects-taxonomy-group.php:166
+msgctxt "projects"
+msgid "Category"
+msgstr "Kategorie"
+
+#: ../library/classes/class-projects-taxonomy-group.php:170
+msgctxt "projects"
+msgid "Ranks"
+msgstr "Ränge"
+
+#: ../library/classes/class-projects-taxonomy-group.php:171
+msgctxt "projects"
+msgid "Rank"
+msgstr "Rang"
+
+#: ../library/classes/class-projects-taxonomy-group.php:175
+msgctxt "projects"
 msgid "Awards"
 msgstr "Auszeichnungen"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:142
+#: ../library/classes/class-projects-taxonomy-group.php:175
+msgctxt "projects"
 msgid "Award"
 msgstr "Auszeichnung"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:143
+#: ../library/classes/class-projects-taxonomy.php:58
+msgctxt "projects"
+msgid "Types"
+msgstr "Typen"
+
+#: ../library/classes/class-projects-taxonomy.php:58
+msgctxt "projects"
+msgid "Type"
+msgstr "Typ"
+
+#: ../library/classes/class-projects-taxonomy.php:59
+msgctxt "projects"
+msgid "Techniques"
+msgstr "Techniken"
+
+#: ../library/classes/class-projects-taxonomy.php:59
+msgctxt "projects"
+msgid "Technique"
+msgstr "Technik"
+
+#: ../library/classes/class-projects-taxonomy.php:60
+msgctxt "projects"
+msgid "Tasks"
+msgstr "Aufgaben"
+
+#: ../library/classes/class-projects-taxonomy.php:60
+msgctxt "projects"
+msgid "Task"
+msgstr "Aufgabe"
+
+#: ../library/classes/class-projects-taxonomy.php:61
+msgctxt "projects"
+msgid "Agencies"
+msgstr "Agenturen"
+
+#: ../library/classes/class-projects-taxonomy.php:61
+msgctxt "projects"
+msgid "Agency"
+msgstr "Agentur"
+
+#: ../library/classes/class-projects-taxonomy.php:62
+msgctxt "projects"
+msgid "Clients"
+msgstr "Kunden"
+
+#: ../library/classes/class-projects-taxonomy.php:62
+msgctxt "projects"
+msgid "Client"
+msgstr "Kunde"
+
+#: ../library/classes/class-projects-taxonomy.php:63
+msgctxt "projects"
 msgid "Tags"
-msgstr ""
+msgstr "Schlagworte"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:143
+#: ../library/classes/class-projects-taxonomy.php:63
+msgctxt "projects"
 msgid "Tag"
-msgstr ""
+msgstr "Schlagwort"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:155
-#, php-format
-msgid "Search %s"
-msgstr ""
+#: ../library/classes/class-projects-taxonomy.php:68
+msgctxt "projects"
+msgid "Stati"
+msgstr "Stati"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:156
-#, php-format
-msgid "All %s"
-msgstr ""
+#: ../library/classes/class-projects-taxonomy.php:68
+#: ../library/classes/class-projects-writepanel.php:280
+msgctxt "projects"
+msgid "Status"
+msgstr "Status"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:157
-#, php-format
-msgid "Parent %s"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:158
-#, php-format
-msgid "Parent %s:"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:159
-#, php-format
-msgid "Edit %s"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:160
-#, php-format
-msgid "Update %s"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:161
-#, php-format
-msgid "Add New %s"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:162
-#, php-format
-msgid "New %s Name"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:163
-#, php-format
-msgid "Separate %s with commas"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:164
-#, php-format
-msgid "Add or remove %s"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:165
-#, php-format
-msgid "Choose from the most used %s"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:230
+#: ../library/classes/class-projects-taxonomy.php:69
+msgctxt "projects"
 msgid "Completed"
-msgstr ""
+msgstr "Abgeschlossen"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:231
+#: ../library/classes/class-projects-taxonomy.php:70
+msgctxt "projects"
 msgid "In Progress"
-msgstr ""
+msgstr "In Arbeit"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:232
+#: ../library/classes/class-projects-taxonomy.php:71
+msgctxt "projects"
 msgid "Planned"
-msgstr ""
+msgstr "Geplant"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:256
-msgid "Thumbnail"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:257
-msgid "Title"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:267
-msgid "Date"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:322
-msgid "None"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-menu.php:338
+#: ../library/classes/class-projects-taxonomy.php:85
+#: ../library/classes/class-projects-type.php:87
 #, php-format
+msgctxt "projects"
+msgid "Search %s"
+msgstr "Suche %s"
+
+#: ../library/classes/class-projects-taxonomy.php:86
+#: ../library/classes/class-projects-type.php:85
+#, php-format
+msgctxt "projects"
+msgid "All %s"
+msgstr "Alle %s"
+
+#: ../library/classes/class-projects-taxonomy.php:87
+#, php-format
+msgctxt "projects"
+msgid "Parent %s"
+msgstr "Übergeordnet %s"
+
+#: ../library/classes/class-projects-taxonomy.php:88
+#, php-format
+msgctxt "projects"
+msgid "Parent %s:"
+msgstr "Übergeordnet %s:"
+
+#: ../library/classes/class-projects-taxonomy.php:89
+#: ../library/classes/class-projects-type.php:83
+#, php-format
+msgctxt "projects"
+msgid "Edit %s"
+msgstr "%s bearbeiten"
+
+#: ../library/classes/class-projects-taxonomy.php:90
+#, php-format
+msgctxt "projects"
+msgid "Update %s"
+msgstr "%s aktualisieren"
+
+#: ../library/classes/class-projects-taxonomy.php:91
+#: ../library/classes/class-projects-type.php:82
+#, php-format
+msgctxt "projects"
+msgid "Add New %s"
+msgstr "%s erstellen"
+
+#: ../library/classes/class-projects-taxonomy.php:92
+#, php-format
+msgctxt "projects"
+msgid "New %s Name"
+msgstr "Neu %s Name"
+
+#: ../library/classes/class-projects-taxonomy.php:93
+#, php-format
+msgctxt "projects"
+msgid "Separate %s with commas"
+msgstr "%s mit Komma trennen"
+
+#: ../library/classes/class-projects-taxonomy.php:94
+#, php-format
+msgctxt "projects"
+msgid "Add or remove %s"
+msgstr "%s hinzufügen oder entfernen"
+
+#: ../library/classes/class-projects-taxonomy.php:95
+#, php-format
+msgctxt "projects"
+msgid "Choose from the most used %s"
+msgstr "Von den meist genutzten %s auswählen"
+
+#: ../library/classes/class-projects-type.php:69
+msgctxt "projects"
+msgid "Projects"
+msgstr "Projekte"
+
+#: ../library/classes/class-projects-type.php:69
+msgctxt "projects"
+msgid "Project"
+msgstr "Projekt"
+
+#: ../library/classes/class-projects-type.php:81
+msgctxt "projects"
+msgid "Add New"
+msgstr "Erstellen"
+
+#: ../library/classes/class-projects-type.php:84
+#, php-format
+msgctxt "projects"
+msgid "New %s"
+msgstr "%s erstellen"
+
+#: ../library/classes/class-projects-type.php:86
+#, php-format
+msgctxt "projects"
+msgid "View %s"
+msgstr "%s anzeigen"
+
+#: ../library/classes/class-projects-type.php:88
+#, php-format
+msgctxt "projects"
+msgid "No %s found"
+msgstr "Keine %s gefunden"
+
+#: ../library/classes/class-projects-type.php:89
+#, php-format
+msgctxt "projects"
+msgid "No %s found in Trash"
+msgstr "Keine %s im Papierkorb gefunden"
+
+#: ../library/classes/class-projects-type.php:147
+msgctxt "projects"
+msgid "Thumbnail"
+msgstr "Voschaubild"
+
+#: ../library/classes/class-projects-type.php:159
+#: ../library/classes/class-projects-writepanel.php:245
+msgctxt "projects"
+msgid "Date"
+msgstr "Datum"
+
+#: ../library/classes/class-projects-type.php:241
+#: ../library/classes/class-projects-writepanel.php:197
+#, php-format
+msgctxt "projects"
 msgid "No %s"
-msgstr ""
+msgstr "Kein %s"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-settings.php:45
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-writepanel.php:292
-msgid "You do not have sufficient permissions to access this page."
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-writepanel.php:138
-msgid "Size"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-writepanel.php:166
-msgid "Media"
-msgstr ""
-
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-writepanel.php:167
+#: ../library/classes/class-projects-writepanel.php:40
+msgctxt "projects"
 msgid "General"
-msgstr ""
+msgstr "Allgemein"
 
-#: /Users/negro/Projekte/iwannegro/201211
-#: portfolio/website/programming/wp-content/plugins/projects/class-projects-writepanel.php:168
-msgid "Location"
-msgstr ""
+#: ../library/classes/class-projects-writepanel.php:41
+msgctxt "projects"
+msgid "Locate"
+msgstr "Verortung"
 
+#: ../library/classes/class-projects-writepanel.php:42
+msgctxt "projects"
+msgid "Color"
+msgstr "Farbe"
+
+#: ../library/classes/class-projects-writepanel.php:76
+msgctxt "toolbox-vernissage"
+msgid "View on Google Maps"
+msgstr "Auf Google Maps anzeigen"
+
+#: ../library/classes/class-projects-writepanel.php:82
+msgctxt "projects"
+msgid "First name"
+msgstr "Vorname"
+
+#: ../library/classes/class-projects-writepanel.php:83
+msgctxt "projects"
+msgid "Last name"
+msgstr "Nachname"
+
+#: ../library/classes/class-projects-writepanel.php:84
+msgctxt "projects"
+msgid "Company"
+msgstr "Firma"
+
+#: ../library/classes/class-projects-writepanel.php:85
+#: ../library/classes/class-projects-writepanel.php:293
+msgctxt "projects"
+msgid "Address"
+msgstr "Adresse"
+
+#: ../library/classes/class-projects-writepanel.php:86
+msgctxt "projects"
+msgid "Postal code"
+msgstr "Postleitzahl"
+
+#: ../library/classes/class-projects-writepanel.php:87
+msgctxt "projects"
+msgid "City"
+msgstr "Stadt"
+
+#: ../library/classes/class-projects-writepanel.php:88
+msgctxt "projects"
+msgid "Country"
+msgstr "Land"
+
+#: ../library/classes/class-projects-writepanel.php:148
+#, php-format
+msgctxt "projects"
+msgid "Add %s"
+msgstr "%s hinzufügen"
+
+#: ../library/classes/class-projects-writepanel.php:164
+msgctxt "projects"
+msgid "Untitled"
+msgstr "Ohne Titel"
+
+#: ../library/classes/class-projects-writepanel.php:183
+msgctxt "projects"
+msgid "Remove"
+msgstr "Entfernen"
+
+#: ../library/classes/class-projects-writepanel.php:231
+msgctxt "projects"
+msgid "Background"
+msgstr "Hintergrund"
+
+#: ../library/classes/class-projects-writepanel.php:232
+msgctxt "projects"
+msgid "Text"
+msgstr "Text"
+
+#: ../library/classes/class-projects-writepanel.php:292
+msgctxt "projects"
+msgid "Reference No."
+msgstr "Referenz"
+
+#: ../library/classes/class-projects-writepanel.php:293
+msgctxt "projects"
+msgid "Website"
+msgstr "Webseite"
+
+#: ../library/classes/class-projects-writepanel.php:307
+msgctxt "projects"
+msgid "Add Media"
+msgstr "Medien hinzufügen"
+
+#: ../library/classes/class-projects-writepanel.php:321
+msgctxt "projects"
+msgid "Add featured Media"
+msgstr "Featured  Medien"
+
+#, fuzzy
+#~ msgctxt "projects"
+
+#~ msgid "Featured Mediaa"
+#~ msgstr "Featured Medien"
+
+#, fuzzy
+#~ msgctxt "projects"
+
+#~ msgid "Award Name"
+#~ msgstr "Auszeichnungsname"
+
+#, fuzzy
+#~ msgctxt "projects"
+
+#~ msgid "Award Year"
+#~ msgstr "Auszeichnungsjahr"
+
+#, fuzzy
+#~ msgctxt "projects"
+
+#~ msgid "Award Rank"
+#~ msgstr "Auszeichnung"
+#~ msgctxt "projects"
+
+#~ msgid "Delete"
+#~ msgstr "Löschen"
+#~ msgctxt "projects"
+
+#~ msgid "Status:"
+#~ msgstr "Status"
+
+#, fuzzy
+#~ msgctxt "projects"
+
+#~ msgid "First Name"
+#~ msgstr "Auszeichnungsname"
+
+#, fuzzy
+#~ msgctxt "projects"
+
+#~ msgid "project-%s"
+#~ msgstr "Projekte"
+
+#~ msgid "Settings saved."
+#~ msgstr "Einstellungen gespeichert."

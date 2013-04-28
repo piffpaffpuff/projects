@@ -157,7 +157,7 @@ class Projects_Media {
 			    						<img src="<?php echo admin_url('images/wpspin_light.gif'); ?>" alt="" />
 			    						<span class="check"></span>
 			    					</span>
-			    					<p class="help"><? _e('Enter an URL from YouTube, Vimeo, Flickr, Twitter and man other video or photo sites.', 'projects'); ?></p>
+			    					<p class="help"><? _e('Enter an URL from YouTube, Vimeo or Flickr.', 'projects'); ?></p>
 			    				</td>
 			    			</tr>
 			    		</tbody>

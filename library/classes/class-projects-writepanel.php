@@ -79,11 +79,11 @@ class Projects_Writepanel {
 		</div>
 		<?php endif; ?>
 		<div class="location">
-			<p class="form-fieldset"><label><span><?php _e('First Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo $projects->get_project_meta('first_name'); ?>" title="<?php _e('First Name', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Last Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo $projects->get_project_meta('last_name'); ?>" title="<?php _e('Last Name', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Company Name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[company_name]" value="<?php echo $projects->get_project_meta('company_name'); ?>" title="<?php _e('Company Name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('First name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo $projects->get_project_meta('first_name'); ?>" title="<?php _e('First name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Last name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo $projects->get_project_meta('last_name'); ?>" title="<?php _e('Last name', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Company', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[company_name]" value="<?php echo $projects->get_project_meta('company_name'); ?>" title="<?php _e('Company', 'projects'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('Address', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo $projects->get_project_meta('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Postal Code', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo $projects->get_project_meta('postal_code'); ?>" title="<?php _e('Code', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Postal code', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo $projects->get_project_meta('postal_code'); ?>" title="<?php _e('Postal code', 'projects'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('City', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo $projects->get_project_meta('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('Country', 'projects'); ?></span></label><select name="projects[country]">
 				<?php 
@@ -94,7 +94,7 @@ class Projects_Writepanel {
 				}
 				?>
 				<?php foreach($countries->world as $code => $name) : ?>
-					<option value="<?php echo $code; ?>" <?php selected($code, $meta); ?>><?php printf(__('%s', 'projects'), $name); ?></option>
+					<option value="<?php echo $code; ?>" <?php selected($code, $meta); ?>><?php echo $name; ?></option>
 				<?php endforeach; ?>
 			</select></p>
 			<input type="hidden" name="projects[lat]" value="<?php echo $lat; ?>">
@@ -180,7 +180,7 @@ class Projects_Writepanel {
 		}
 		?>
 		<div class="preset" id="projects-taxonomy-group-preset-<?php echo $taxonomy_group_name; ?>">
-			<div class="preset-options"><h4 title="<?php echo $title_placeholder; ?>"><?php echo $title; ?></h4><a href="#" class="delete-preset"><?php _e('Delete', 'projects'); ?></a></div>
+			<div class="preset-options"><h4 title="<?php echo $title_placeholder; ?>"><?php echo $title; ?></h4><a href="#" class="delete-preset"><?php _e('Remove', 'projects'); ?></a></div>
 			<div class="preset-fields">
 				<?php $index = 1; ?>	
 				<?php foreach($taxonomies as $taxonomy) : ?>
@@ -277,7 +277,7 @@ class Projects_Writepanel {
 		$taxonomy = $projects->get_internal_name('status');
 		$terms = get_terms($taxonomy, $args);
 		?>
-		<p class="form-fieldset"><label><span><?php _e('Status:', 'projects'); ?></span></label><select name="projects[status]">
+		<p class="form-fieldset"><label><span><?php _e('Status', 'projects'); ?></span></label><select name="projects[status]">
 			<?php foreach($terms as $term) : ?>
 				<?php 
 					$in_term = is_object_in_term($post->ID, $taxonomy, $term->term_id);

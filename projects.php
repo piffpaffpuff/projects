@@ -470,7 +470,7 @@ function get_project_featured_media($post_id = null, $mime = null) {
 }
 
 /**
- * Show the gallery
+ * Show the media
  */
 function project_gallery_media($size = 'large', $post_id = null, $mime = null) {
 	global $projects;
@@ -507,7 +507,7 @@ function project_gallery_media($size = 'large', $post_id = null, $mime = null) {
 }
 
 /**
- * Show the featured image. It displays only web images.
+ * Show the featured media. It displays only web images.
  */
 function project_featured_media($size = 'thumbnail', $post_id = null) {
 	global $projects;
