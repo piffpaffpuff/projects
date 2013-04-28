@@ -289,7 +289,7 @@ class Projects_Writepanel {
 			<?php endforeach; ?>
 		</select></p>
 		<?php $website = $projects->get_project_meta('website'); ?>
-		<p class="form-fieldset"><label><span><?php _e('Reference No.', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo $projects->get_project_meta('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
+		<p class="form-fieldset"><label><span><?php _e('Reference Nr.', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo $projects->get_project_meta('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
 		<p class="form-fieldset"><label><span><?php _e('Website', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo $website; ?>" title="<?php _e('Address', 'projects'); ?>"><?php if(!empty($website)) : ?><a href="<?php echo $website; ?>" target="_blank" class="external"></a><?php endif; ?></p>
 		<?php
 	}
@@ -318,7 +318,7 @@ class Projects_Writepanel {
 		<ul class="projects-media-list hide-if-no-js" id="projects-featured-media-list">
 		<?php $this->create_media_list(null, Projects_Media::$media_type_featured); ?>
 		</ul>
-		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-featured-media-add" class="thickbox projects-media-add"><?php _e('Add featured media', 'projects'); ?></a></p>
+		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-featured-media-add" class="thickbox projects-media-add"><?php _e('Add media', 'projects'); ?></a></p>
 		<?php
 	}
 	

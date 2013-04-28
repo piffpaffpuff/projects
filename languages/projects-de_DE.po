@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-04-28 18:41+0100\n"
-"PO-Revision-Date: 2013-04-28 18:55+0100\n"
+"POT-Creation-Date: 2013-04-28 18:58+0100\n"
+"PO-Revision-Date: 2013-04-28 18:59+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -50,6 +50,7 @@ msgstr "Eine URL von YouTube, Vimeo oder Flickr hinzufügen."
 
 #: ../library/classes/class-projects-media.php:168
 #: ../library/classes/class-projects-writepanel.php:307
+#: ../library/classes/class-projects-writepanel.php:321
 msgid "Add media"
 msgstr "Medien hinzufügen"
 
@@ -59,8 +60,8 @@ msgid "Title"
 msgstr "Titel"
 
 #: ../library/classes/class-projects-media.php:345
-msgid "Use as featured media"
-msgstr "Als featured verwenden"
+msgid "Use as featured"
+msgstr "Als featured markieren"
 
 #: ../library/classes/class-projects-media.php:363
 #: ../library/classes/class-projects-type.php:225
@@ -390,6 +391,10 @@ msgid "Text"
 msgstr "Text"
 
 #: ../library/classes/class-projects-writepanel.php:292
+msgid "Reference Nr."
+msgstr "Referenz-Nr."
+
+#: ../library/classes/class-projects-writepanel.php:292
 msgid "Reference No."
 msgstr "Referenz-Nr."
 
@@ -397,9 +402,8 @@ msgstr "Referenz-Nr."
 msgid "Website"
 msgstr "Webseite"
 
-#: ../library/classes/class-projects-writepanel.php:321
-msgid "Add featured media"
-msgstr "Featured Medien hinzufügen"
+#~ msgid "Add featured media"
+#~ msgstr "Featured Medien hinzufügen"
 
 #~ msgid "Locate"
 #~ msgstr "Lokalisieren"

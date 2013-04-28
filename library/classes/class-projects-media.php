@@ -342,7 +342,7 @@ class Projects_Media {
 		$meta = $projects->get_project_meta('featured_media', $post->ID);		
 		$form_fields['projects_featured_media']['label'] = __('Featured Media', 'projects');
 		$form_fields['projects_featured_media']['input'] = 'html';
-		$form_fields['projects_featured_media']['html'] = '<label><input type="checkbox" name="attachments[' . $post->ID . '][projects_featured_media]" value="1" ' . checked($meta, 1, false) . ' /> ' . __('Use as featured media', 'projects') . '</label>';
+		$form_fields['projects_featured_media']['html'] = '<label><input type="checkbox" name="attachments[' . $post->ID . '][projects_featured_media]" value="1" ' . checked($meta, 1, false) . ' /> ' . __('Use as featured', 'projects') . '</label>';
 		
 		// add a custom image size field
 		if(strpos($post->post_mime_type, 'image') !== false) {
