@@ -38,7 +38,7 @@ class Projects_Writepanel {
 		add_meta_box('projects-featured-media-box', __('Featured Media', 'projects'), array($this, 'create_box_featured_media'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-gallery-media-box', __('Media', 'projects'), array($this, 'create_box_gallery_media'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-general-box', __('General', 'projects'), array($this, 'create_box_general'), Projects::$post_type, 'side', 'default');
-		add_meta_box('projects-location-box', __('Locate', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
+		add_meta_box('projects-location-box', __('Location', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-color-box', __('Color', 'projects'), array($this, 'create_box_color'), Projects::$post_type, 'side', 'default');
 		
 		// create the meta boxes for the taxonomy groups
@@ -304,7 +304,7 @@ class Projects_Writepanel {
 		<ul class="projects-media-list hide-if-no-js" id="projects-gallery-media-list">
 		<?php $this->create_media_list(null, Projects_Media::$media_type_gallery); ?>
 		</ul>
-		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-gallery-media-add" class="thickbox projects-media-add"><?php _e('Add Media', 'projects'); ?></a></p>
+		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-gallery-media-add" class="thickbox projects-media-add"><?php _e('Add media', 'projects'); ?></a></p>
 		<?php
 	}
 	
@@ -318,7 +318,7 @@ class Projects_Writepanel {
 		<ul class="projects-media-list hide-if-no-js" id="projects-featured-media-list">
 		<?php $this->create_media_list(null, Projects_Media::$media_type_featured); ?>
 		</ul>
-		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-featured-media-add" class="thickbox projects-media-add"><?php _e('Add featured Media', 'projects'); ?></a></p>
+		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-featured-media-add" class="thickbox projects-media-add"><?php _e('Add featured media', 'projects'); ?></a></p>
 		<?php
 	}
 	

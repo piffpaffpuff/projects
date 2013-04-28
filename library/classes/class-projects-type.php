@@ -130,7 +130,7 @@ class Projects_Type {
 			} else {
 				$class = '';
 			}
-			$views[$term->name] = '<a href="' . admin_url('edit.php?post_type=' . Projects::$post_type . '&' . $taxonomy . '=' . $term->slug) . '"' . $class . '>' . $term->name . ' <span class="count">(' . $term->count . ')</span></a>';
+			$views[$term->name] = '<a href="' . admin_url('edit.php?post_type=' . Projects::$post_type . '&' . $taxonomy . '=' . $term->slug) . '"' . $class . '>' . __( $term->name, 'projects' ) . ' <span class="count">(' . $term->count . ')</span></a>';
 		}
 
 		return $views;
