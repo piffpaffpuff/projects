@@ -285,7 +285,7 @@ class Projects_Writepanel {
 						$in_term = false;
 					}			
 				?>
-				<option value="<?php echo $term->term_id; ?>" <?php selected(true, $in_term); ?>><?php echo $term->name; ?></option>
+				<option value="<?php echo $term->term_id; ?>" <?php selected(true, $in_term); ?>><?php _e($term->name, 'projects'); ?></option>
 			<?php endforeach; ?>
 		</select></p>
 		<?php $website = $projects->get_project_meta('website'); ?>

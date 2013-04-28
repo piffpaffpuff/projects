@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-04-28 18:58+0100\n"
-"PO-Revision-Date: 2013-04-28 18:59+0100\n"
+"POT-Creation-Date: 2013-04-28 19:07+0100\n"
+"PO-Revision-Date: 2013-04-28 19:07+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -355,7 +355,7 @@ msgstr "Firma"
 #: ../library/classes/class-projects-writepanel.php:85
 #: ../library/classes/class-projects-writepanel.php:293
 msgid "Address"
-msgstr "Sdresse"
+msgstr "Adresse"
 
 #: ../library/classes/class-projects-writepanel.php:86
 msgid "Postal code"
