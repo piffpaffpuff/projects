@@ -107,7 +107,7 @@ class Projects {
 		$this->media->load();
 		$this->writepanel->load();
 		$this->settings->load();
-		
+				
 		// load hooks
 		add_action('plugins_loaded', array($this, 'load_translation'));
 		add_action('init', array($this, 'hooks_init'));
@@ -124,7 +124,7 @@ class Projects {
 	/**
 	 * Load the main hooks
 	 */
-	public function hooks_init() {		
+	public function hooks_init() {
 		add_filter('get_previous_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_next_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_previous_post_sort', array($this, 'adjacent_post_previous_sort'));
@@ -142,7 +142,7 @@ class Projects {
 	}
 	
 	/**
-	 * Load the main hooks
+	 * Load the admin hooks
 	 */
 	public function hooks_admin() {
 		// Enqueue script on settings page
@@ -546,6 +546,14 @@ function project_taxonomy($key, $args = null) {
 function get_project_meta($key) {
 	global $projects;
 	return $projects->get_project_meta($key);
+}
+
+/**
+ * Get project term meta
+ */
+function get_project_term_meta($term_id, $key) {
+	global $projects;
+	return $projects->taxonomy->get_term_meta($term_id, $key);
 }
 
 /**
