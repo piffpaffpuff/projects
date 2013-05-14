@@ -22,12 +22,13 @@ class Projects_Writepanel {
 	/**
 	 * Hook into the admin hooks
 	 */
-	public function hook_admin() {		
+	public function hook_admin() {				
 		add_action('add_meta_boxes', array($this, 'add_boxes'));
 		add_action('add_meta_boxes', array($this, 'remove_boxes'), 20);
 		add_action('wp_ajax_add_taxonomy_group_preset', array($this, 'add_taxonomy_group_preset_ajax'));
 		add_action('wp_ajax_load_media_list', array($this, 'load_media_list_ajax'));
-		
+
+		add_filter('wp_insert_post_data', array($this, 'change_post_date'));		
 		add_action('save_post', array($this, 'save_box_data'));
 	}
 	
@@ -253,8 +254,8 @@ class Projects_Writepanel {
 					}
 					?>
 					<?php while($count <= 12) : ?>
-					<option value="<?php echo $count; ?>" <?php selected($count, $month_meta); ?>><?php echo date_i18n('m', mktime(0, 0, 0, $count, 1)); ?>-<?php echo date_i18n('M', mktime(0, 0, 0, $count, 1)); ?></option>						
-					<?php $count++; ?>
+						<option value="<?php echo $count; ?>" <?php selected($count, $month_meta); ?>><?php echo date_i18n('F', mktime(0, 0, 0, $count, 1)); ?></option>						
+						<?php $count++; ?>
 					<?php endwhile; ?>
 				</select>
 				<select class="select-date" name="projects[year]">
@@ -263,9 +264,9 @@ class Projects_Writepanel {
 					$year = date_i18n('Y');
 					$year_meta = $projects->get_project_meta('year');
 					?>
-					<?php while($count <= 100) : ?>
-					<option value="<?php echo $year - $count; ?>" <?php selected($year - $count, $year_meta); ?>><?php echo $year - $count; ?></option>						
-					<?php $count++; ?>
+					<?php while($count <= 50) : ?>
+						<option value="<?php echo $year - $count; ?>" <?php selected($year - $count, $year_meta); ?>><?php echo $year - $count; ?></option>						
+						<?php $count++; ?>
 					<?php endwhile; ?>
 				</select>
 			</span>
@@ -363,6 +364,19 @@ class Projects_Writepanel {
 	    
 		exit;
 	}	
+
+	/**
+	 * Pre saving the box data to change the date
+	 */
+	public function change_post_date($data) {
+		// edit the date	
+		if(isset($_POST['projects'])) {
+			$data['post_date'] = date_i18n('Y-m-d H:i:s', mktime(12, 0, 0, $_POST['projects']['month'], 1, $_POST['projects']['year']));	
+			$data['post_date_gmt'] = get_gmt_from_date($data['post_date']);
+		}
+
+		return $data;
+	}
 	
 	/**
 	 * Save the box data
@@ -402,7 +416,7 @@ class Projects_Writepanel {
 		if(isset($_POST['projects'])) {
 			$projects = new Projects();
 			$projects_taxonomy_group = new Projects_Taxonomy_Group();
-			
+	
 			// create a date entry to make querying by month or year easy 
 			$_POST['projects']['date'] = mktime(0, 0, 0, $_POST['projects']['month'], 1, $_POST['projects']['year']);
 			

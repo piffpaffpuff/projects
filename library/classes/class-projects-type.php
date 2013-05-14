@@ -227,7 +227,7 @@ class Projects_Type {
 					break;
 					
 				case 'year':
-					echo date_i18n('M', $projects->get_project_meta('date', $post_id)) . ', ' . $projects->get_project_meta('year', $post_id);
+					echo '<abbr>' . date_i18n('F', $projects->get_project_meta('date', $post_id)) . ', ' . $projects->get_project_meta('year', $post_id) . '</abbr><br/>' . get_post_status_object(get_post_status($post_id))->label;
 					break;
 			}
 			

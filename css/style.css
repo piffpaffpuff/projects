@@ -56,14 +56,14 @@ table.wp-list-table .column-title {
 }
 .form-fieldset label {
 	float: left;
-	width: 90px;
+	width: 80px;
 	padding: 0;
 	vertical-align: middle;
 }
-.form-fieldset input,
-.form-fieldset select,
+.form-fieldset > input,
+.form-fieldset > select,
 .form-fieldset .input-group {
-	float: left;
+	float: right;
 	width: 166px;
 }
 .form-fieldset .input-group {
@@ -71,7 +71,7 @@ table.wp-list-table .column-title {
 	display: block;
 }
 .form-fieldset .input-group .select-date {
-	width: 50%;
+	width: 49%;
 	margin: 0;
 	padding: 0;
 }
@@ -95,13 +95,13 @@ table.wp-list-table .column-title {
 #normal-sortables .form-fieldset select,
 #normal-sortables .form-fieldset .input-group,
 #normal-sortables .form-fieldset .input-group .miniColors {
-	width: 200px;
+	width: 65%;
 }
 #normal-sortables .form-fieldset .input-group .select-date  {
-	width: 100px;
+	width: 50%;
 }
 #normal-sortables .form-fieldset label {
-	width: 120px;
+	width: 30%;
 }
 .map {
 	border: 1px solid #DFDFDF;
