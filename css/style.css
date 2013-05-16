@@ -40,6 +40,10 @@ table.wp-list-table .column-title {
    Meta Boxes
 */
 
+.post-type-project #submitdiv .curtime {
+	display: none;
+}
+
 #projects-location-box {
 	overflow: hidden;
 }

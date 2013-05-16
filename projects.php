@@ -132,19 +132,20 @@ class Projects {
 		add_filter('get_previous_post_where', array($this, 'adjacent_post_previous_where'));
 		add_filter('get_next_post_where', array($this, 'adjacent_post_next_where'));
    		
-   		add_action('pre_get_posts', array($this, 'projects_page_query'));
-   		
-   		add_action('admin_print_styles', array($this, 'add_styles'));
-		add_action('admin_print_scripts-post.php', array($this, 'add_scripts'));
-		add_action('admin_print_scripts-post-new.php', array($this, 'add_scripts'));
-		add_action('admin_print_styles-media-upload-popup', array($this, 'add_media_styles'));		
-		add_action('admin_print_scripts-media-upload-popup', array($this, 'add_media_scripts'));		
+   		add_action('pre_get_posts', array($this, 'projects_page_query'));		
 	}
 	
 	/**
 	 * Load the admin hooks
 	 */
 	public function hooks_admin() {
+   		add_action('admin_print_styles', array($this, 'add_styles'));
+		add_action('admin_print_scripts-post.php', array($this, 'add_scripts'));
+		add_action('admin_print_scripts-post-new.php', array($this, 'add_scripts'));
+		add_action('admin_print_styles-media-upload-popup', array($this, 'add_media_styles'));		
+		add_action('admin_print_scripts-media-upload-popup', array($this, 'add_media_scripts'));
+		add_filter('admin_body_class', array($this, 'add_admin_body_classes'));
+
 		// Enqueue script on settings page
 		if(isset($_GET['page']) && $_GET['page'] == 'projects-settings') {
 			$hook = get_plugin_page_hookname($_GET['page'], 'options-general.php');
@@ -193,6 +194,19 @@ class Projects {
 				'label_featured' => __( 'Featured', 'projects' )
 			));
 		}
+	}
+	
+	/**
+	 * Add admin body class
+	 */
+	public function add_admin_body_classes($classes) {
+		global $post;
+		
+		$post_type = get_post_type($post->ID);
+		if(is_admin() && $post_type == self::$post_type) {
+			$classes .= 'post-type-' . $post_type;
+		}
+		return $classes;
 	}
 	
 	/**

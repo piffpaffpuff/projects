@@ -1,22 +1,59 @@
 jQuery(document).ready(function($) {
 
 	// Writepanel -------------------------
-			
+	
+	// change the date
+	/*
+	$('#projects-date-month').on('change', function(event) {
+		var value = $(this).val();
+		if(value < 10) {
+			value = '0' + value;
+		}
+		
+		$('#mm option').removeAttr('selected');
+		$('#mm option[value="' + value + '"]').attr('selected', 'selected');		
+	});
+	
+	$('#mm').on('change', function(event) {
+		var value = Number($(this).val());
+
+		$('#projects-date-month option').removeAttr('selected');
+		$('#projects-date-month option[value="' + value + '"]').attr('selected', 'selected');		
+	});
+	
+	$('#projects-date-year').on('change', function(event) {
+		$('#aa').val($(this).val());
+	});
+	
+	$('#aa').on('change', function(event) {
+		var value = $(this).val();
+		var option = $('#projects-date-year option[value="' + value + '"]');
+		
+		
+		$('#projects-date-year option').removeAttr('selected');
+		
+		if(option.length > 0) {
+		console.log(option);
+			option.attr('selected', 'selected');		
+		}
+	});
+	*/
+
 	// color picker
 	$('input.minicolors').miniColors();
 		
 	// reload the media list on thickbox close 
 	$('#TB_overlay, #TB_closeWindowButton').live('mouseup', function(event) {
-		load_media_list('featured');
-		load_media_list('gallery');
+		loadMediaList('featured');
+		loadMediaList('gallery');
 	});
 	
 	/**
 	 * load the media list with ajax
 	 */
-	function load_media_list(type) {
+	function loadMediaList(type) {
 		var data = {
-			action: 'load_media_list',
+			action: 'loadMediaList',
 			type: type,
 			post_id: $('#post_ID').val(),
 			nonce: $('#projects_nonce').val()
@@ -36,7 +73,7 @@ jQuery(document).ready(function($) {
 	// add a preset
 	$('.add-preset').on('click', function(event) {
 		var taxonomy_group_name = $(this).closest('.inside').find('input.taxonomy-group-name').val();
-		add_taxonomy_group_preset(taxonomy_group_name);
+		addTaxonomyGroupPreset(taxonomy_group_name);
 		event.preventDefault();
 	});
 
@@ -66,7 +103,7 @@ jQuery(document).ready(function($) {
 	/**
 	 * add new term list group item
 	 */
-	function add_taxonomy_group_preset(taxonomy_group_name) {
+	function addTaxonomyGroupPreset(taxonomy_group_name) {
 		var box = $('#projects-taxonomy-group-box-' + taxonomy_group_name);
 		var data = {
 			action: 'add_taxonomy_group_preset',

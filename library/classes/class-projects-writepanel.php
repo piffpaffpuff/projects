@@ -245,7 +245,7 @@ class Projects_Writepanel {
 		?>
 		<p class="form-fieldset"><label><span><?php _e('Date', 'projects'); ?></span></label>
 			<span class="input-group">
-				<select class="select-date" name="projects[month]">
+				<select id="projects-date-month" class="select-date" name="projects[month]">
 					<?php 
 					$count = 1;
 					$month_meta = $projects->get_project_meta('month');
@@ -258,14 +258,19 @@ class Projects_Writepanel {
 						<?php $count++; ?>
 					<?php endwhile; ?>
 				</select>
-				<select class="select-date" name="projects[year]">
+				<select id="projects-date-year" class="select-date" name="projects[year]">
 					<?php 
 					$count = 0;
 					$year = date_i18n('Y');
+					$year_start = $year + 1;
 					$year_meta = $projects->get_project_meta('year');
+					
+					if(empty($year_meta)) {
+						$year_meta = $year;
+					}
 					?>
 					<?php while($count <= 50) : ?>
-						<option value="<?php echo $year - $count; ?>" <?php selected($year - $count, $year_meta); ?>><?php echo $year - $count; ?></option>						
+						<option value="<?php echo $year_start - $count; ?>" <?php selected($year_start - $count, $year_meta); ?>><?php echo $year_start - $count; ?></option>						
 						<?php $count++; ?>
 					<?php endwhile; ?>
 				</select>
