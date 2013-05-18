@@ -94,7 +94,7 @@ class Projects_Type {
 		$default_args = array(
 	    	'labels' => $labels,
 	    	'public' => true,
-			'supports' => array('title', 'editor', 'excerpt', 'post-formats', 'thumbnail'),
+			'supports' => array('title', 'editor', 'excerpt', 'thumbnail'),
 			'capability_type' => 'post',
 			'rewrite' => array('slug' => $projects_installation->slug),
 			'menu_position' => 5,

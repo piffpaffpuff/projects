@@ -1,43 +1,6 @@
 jQuery(document).ready(function($) {
 
 	// Writepanel -------------------------
-	
-	// change the date
-	/*
-	$('#projects-date-month').on('change', function(event) {
-		var value = $(this).val();
-		if(value < 10) {
-			value = '0' + value;
-		}
-		
-		$('#mm option').removeAttr('selected');
-		$('#mm option[value="' + value + '"]').attr('selected', 'selected');		
-	});
-	
-	$('#mm').on('change', function(event) {
-		var value = Number($(this).val());
-
-		$('#projects-date-month option').removeAttr('selected');
-		$('#projects-date-month option[value="' + value + '"]').attr('selected', 'selected');		
-	});
-	
-	$('#projects-date-year').on('change', function(event) {
-		$('#aa').val($(this).val());
-	});
-	
-	$('#aa').on('change', function(event) {
-		var value = $(this).val();
-		var option = $('#projects-date-year option[value="' + value + '"]');
-		
-		
-		$('#projects-date-year option').removeAttr('selected');
-		
-		if(option.length > 0) {
-		console.log(option);
-			option.attr('selected', 'selected');		
-		}
-	});
-	*/
 
 	// color picker
 	$('input.minicolors').miniColors();

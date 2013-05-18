@@ -529,7 +529,10 @@ class Projects_Media {
 		
 		// set the first key instead of an array
 		if(!empty($attachments)) {
-			$attachment = $attachments[0];
+			foreach($attachments as $attachment) {
+				$attachment = $attachment;
+				break;
+			}
 		} else {
 			$attachment = null;
 		}
