@@ -37,12 +37,24 @@ table.wp-list-table .column-title {
 }
 
 /*
-   Meta Boxes
+   Admin Media Library
+*/
+
+#post-body .compat-field-projects_default_image_size {
+	display: none;
+}
+
+/*
+   Publish Meta Box
 */
 
 .post-type-project #submitdiv .curtime {
 	display: none;
 }
+
+/*
+   Location Meta Box
+*/
 
 #projects-location-box {
 	overflow: hidden;
@@ -229,22 +241,9 @@ table.wp-list-table .column-title {
 }
 
 /*
-   Media Uploader
+   Media Upload 3.5
 */
 
-div.image-size-item {
-	margin: 0 0 5px;
-}
-div.image-size-item label {
-	margin: 0 0 0 5px;
-	font-weight: bold;
-}
-div.image-size-item label.help {
-	font-weight: normal;
-	font-size: 12px;
-	font-style: italic;
-	color: #333;
-}
-#media-items .savesend .wp-post-thumbnail {
-	margin: 0;
+.media-modal .image-size-select {
+	width: 100%;
 }

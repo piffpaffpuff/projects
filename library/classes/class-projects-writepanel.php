@@ -36,8 +36,7 @@ class Projects_Writepanel {
 	 * Add the meta boxes
 	 */
 	public function add_boxes() {			
-		add_meta_box('projects-featured-media-box', __('Featured Media', 'projects'), array($this, 'create_box_featured_media'), Projects::$post_type, 'normal', 'default');
-		add_meta_box('projects-gallery-media-box', __('Media', 'projects'), array($this, 'create_box_gallery_media'), Projects::$post_type, 'normal', 'default');
+		add_meta_box('projects-media-box', __('Media', 'projects'), array($this, 'create_box_media'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-general-box', __('General', 'projects'), array($this, 'create_box_general'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-location-box', __('Location', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
 		add_meta_box('projects-color-box', __('Color', 'projects'), array($this, 'create_box_color'), Projects::$post_type, 'side', 'default');
@@ -303,42 +302,28 @@ class Projects_Writepanel {
 	/**
 	 * Create the box content
 	 */
-	public function create_box_gallery_media($post, $metabox) {		
+	public function create_box_media($post, $metabox) {		
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
   		?>
-		<ul class="projects-media-list hide-if-no-js" id="projects-gallery-media-list">
-		<?php $this->create_media_list(null, Projects_Media::$media_type_gallery); ?>
+		<ul class="projects-media-list hide-if-no-js" id="projects-media-list">
+		<?php $this->create_media_list(); ?>
 		</ul>
-		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-gallery-media-add" class="thickbox projects-media-add"><?php _e('Add media', 'projects'); ?></a></p>
-		<?php
-	}
-	
-	/**
-	 * Create the box content
-	 */
-	public function create_box_featured_media($post, $metabox) {				
-		// Use nonce for verification
-  		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
-  		?>
-		<ul class="projects-media-list hide-if-no-js" id="projects-featured-media-list">
-		<?php $this->create_media_list(null, Projects_Media::$media_type_featured); ?>
-		</ul>
-		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-featured-media-add" class="thickbox projects-media-add"><?php _e('Add media', 'projects'); ?></a></p>
+		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-media-add" class="thickbox projects-media-add"><?php _e('Manage media', 'projects'); ?></a></p>
 		<?php
 	}
 	
 	/**
 	 * Create the media list
 	 */
-	public function create_media_list($post_id = null, $type = null) {
+	public function create_media_list($post_id = null) {
 		if(empty($post_id)) {
 			global $post;
 			$post_id = $post->ID;
 		}
 		
 		$projects_media = new Projects_Media();
-		$attachments = $projects_media->get_project_media($post_id, null, $type);
+		$attachments = $projects_media->get_project_content_media($post_id, null);
 		if ($attachments) {
 			foreach($attachments as $attachment) {
 				$mime = explode('/', strtolower($attachment->post_mime_type)); 
@@ -365,7 +350,7 @@ class Projects_Writepanel {
 		}
 
 		// Create the list
-		$this->create_media_list($_POST['post_id'], $_POST['type']);
+		$this->create_media_list($_POST['post_id']);
 	    
 		exit;
 	}	

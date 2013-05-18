@@ -468,31 +468,31 @@ function get_projects($args = null) {
 }
 
 /**
- * Get the gallery
+ * Get the content media
  */
-function get_project_gallery_media($post_id = null, $mime = null) {
+function get_project_content_media($post_id = null, $mime = null) {
 	global $projects;
-	return $projects->media->get_project_gallery_media($post_id, $mime);
+	return $projects->media->get_project_content_media($post_id, $mime);
 }
 
 /**
- * Get the featured
+ * Get the featured media
  */
-function get_project_featured_media($post_id = null, $mime = null) {
+function get_project_featured_media($post_id = null) {
 	global $projects;
-	return $projects->media->get_project_featured_media($post_id, $mime);
+	return $projects->media->get_project_featured_media($post_id);
 }
 
 /**
- * Show the media
+ * Show the content media
  */
-function project_gallery_media($size = 'large', $post_id = null, $mime = null) {
+function project_content_media($size = 'large', $post_id = null, $mime = null) {
 	global $projects;
 
-	$attachments = get_project_gallery_media($post_id, $mime);
+	$attachments = get_project_content_media($post_id, $mime);
 	
 	?>
-	<ul class="project-gallery-media">
+	<ul class="project-content-media">
 		<?php foreach($attachments as $attachment) : ?><?php if($projects->media->is_web_image($attachment->post_mime_type)) : ?><li>
 				<?php 				
 				// overwrite the size when the attachment has set a custom one
@@ -526,12 +526,14 @@ function project_gallery_media($size = 'large', $post_id = null, $mime = null) {
 function project_featured_media($size = 'thumbnail', $post_id = null) {
 	global $projects;
 
-	$attachments = get_project_featured_media($post_id);
+	$attachment = get_project_featured_media($post_id);
 
 	?>
- 	<?php foreach($attachments as $attachment) : ?><?php if($projects->media->is_web_image($attachment->post_mime_type)) : ?><?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
- 		<img src="<?php echo $attachment_src[0]; ?>" /><?php endif; ?><?php endforeach; ?>
-	<?php
+ 	<?php if(isset($attachment)) : ?>
+ 		<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $size); ?>
+ 		<img src="<?php echo $attachment_src[0]; ?>" />
+ 	<?php endif; ?>
+ 	<?php
 }
 
 /**

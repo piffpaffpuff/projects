@@ -44,8 +44,7 @@ jQuery(document).ready(function($) {
 		
 	// reload the media list on thickbox close 
 	$('#TB_overlay, #TB_closeWindowButton').live('mouseup', function(event) {
-		loadMediaList('featured');
-		loadMediaList('gallery');
+		loadMediaList();
 	});
 	
 	/**
@@ -53,19 +52,14 @@ jQuery(document).ready(function($) {
 	 */
 	function loadMediaList(type) {
 		var data = {
-			action: 'loadMediaList',
+			action: 'load_media_list',
 			type: type,
 			post_id: $('#post_ID').val(),
 			nonce: $('#projects_nonce').val()
 		};
 		
 		$.post(ajaxurl, data, function(response) {			
-			// check the media type and load the list into the right box
-			if(data.type == 'featured') {
-				$('#projects-featured-media-list').empty().append(response);
-			} else {
-				$('#projects-gallery-media-list').empty().append(response);
-			}
+			$('#projects-media-list').empty().append(response);
 		});
 	}
 	

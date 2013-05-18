@@ -6,7 +6,7 @@
 if (!class_exists('Projects_Media')) {
 class Projects_Media {
 
-	public static $media_type_gallery = 'gallery';
+	public static $media_type_content = 'content';
 	public static $media_type_featured = 'featured';
 	
 	/**
@@ -54,7 +54,6 @@ class Projects_Media {
 	 * Add the meta boxes
 	 */
 	public function add_boxes() {			
-		add_meta_box('projects-featured-media-box', __('Featured Media', 'projects'), array($this, 'create_box_featured_media'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-gallery-media-box', __('Media', 'projects'), array($this, 'create_box_gallery_media'), Projects::$post_type, 'normal', 'default');
 	}
 	
@@ -337,13 +336,9 @@ class Projects_Media {
 		$form_fields['image-size']['value'] = 'full';
 		$form_fields['image-size']['input'] = 'hidden';
 		
-		// add a thumbnail check field
+		// create object
 		$projects = new Projects();
-		$meta = $projects->get_project_meta('featured_media', $post->ID);		
-		$form_fields['projects_featured_media']['label'] = __('Featured Media', 'projects');
-		$form_fields['projects_featured_media']['input'] = 'html';
-		$form_fields['projects_featured_media']['html'] = '<label><input type="checkbox" name="attachments[' . $post->ID . '][projects_featured_media]" value="1" ' . checked($meta, 1, false) . ' /> ' . __('Use as featured', 'projects') . '</label>';
-		
+			
 		// add a custom image size field
 		if(strpos($post->post_mime_type, 'image') !== false) {
 			$html = '';
@@ -426,13 +421,7 @@ class Projects_Media {
 			update_post_meta($post['ID'], '_projects_default_image_size', $attachment['projects_default_image_size']);
   		}
   		
-  		if(empty($attachment['projects_featured_media'])) {
-			delete_post_meta($post['ID'], '_projects_featured_media');
-		} else {
-			update_post_meta($post['ID'], '_projects_featured_media', $attachment['projects_featured_media']);
-  		}
-		
-		return $post;
+ 		return $post;
 	}
 	
 	/**
@@ -501,9 +490,9 @@ class Projects_Media {
 		// get all the attachments
 		$attachments = get_children($args);
 		
-		// get the post thumbnail id
-		//$post_thumbnail_id = get_post_thumbnail_id($post_id);
-
+		// get the post thumbnail id 
+		$post_thumbnail_id = get_post_thumbnail_id($post_id);
+				
 		// add the default size to the attachments
 		foreach($attachments as $attachment) {		
 			// set the default properties
@@ -512,43 +501,47 @@ class Projects_Media {
 			} else {
 				$attachment->default_size = null;
 			}
-			$attachment->featured = (bool) $projects->get_project_meta('featured_media', $attachment->ID);		
 			$attachment->embed_url = $projects->get_project_meta('embed_url', $attachment->ID);
 			//$attachment->embed_thumbnail_id = $projects->get_project_meta('embed_thumbnail_id', $attachment->ID);
 
-			// remove images
+			// filter the images
 			if(!empty($type) && $type == Projects_Media::$media_type_featured) {
-				// remove all gallery media
-				//if($post_thumbnail_id != $attachment->ID && empty($attachment->featured)) {
-				if(empty($attachment->featured)) {
+				// remove all except the post thumbnail from return value
+				if($post_thumbnail_id != $attachment->ID) {
 					unset($attachments[$attachment->ID]);
 				}
-			} else if(!empty($type) && $type == Projects_Media::$media_type_gallery) {
-				// remove all featured media
-				//if($post_thumbnail_id == $attachment->ID || !empty($attachment->featured)) {
-				if(!empty($attachment->featured)) {
+			} else if(!empty($type) && $type == Projects_Media::$media_type_content) {
+				// remove the post thumbnail from return value
+				if($post_thumbnail_id == $attachment->ID) {
 					unset($attachments[$attachment->ID]);
 				}
 			}
 		} 
-		
+
 		return $attachments;
 	}
 
 	/**
 	 * Get the featured media
 	 */
-	public function get_project_featured_media($post_id = null, $mime = null) {
-		$attachments = $this->get_project_media($post_id, $mime, Projects_Media::$media_type_featured);
+	public function get_project_featured_media($post_id = null) {		
+		$attachments = $this->get_project_media($post_id, 'image', Projects_Media::$media_type_featured);
 		
-		return $attachments;
+		// set the first key instead of an array
+		if(!empty($attachments)) {
+			$attachment = $attachments[0];
+		} else {
+			$attachment = null;
+		}
+		
+		return $attachment;
 	}
 	
 	/**
-	 * Get the gallery media
+	 * Get the content media
 	 */
-	public function get_project_gallery_media($post_id = null, $mime = null) {		
-		$attachments = $this->get_project_media($post_id, $mime, Projects_Media::$media_type_gallery);
+	public function get_project_content_media($post_id = null, $mime = null) {		
+		$attachments = $this->get_project_media($post_id, $mime, Projects_Media::$media_type_content);
 
 		return $attachments;
 	}

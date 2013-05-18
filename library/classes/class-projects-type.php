@@ -94,7 +94,7 @@ class Projects_Type {
 		$default_args = array(
 	    	'labels' => $labels,
 	    	'public' => true,
-			'supports' => array('title', 'editor', 'excerpt', 'post-formats'),
+			'supports' => array('title', 'editor', 'excerpt', 'post-formats', 'thumbnail'),
 			'capability_type' => 'post',
 			'rewrite' => array('slug' => $projects_installation->slug),
 			'menu_position' => 5,
@@ -209,18 +209,12 @@ class Projects_Type {
 				case 'thumbnail':
 					$thumbnail_id = null;
 					
-					// load the first attachment that is an image
+					// load the thumbnail
 					$projects_media = new Projects_Media();
-					$attachments = $projects_media->get_project_featured_media();					
-					foreach($attachments as $attachment) {
-						if($projects_media->is_web_image($attachment->post_mime_type)) {
-							$thumbnail_id = $attachment->ID;
-							break;
-						}
-					}
+					$attachment = $projects_media->get_project_featured_media();					
 					
-					if(isset($thumbnail_id)) {
-						echo wp_get_attachment_image($thumbnail_id, 'project-thumbnail', true );
+					if(isset($attachment)) {
+						echo wp_get_attachment_image($attachment->ID, 'project-thumbnail', true );
 					} else {
 						echo __('None', 'projects');
 					}
