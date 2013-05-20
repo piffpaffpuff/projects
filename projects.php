@@ -403,7 +403,7 @@ class Projects {
 	/**
 	 * Set the meta value from a key
 	 */
-	public function set_project_meta($key, $value, $post_id = null) {
+	public function set_project_meta($key, $value = null, $post_id = null) {
 		if(empty($post_id)) {
 			global $post;
 			$post_id = $post->ID;

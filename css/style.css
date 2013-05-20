@@ -262,3 +262,7 @@ table.wp-list-table .column-title {
 .post-type-project .attachment-details label[data-setting=description] {
 	display: none;
 }
+
+.post-type-project .compat-attachment-fields select {
+	width: 100%;
+}
