@@ -161,7 +161,7 @@ class Projects_Media {
 			
 		// build the selection
 		$html = '';
-		$html .= '<select class="image-size-select" name="attachments[' . $attachment->ID . '][default_size]">';
+		$html .= '<select class="image-size-select" name="attachments[' . $attachment->ID . '][default_image_size]">';
 		$html .= '<option class="image-size-item" value="" ' . selected($meta_size, null, false) . '>' . __('None', 'projects') . '</option>';
 		
 		// go through all sizes and generate the fields
