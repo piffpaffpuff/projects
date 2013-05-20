@@ -23,10 +23,13 @@ class Projects_Writepanel {
 	 * Hook into the admin hooks
 	 */
 	public function hook_admin() {				
+ 		add_theme_support('post-thumbnails');
+
 		add_action('add_meta_boxes', array($this, 'add_boxes'));
 		add_action('add_meta_boxes', array($this, 'remove_boxes'), 20);
 		add_action('wp_ajax_add_taxonomy_group_preset', array($this, 'add_taxonomy_group_preset_ajax'));
 		add_action('wp_ajax_load_media_list', array($this, 'load_media_list_ajax'));
+		add_action('wp_ajax_save_media_list', array($this, 'save_media_list_ajax'));
 
 		add_filter('wp_insert_post_data', array($this, 'change_post_date'));		
 		add_action('save_post', array($this, 'save_box_data'));
@@ -295,7 +298,7 @@ class Projects_Writepanel {
 		</select></p>
 		<?php $website = $projects->get_project_meta('website'); ?>
 		<p class="form-fieldset"><label><span><?php _e('Reference Nr.', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo $projects->get_project_meta('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
-		<p class="form-fieldset"><label><span><?php _e('Website', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo $website; ?>" title="<?php _e('Address', 'projects'); ?>"><?php if(!empty($website)) : ?><a href="<?php echo $website; ?>" target="_blank" class="external"></a><?php endif; ?></p>
+		<p class="form-fieldset"><label><span><?php _e('Website', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo $website; ?>" placeholder="http://" title="<?php _e('Address', 'projects'); ?>"><?php if(!empty($website)) : ?><a href="<?php echo $website; ?>" target="_blank" class="external"></a><?php endif; ?></p>
 		<?php
 	}
 	
@@ -306,10 +309,10 @@ class Projects_Writepanel {
 		// Use nonce for verification
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
   		?>
-		<ul class="projects-media-list hide-if-no-js" id="projects-media-list">
+		<ul id="projects-media-list" class="media-list hide-if-no-js">
 		<?php $this->create_media_list(); ?>
 		</ul>
-		<p class="hide-if-no-js"><a href="media-upload.php?post_id=<?php echo $post->ID; ?>&amp;tab=type&amp;TB_iframe=true" id="projects-media-add" class="thickbox projects-media-add"><?php _e('Manage media', 'projects'); ?></a></p>
+		<p class="hide-if-no-js"><a href="#" id="projects-media-manage" class="media-manage"><?php _e('Manage media', 'projects'); ?></a></p>
 		<?php
 	}
 	
@@ -323,15 +326,16 @@ class Projects_Writepanel {
 		}
 		
 		$projects_media = new Projects_Media();
-		$attachments = $projects_media->get_project_content_media($post_id, null);
+		$attachments = $projects_media->get_project_content_media($post_id);
 		if ($attachments) {
 			foreach($attachments as $attachment) {
 				$mime = explode('/', strtolower($attachment->post_mime_type)); 
-				$meta = wp_get_attachment_metadata($attachment->ID); ?>
-				<li class="projects-media-item mime-<?php echo $mime[1]; ?> <?php if($mime[0] != 'image') : ?>mime-placeholder<?php endif; ?>">
-					<a href="media-upload.php?post_id=<?php echo $post_id; ?>&amp;tab=gallery&amp;TB_iframe=true" class="thickbox">
+				$meta = wp_get_attachment_metadata($attachment->ID); 
+				$source = wp_get_attachment_image_src($attachment->ID, 'project-media-manager'); ?>
+				<li class="media-item mime-<?php echo $mime[1]; ?> <?php if($mime[0] != 'image') : ?>mime-placeholder<?php endif; ?>">
+					<a href="#" class="media-manage" data-attachment-id="<?php echo esc_html($attachment->ID); ?>">
 						<span class="media-options"></span>
-						<span class="media-content"><?php echo wp_get_attachment_image($attachment->ID, 'project-media-manager', true); ?></span>
+						<span class="media-content"><img src="<?php echo $source[0]; ?>"></span>
 						<span class="media-title"><?php echo esc_html($attachment->post_title); ?></span>
 					</a>
 				</li>
@@ -341,16 +345,20 @@ class Projects_Writepanel {
 	}
 	
 	/**
-	 * Load the media list with an ajax callback
+	 * Save the media list with an ajax callback
 	 */
-	public function load_media_list_ajax() {
+	public function save_media_list_ajax() {
 	    // Verifiy post data and nonce
 		if(empty($_POST) || empty($_POST['post_id']) || empty($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], Projects::$plugin_basename)) {
 			die();
 		}
 
-		// Create the list
-		$this->create_media_list($_POST['post_id']);
+		// Save the list as metadata
+		$projects_media = new Projects_Media();
+		$projects_media->set_project_media_meta($_POST['ids'], array(), $_POST['post_id']);
+	    
+	    // output the new media list
+	    $this->create_media_list($_POST['post_id']);
 	    
 		exit;
 	}	

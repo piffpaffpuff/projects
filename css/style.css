@@ -72,9 +72,12 @@ table.wp-list-table .column-title {
 }
 .form-fieldset label {
 	float: left;
-	width: 80px;
+	width: 33%;
 	padding: 0;
 	vertical-align: middle;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 .form-fieldset > input,
 .form-fieldset > select,
@@ -182,8 +185,11 @@ table.wp-list-table .column-title {
 	border-radius: 3px;
 	background-color:#ffffff;
 }
-.taxonomy-group-list select {
-	width: 48%;
+.taxonomy-group-list .preset-fields {
+	text-align: center;
+}
+.taxonomy-group-list .preset-fields select {
+	width: 48.3%;
 	margin-bottom: 5px;
 }
 .taxonomy-group-list .preset-options {
@@ -200,41 +206,46 @@ table.wp-list-table .column-title {
 .taxonomy-group-list .preset-options a {
 	float: right;
 }
+#normal-sortables .taxonomy-group-list select {
+	width: 24.1%;
+}
 
 /*
    Attachments Meta Box
 */
 
-.projects-media-list { 
+#projects-media-list { 
 	list-style-type: none; 
 	margin: 0; 
 	padding: 0;
 	overflow: hidden;
 }
-.projects-media-list li {
+#projects-media-list li {
 	float: left;
 	cursor: pointer;
 	margin: 10px;
 	text-align: center;
 }
-.projects-media-list li .media-content  {
-	line-height: 240px;
-	width: 240px; 
-	height: 240px;
+#projects-media-list li .media-content  {
+	line-height: 200px;
+	width: 200px; 
+	height: 200px;
 	display: block;
 }
-.projects-media-list li.mime-placeholder .media-content {
+#projects-media-list li.mime-placeholder .media-content {
 	background-color: #f1f1f1;
 }
-.projects-media-list li .media-content img {
+#projects-media-list li .media-content img {
 	vertical-align: bottom;
+	max-width: 100%;
+	max-height: 100%;
 }
-.projects-media-list li.mime-placeholder img {
+#projects-media-list li.mime-placeholder img {
 	vertical-align: middle;
 	max-width: 48px;
 	max-height: 48px;
 }
-.projects-media-list li .media-title {
+#projects-media-list li .media-title {
 	color: #c0c0c0;
 	font-weight: bold;
 	display: none;
@@ -244,6 +255,10 @@ table.wp-list-table .column-title {
    Media Upload 3.5
 */
 
-.media-modal .image-size-select {
-	width: 100%;
+.post-type-project .media-frame .gallery-settings,
+.post-type-project .media-menu .media-menu-item:first-child,
+.post-type-project .media-menu .separator,
+.post-type-project .attachment-details label[data-setting=alt],
+.post-type-project .attachment-details label[data-setting=description] {
+	display: none;
 }

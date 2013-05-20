@@ -1,31 +1,71 @@
 jQuery(document).ready(function($) {
 
-	// Writepanel -------------------------
-
+	/* -------------------------
+	 * Writepanel
+	 * ------------------------- */
+	
+	
 	// color picker
 	$('input.minicolors').miniColors();
+	
+	// media manage buttons 
+	$('.media-manage').live('click', function(event) {
+		event.preventDefault();
 		
-	// reload the media list on thickbox close 
-	$('#TB_overlay, #TB_closeWindowButton').live('mouseup', function(event) {
-		loadMediaList();
+		// Target
+		var file_frame;
+		var button = $(this);
+		
+		// Find all attachment ids in the dom
+		var ids = [];
+		button.closest('#projects-media-box').find('.media-item a').each(function() {
+			ids.push($(this).data('attachment-id'));
+		});
+		
+		// Use a pseudo shortcode to send the ids to the frame 
+		var shortcode = '[gallery ids="' + ids.join(',') + '"]';
+		
+		// Create the media frame
+		if(ids.length == 0) {
+			// check if there are already an ids
+			file_frame = wp.media.frames.file_frame = wp.media({
+				frame: 'post',
+				state: 'gallery-edit',
+				multiple: true
+			});
+			file_frame.open();
+		} else {
+			file_frame = wp.media.frames.file_frame = wp.media.gallery.edit(shortcode);
+		}
+		
+		// Update the media list
+		file_frame.on('update', function() {
+			var controller = file_frame.state('gallery-edit');
+			var library = controller.get('library');
+			console.log(library);
+			// Get all the attachment ids 
+			var ids = library.pluck('id');
+			
+			// Save all
+			saveMediaList(ids);
+		});
 	});
 	
 	/**
-	 * load the media list with ajax
+	 * save the media list with ajax and output it
 	 */
-	function loadMediaList(type) {
+	function saveMediaList(ids) {		
 		var data = {
-			action: 'load_media_list',
-			type: type,
+			action: 'save_media_list',
 			post_id: $('#post_ID').val(),
-			nonce: $('#projects_nonce').val()
+			nonce: $('#projects_nonce').val(),
+			ids: ids
 		};
 		
 		$.post(ajaxurl, data, function(response) {			
 			$('#projects-media-list').empty().append(response);
 		});
 	}
-	
 		
 	// add a preset
 	$('.add-preset').on('click', function(event) {

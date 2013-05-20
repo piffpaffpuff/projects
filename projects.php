@@ -142,8 +142,8 @@ class Projects {
    		add_action('admin_print_styles', array($this, 'add_styles'));
 		add_action('admin_print_scripts-post.php', array($this, 'add_scripts'));
 		add_action('admin_print_scripts-post-new.php', array($this, 'add_scripts'));
-		add_action('admin_print_styles-media-upload-popup', array($this, 'add_media_styles'));		
-		add_action('admin_print_scripts-media-upload-popup', array($this, 'add_media_scripts'));
+		//add_action('admin_print_styles-media-upload-popup', array($this, 'add_media_styles'));		
+		//add_action('admin_print_scripts-media-upload-popup', array($this, 'add_media_scripts'));
 		add_filter('admin_body_class', array($this, 'add_admin_body_classes'));
 
 		// Enqueue script on settings page

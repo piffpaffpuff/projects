@@ -38,16 +38,16 @@ class Projects_Media {
 		add_action('admin_head-post.php', array($this, 'remove_insert_media_buttons'));
 		add_action('admin_head-post-new.php', array($this, 'remove_insert_media_buttons'));
 		
-		add_filter('upload_mimes', array($this, 'add_mime_types'));
-		add_filter('icon_dir', array($this, 'attachment_mime_icons_path'));
-		add_filter('icon_dir_uri', array($this, 'attachment_mime_icons_url'));
-		add_filter('media_upload_tabs', array($this, 'remove_media_tabs'));
-		add_filter('media_upload_media_url', array($this, 'add_tab_media_url'));
+		add_filter('media_view_strings', array($this, 'rename_media_manager_strings'), 10, 2);
+		//add_filter('icon_dir', array($this, 'attachment_mime_icons_path'));
+		//add_filter('icon_dir_uri', array($this, 'attachment_mime_icons_url'));
+		//add_filter('media_upload_tabs', array($this, 'remove_media_tabs'));
+		//add_filter('media_upload_media_url', array($this, 'add_tab_media_url'));
 		add_filter('attachment_fields_to_edit', array($this, 'edit_media_options'), 15, 2);
 		add_filter('attachment_fields_to_save', array($this, 'save_media_options'), 15, 2);
-		add_action('delete_attachment', array($this, 'delete_embed_thumbnail'));
+		//add_action('delete_attachment', array($this, 'delete_embed_thumbnail'));
 		
-		add_action('wp_ajax_validate_media_url_item', array($this, 'validate_media_url_item_ajax'));
+		//add_action('wp_ajax_validate_media_url_item', array($this, 'validate_media_url_item_ajax'));
 	}
 	
 	/**
@@ -55,16 +55,6 @@ class Projects_Media {
 	 */
 	public function add_boxes() {			
 		add_meta_box('projects-gallery-media-box', __('Media', 'projects'), array($this, 'create_box_gallery_media'), Projects::$post_type, 'normal', 'default');
-	}
-	
-	/**
-	 * Register the mime type
-	 */
-	public function add_mime_types($mimes) {
-		/*$mimes = wp_parse_args(array(
-			'csv' => 'text/csv'
-		), $mimes);*/
-		return $mimes;
 	}
 	
 	/**
@@ -78,17 +68,40 @@ class Projects_Media {
 		}
 	}
 	
+		
+	/**
+	 * Rename some media manager strings
+	 */
+	public function rename_media_manager_strings($strings, $post) {
+		if($post->post_type == Projects::$post_type) {
+			$strings['createNewGallery'] = __('Create Media', 'projects');
+			$strings['cancelGalleryTitle'] = __('Cancel', 'projects');
+			
+			$strings['addToGalleryTitle'] = __('Add Media', 'projects');
+			$strings['insertGallery'] = $strings['addToGalleryTitle'];
+			$strings['addToGallery'] = $strings['addToGalleryTitle'];
+			
+			$strings['createGalleryTitle'] = __('Edit Media', 'projects');
+			$strings['editGalleryTitle'] = $strings['createGalleryTitle'];
+			
+			$strings['updateGallery'] = __('Update Media', 'projects');
+	    }
+	    
+	    return $strings;
+	}
+
+	
 	/**
 	 * Replace the default file icons with some nicer ones
 	 */
-	function attachment_mime_icons_path($directory) {
+	public function attachment_mime_icons_path($directory) {
 		return Projects::$plugin_directory_path . '/images/icons'; 
 	}
 	
 	/**
 	 * Replace the default file icons with some nicer ones
 	 */
-	function attachment_mime_icons_url($directory) {
+	public function attachment_mime_icons_url($directory) {
 		return Projects::$plugin_directory_url . '/images/icons'; 
 	}
 	
@@ -174,6 +187,27 @@ class Projects_Media {
 	    </form>
 		<?php
 	}
+	
+	/**
+	 * Save media id from the media manager via ajax
+	 */
+/*
+	public function save_media_items_ajax() {		
+		// Verifiy post data and nonce
+		if(empty($_POST)) {
+			die();
+		}
+
+		// Save ids as meta array. In WordPress 3.5 the
+		// uploads aren't bound anymore uniquely to a 
+		// post. Instead of attaching the ids to a post, 
+		// they are saved to a meta array.
+		print_r($_POST)
+		
+		exit;
+	}
+*/
+	
 
 	/**
 	 * Validate a media url to embed via ajax
@@ -186,7 +220,7 @@ class Projects_Media {
 
 		// Get the oembed
 		$data = $this->get_embed($_POST['url']);
-		print_r($data);
+
 		if(empty($data)) {
 			die();
 		}
@@ -459,11 +493,67 @@ class Projects_Media {
 	public function is_web_image($mime) {
 		return $this->is_mime_type($mime, 'jpg|jpeg|jpe|png|gif');
 	}
+	
+	/**
+	 * Get the media
+	 */
+	public function get_project_media($attachment_ids = null, $mime = null) {
+		$projects = new Projects();
+		
+		// get all media
+		$args = array( 
+			'post_type' => 'attachment', 
+			'post_status' => null, 
+			'numberposts' => -1, 
+			'include' => $attachment_ids
+		); 
+			
+		// use post attachments when the array is empty
+		if(empty($attachment_ids)) {
+			global $post;
+			$default_args = array(
+				'post_parent' => $post->ID,
+				'post_status' => 'inherit',
+				'order' =>'ASC',
+				'orderby' => 'menu_order'
+			);
+			$args = array_merge($args, $default_args);
+		}
+		
+		// restrict mime
+		if(!empty($mime)) {
+			$default_args = array(
+				'post_mime_type' => $mime,
+			);
+			$args = array_merge($args, $default_args);
+		}
+
+		// get all the attachments
+		$attachments = get_posts($args);
+		
+		// sort the attachments by the array ids
+		if(!empty($attachment_ids)) {
+			$hash = array();
+			$sorted = array();
+	
+			foreach($attachments as $attachment) {
+				$hash[$attachment->ID] = $attachment;
+			}
+	
+			foreach($attachment_ids as $attachment_id) {
+			    $sorted[] = $hash[$attachment_id];
+			}
+			
+			$attachments = $sorted;
+		}
+		
+		return $attachments;
+	}
 
 	/**
 	 * Get the media
 	 */
-	public function get_project_media($post_id = null, $mime = null, $type = null) {
+	/*public function get_project_media($post_id = null, $mime = null, $type = null) {
 		$projects = new Projects();
 		
 		// default id
@@ -486,6 +576,7 @@ class Projects_Media {
 		if(!empty($mime)) {
 			$args['post_mime_type'] = $mime;
 		}
+		
 		
 		// get all the attachments
 		$attachments = get_children($args);
@@ -519,24 +610,60 @@ class Projects_Media {
 		} 
 
 		return $attachments;
+	}*/
+	
+	/**
+	 * Get the content media meta
+	 */
+	public function get_project_media_meta($post_id = null) {		
+		// default id
+		if(empty($post_id)) {
+			global $post;
+			$post_id = $post->ID;
+		}
+		
+		// get the meta
+		$projects = new Projects();
+		$meta = $projects->get_project_meta('content_media', $post_id);
+		
+		return $meta;
 	}
-
+	
+	/**
+	 * Set the content media meta
+	 */
+	public function set_project_media_meta($ids, $sizes, $post_id) {
+		// build an array of items
+		$items = array(
+			'attachment_id' => $ids,
+			'attachment_image_size' => $sizes
+		);
+						
+		// set the meta
+		$projects = new Projects();
+		$meta = $projects->set_project_meta('content_media', $items, $post_id);
+		
+		return $meta;
+	}
+	
 	/**
 	 * Get the featured media
 	 */
 	public function get_project_featured_media($post_id = null) {		
-		$attachments = $this->get_project_media($post_id, 'image', Projects_Media::$media_type_featured);
+		$attachment = null;
 		
-		// set the first key instead of an array
-		if(!empty($attachments)) {
-			foreach($attachments as $attachment) {
-				$attachment = $attachment;
-				break;
+		// get the featured image id
+		$featured_image_id = get_post_thumbnail_id($post_id);
+		
+		if(!empty($featured_image_id)) {
+			// return the first key instead of an array
+			$attchment_ids = array($featured_image_id);
+			$attachments = $this->get_project_media($attchment_ids);
+			if(!empty($attachments)) {
+				$attachment = reset($attachments);
 			}
-		} else {
-			$attachment = null;
-		}
-		
+		} 
+
 		return $attachment;
 	}
 	
@@ -544,7 +671,17 @@ class Projects_Media {
 	 * Get the content media
 	 */
 	public function get_project_content_media($post_id = null, $mime = null) {		
-		$attachments = $this->get_project_media($post_id, $mime, Projects_Media::$media_type_content);
+		$attachment_ids = array();
+		
+		// get the meta with the ids
+		$meta = $this->get_project_media_meta($post_id);
+		
+		if(!empty($meta['attachment_id'])) {
+			$attachment_ids = $meta['attachment_id'];
+		}
+		
+		// get the attachment data
+		$attachments = $this->get_project_media($attachment_ids, $mime);
 
 		return $attachments;
 	}
