@@ -149,7 +149,7 @@ class Projects_Media {
 		$projects = new Projects();
 			
 		// add a custom image size field
-		$meta_size = $projects->get_project_meta('default_size', $attachment->ID);
+		$meta_size = $projects->get_project_meta('default_image_size', $attachment->ID);
 		$image_sizes = get_intermediate_image_sizes();
 		$image_sizes[] = 'full';
 		
@@ -193,7 +193,7 @@ class Projects_Media {
 		$html .= '</select>';
 		
 		// add the size field	
-		$fields['default_size'] = array(
+		$fields['default_image_size'] = array(
 			'label' => __('Size', 'projects'),
 			'input' => 'html',
 			'html' => $html,
@@ -229,8 +229,8 @@ class Projects_Media {
 		// and return the attachment object.
 		$projects = new Projects();
 
-		if(isset($attachment_data['default_size'])) {
- 			$projects->set_project_meta('default_size', $attachment_data['default_size'], $attachment['ID']);
+		if(isset($attachment_data['default_image_size'])) {
+ 			$projects->set_project_meta('default_image_size', $attachment_data['default_image_size'], $attachment['ID']);
  		}
  		if(isset($attachment_data['embed_url'])) {
  			$url = $attachment_data['embed_url'];
