@@ -504,9 +504,9 @@ function project_content_media($size = 'large', $post_id = null, $mime = null) {
 				?>
 				<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
 				<img src="<?php echo $attachment_src[0]; ?>" />
-			</li><?php elseif($projects->media->is_mime_type($attachment->post_mime_type, 'embed')) : ?>
-			<li>
-				<?php echo $projects->media->get_embed_html($attachment->embed_url); ?>
+				<?php if(!empty($attachment->embed_html)) : ?>
+					<?php echo $attachment->embed_html; ?>
+				<?php endif; ?>
 			</li><?php elseif($projects->media->is_mime_type($attachment->post_mime_type, 'video|m4v|mp4|ogv|webm')) : ?>
 			<li>
 				<video src="<?php echo wp_get_attachment_url($attachment->ID); ?>" controls></video>

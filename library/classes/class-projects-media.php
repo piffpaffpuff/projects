@@ -41,13 +41,6 @@ class Projects_Media {
 		add_filter('media_view_strings', array($this, 'rename_media_manager_strings'), 10, 2);
 		add_filter('attachment_fields_to_edit', array($this, 'edit_media_options'), 20, 2);
 		add_filter('attachment_fields_to_save', array($this, 'save_media_options'), 20, 2);
-		
-		
-		//		
-		
-		$url = 'http://vimeo.com/20412632';
-		$data = $this->get_embed($url, 1857);
-		print_r($data);
 	}
 	
 	/**
@@ -88,60 +81,6 @@ class Projects_Media {
 	    return $strings;
 	}
 
-	/**
-	 * Return the data of an oembed item instead of the html
-	 */
-	public function parse_oembed_data($html, $data, $url) {
-		return $data;
-	}
-	
-	/**
-	 * Get an oembed data object or html
-	 */
-	public function get_embed($url, $attachment_id, $html = false) {		
-		// Internally oEmbed is used to embed media
-		// http://codex.wordpress.org/Embeds
-		// Use wp_oembed_add_provider() to add more
-		// providers to the whitelist.
-		
-		// Check if the url is set
-		if(empty($url)) {
-			return false;
-		}
-		
-		// Check if the media url can be embedded,
-		// when the url can't be embedded:
-		// $data is false when returned as object
-		// or an empty string when returned as html.
-		if($html) {
-			// Get the html from the cache
-			$projects = new Projects();
-			$cache = $projects->get_project_meta('embed_object', $attachment_id);
-			if($cache) {
-				print_r($cache);
-				return $cache;
-			}
-			
-			// Get the html from discovery
-			$data = wp_oembed_get($url);
-			return $data;
-		} else {
-			// Get the data object
-			add_filter('oembed_dataparse', array($this, 'parse_oembed_data'), 10, 3);
-			$data = wp_oembed_get($url);
-			remove_filter('oembed_dataparse', array($this, 'parse_oembed_data'), 10, 3);
-			return $data;
-		}
-		return false;
-	}
-	
-	/**
-	 * Get an oembed html
-	 */
-	public function get_embed_html($url, $attachment_id) {
-		return $this->get_embed($url, $attachment_id, true);
-	}
-	
 	/**
 	 * Set the media fields
 	 */
@@ -234,21 +173,17 @@ class Projects_Media {
  		}
  		if(isset($attachment_data['embed_url'])) {
  			$url = $attachment_data['embed_url'];
- 			
- 			/*
-// Check if the media can be embedded
-			$html = null;
-			$data = $this->get_embed($url, $attachment['ID']);
-			if(!empty($data)) {
-				// Create oembed meta and cache
-				$oembed = _wp_oembed_get_object();
-				$html = $oembed->data2html($data, $url);
-			}
-			
-*/
-			// Save meta
- 			$projects->set_project_meta('embed_url', $url, $attachment['ID']);
-			//$projects->set_project_meta('embed_object', $html, $attachment['ID']);
+ 			$meta_url = $projects->get_project_meta('embed_url', $attachment['ID']);
+
+			// Save the meta only when the url changed
+			if($url != $meta_url) {
+				// Discover the embed html for an url
+				$html = wp_oembed_get($url);
+				
+				// Save the meta
+ 				$projects->set_project_meta('embed_url', $url, $attachment['ID']);
+ 				$projects->set_project_meta('embed_html', $html, $attachment['ID']);
+ 			}
  		}
  		
  		return $attachment;
@@ -316,11 +251,18 @@ class Projects_Media {
 		if(!empty($attachment_ids)) {
 			$hash = array();
 			$sorted = array();
-	
+			
+			// create hash table and add custom meta
 			foreach($attachments as $attachment) {
 				$hash[$attachment->ID] = $attachment;
+				
+				// set custom meta in the attachment object
+				$attachment->default_size = $projects->get_project_meta('default_image_size', $attachment->ID);
+				$attachment->embed_url = $projects->get_project_meta('embed_url', $attachment->ID);
+				$attachment->embed_html = $projects->get_project_meta('embed_html', $attachment->ID);
 			}
-	
+			
+			// fill sorted array
 			foreach($attachment_ids as $attachment_id) {
 			    $sorted[] = $hash[$attachment_id];
 			}
@@ -404,7 +346,6 @@ class Projects_Media {
 
 		return $attachments;
 	}
-	
 }
 }
 
