@@ -142,8 +142,6 @@ class Projects {
    		add_action('admin_print_styles', array($this, 'add_styles'));
 		add_action('admin_print_scripts-post.php', array($this, 'add_scripts'));
 		add_action('admin_print_scripts-post-new.php', array($this, 'add_scripts'));
-		//add_action('admin_print_styles-media-upload-popup', array($this, 'add_media_styles'));		
-		//add_action('admin_print_scripts-media-upload-popup', array($this, 'add_media_scripts'));
 		add_filter('admin_body_class', array($this, 'add_admin_body_classes'));
 
 		// Enqueue script on settings page
@@ -169,31 +167,6 @@ class Projects {
 		wp_enqueue_script('jquery-ui-sortable');
 		wp_enqueue_script('minicolors', self::$plugin_directory_url . 'js/jquery.miniColors.min.js', array('jquery'));
 		wp_enqueue_script('projects', self::$plugin_directory_url . 'js/script.js', array('jquery', 'jquery-ui-core', 'jquery-ui-sortable', 'minicolors'));
-	}
-
-	/**
-	 * Add the media manager styles
-	 */
-	public function add_media_styles() {
-		$post_type = get_post_type($_GET['post_id']);
-		if(!empty($post_type) && $post_type == self::$post_type) {
-			wp_enqueue_style('projects-media', self::$plugin_directory_url . 'css/media-style.css');
-		}
-	}
-	
-	/**
-	 * Add the media manager scripts
-	 */
-	public function add_media_scripts() {
-		$post_type = get_post_type($_GET['post_id']);
-		if(!empty($post_type) && $post_type == self::$post_type) {
-			wp_enqueue_script('projects-media', self::$plugin_directory_url . 'js/media-script.js');
-			
-			// localize the script to send some properties
-			wp_localize_script('projects-media', 'ProjectsScript', array(
-				'label_featured' => __( 'Featured', 'projects' )
-			));
-		}
 	}
 	
 	/**

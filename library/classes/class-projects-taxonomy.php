@@ -212,7 +212,7 @@ class Projects_Taxonomy {
 		<div class="form-field">
 			<label for="website"><?php _e('Website', 'projects' ); ?></label>
 			<input type="text" name="website" id="website" value="">
-			<p class="description"><?php _e("The Website URL is optional. Some themes may use it. Type in a complete URL like <code>http://www.example.com</code>.", 'projects'); ?></p>
+			<p class="description"><?php _e("The Website URL is optional. Type in a complete URL like <code>http://www.example.com</code>.", 'projects'); ?></p>
 		</div>
 		<?php
 	}
@@ -229,7 +229,7 @@ class Projects_Taxonomy {
 			<th scope="row" valign="top"><label for="website"><?php _e('Website', 'projects' ); ?></label></th>
 			<td>
 				<input type="text" name="website" id="website" value="<?php echo (!empty($term_meta)) ? esc_attr($term_meta) : ''; ?>">
-				<p class="description"><?php _e("The Website URL is optional. Some themes may use it. Use full urls like <code>http://www.example.com</code>.", 'projects'); ?></p>
+				<p class="description"><?php _e("The Website URL is optional. Type in a complete URL like <code>http://www.example.com</code>.", 'projects'); ?></p>
 			</td>
 		</tr>
 		<?php

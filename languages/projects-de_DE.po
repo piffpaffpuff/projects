@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-04-28 19:07+0100\n"
-"PO-Revision-Date: 2013-04-28 19:07+0100\n"
+"POT-Creation-Date: 2013-05-21 22:18+0100\n"
+"PO-Revision-Date: 2013-05-21 22:18+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -13,72 +13,47 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: ..\n"
 
-#: ../projects.php:193
-msgid "Featured"
-msgstr "Featured"
-
-#: ../library/classes/class-projects-media.php:57
-#: ../library/classes/class-projects-media.php:343
-#: ../library/classes/class-projects-writepanel.php:38
-msgid "Featured Media"
-msgstr "Featured Medien"
-
-#: ../library/classes/class-projects-media.php:58
-#: ../library/classes/class-projects-writepanel.php:39
+#: ../library/classes/class-projects-media.php:50
+#: ../library/classes/class-projects-writepanel.php:42
 msgid "Media"
 msgstr "Medien"
 
-#: ../library/classes/class-projects-media.php:106
-msgid "From URL"
-msgstr "URL einbetten"
+#: ../library/classes/class-projects-media.php:69
+msgid "Create Media"
+msgstr "Medien auswählen"
 
-#: ../library/classes/class-projects-media.php:107
-msgid "Project Media"
-msgstr "Projektmedien"
+#: ../library/classes/class-projects-media.php:70
+msgid "Cancel"
+msgstr "Abbrechen"
 
-#: ../library/classes/class-projects-media.php:145
-msgid "Add media from another website"
-msgstr "Medien von einer anderen Webseite hinzufügen"
-
-#: ../library/classes/class-projects-media.php:152
-msgid "URL"
-msgstr "URL"
-
-#: ../library/classes/class-projects-media.php:160
-msgid "Enter an URL from YouTube, Vimeo or Flickr."
-msgstr "Eine URL von YouTube, Vimeo oder Flickr hinzufügen."
-
-#: ../library/classes/class-projects-media.php:168
-#: ../library/classes/class-projects-writepanel.php:307
-#: ../library/classes/class-projects-writepanel.php:321
-msgid "Add media"
+#: ../library/classes/class-projects-media.php:72
+msgid "Add Media"
 msgstr "Medien hinzufügen"
 
-#: ../library/classes/class-projects-media.php:268
-#: ../library/classes/class-projects-type.php:148
-msgid "Title"
-msgstr "Titel"
+#: ../library/classes/class-projects-media.php:76
+msgid "Edit Media"
+msgstr "Medien bearbeiten"
 
-#: ../library/classes/class-projects-media.php:345
-msgid "Use as featured"
-msgstr "Als featured markieren"
+#: ../library/classes/class-projects-media.php:79
+msgid "Update Media"
+msgstr "Medien aktualisieren"
 
-#: ../library/classes/class-projects-media.php:363
-#: ../library/classes/class-projects-type.php:225
+#: ../library/classes/class-projects-media.php:104
+#: ../library/classes/class-projects-type.php:219
 msgid "None"
 msgstr "Keine"
 
-#: ../library/classes/class-projects-media.php:390
-msgid "Default Size"
+#: ../library/classes/class-projects-media.php:136
+msgid "Size"
 msgstr "Grösse"
 
-#: ../library/classes/class-projects-media.php:398
+#: ../library/classes/class-projects-media.php:145
 msgid "Embed URL"
 msgstr "Eingebettete URL"
 
-#: ../library/classes/class-projects-media.php:403
-msgid "Embed Type"
-msgstr "Eingebetteter Typ"
+#: ../library/classes/class-projects-media.php:155
+msgid "View link"
+msgstr "Link öffnen"
 
 #: ../library/classes/class-projects-settings.php:45
 msgid "You do not have sufficient permissions to access this page."
@@ -101,7 +76,7 @@ msgid "Projects base-page"
 msgstr "Projekte Basisseite"
 
 #: ../library/classes/class-projects-settings.php:82
-#: ../library/classes/class-projects-writepanel.php:41
+#: ../library/classes/class-projects-writepanel.php:44
 msgid "Location"
 msgstr "Verortung"
 
@@ -153,133 +128,144 @@ msgstr "Auszeichnungen"
 msgid "Award"
 msgstr "Auszeichnung"
 
-#: ../library/classes/class-projects-taxonomy.php:58
+#: ../library/classes/class-projects-taxonomy.php:102
 msgid "Types"
 msgstr "Typen"
 
-#: ../library/classes/class-projects-taxonomy.php:58
+#: ../library/classes/class-projects-taxonomy.php:102
 msgid "Type"
 msgstr "Typ"
 
-#: ../library/classes/class-projects-taxonomy.php:59
+#: ../library/classes/class-projects-taxonomy.php:103
 msgid "Techniques"
 msgstr "Techniken"
 
-#: ../library/classes/class-projects-taxonomy.php:59
+#: ../library/classes/class-projects-taxonomy.php:103
 msgid "Technique"
 msgstr "Technik"
 
-#: ../library/classes/class-projects-taxonomy.php:60
+#: ../library/classes/class-projects-taxonomy.php:104
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: ../library/classes/class-projects-taxonomy.php:60
+#: ../library/classes/class-projects-taxonomy.php:104
 msgid "Task"
 msgstr "Aufgabe"
 
-#: ../library/classes/class-projects-taxonomy.php:61
+#: ../library/classes/class-projects-taxonomy.php:105
 msgid "Agencies"
 msgstr "Agenturen"
 
-#: ../library/classes/class-projects-taxonomy.php:61
+#: ../library/classes/class-projects-taxonomy.php:105
 msgid "Agency"
 msgstr "Agentur"
 
-#: ../library/classes/class-projects-taxonomy.php:62
+#: ../library/classes/class-projects-taxonomy.php:106
 msgid "Clients"
 msgstr "Kunden"
 
-#: ../library/classes/class-projects-taxonomy.php:62
+#: ../library/classes/class-projects-taxonomy.php:106
 msgid "Client"
 msgstr "Kunde"
 
-#: ../library/classes/class-projects-taxonomy.php:63
+#: ../library/classes/class-projects-taxonomy.php:107
 msgid "Tags"
 msgstr "Schlagworte"
 
-#: ../library/classes/class-projects-taxonomy.php:63
+#: ../library/classes/class-projects-taxonomy.php:107
 msgid "Tag"
 msgstr "Schlagwort"
 
-#: ../library/classes/class-projects-taxonomy.php:68
+#: ../library/classes/class-projects-taxonomy.php:112
 msgid "Stati"
 msgstr "Stati"
 
-#: ../library/classes/class-projects-taxonomy.php:68
-#: ../library/classes/class-projects-writepanel.php:280
+#: ../library/classes/class-projects-taxonomy.php:112
+#: ../library/classes/class-projects-writepanel.php:288
 msgid "Status"
 msgstr "Status"
 
-#: ../library/classes/class-projects-taxonomy.php:69
+#: ../library/classes/class-projects-taxonomy.php:113
 msgid "Completed"
 msgstr "Abgeschlossen"
 
-#: ../library/classes/class-projects-taxonomy.php:70
+#: ../library/classes/class-projects-taxonomy.php:114
 msgid "In Progress"
 msgstr "In Arbeit"
 
-#: ../library/classes/class-projects-taxonomy.php:71
+#: ../library/classes/class-projects-taxonomy.php:115
 msgid "Planned"
 msgstr "Geplant"
 
-#: ../library/classes/class-projects-taxonomy.php:85
+#: ../library/classes/class-projects-taxonomy.php:129
 #: ../library/classes/class-projects-type.php:87
 #, php-format
 msgid "Search %s"
 msgstr "%s durchsuchen"
 
-#: ../library/classes/class-projects-taxonomy.php:86
+#: ../library/classes/class-projects-taxonomy.php:130
 #: ../library/classes/class-projects-type.php:85
 #, php-format
 msgid "All %s"
 msgstr "Alle %s"
 
-#: ../library/classes/class-projects-taxonomy.php:87
+#: ../library/classes/class-projects-taxonomy.php:131
 #, php-format
 msgid "Parent %s"
 msgstr "Übergeordnete %s"
 
-#: ../library/classes/class-projects-taxonomy.php:88
+#: ../library/classes/class-projects-taxonomy.php:132
 #, php-format
 msgid "Parent %s:"
 msgstr "Übergeordnete %s:"
 
-#: ../library/classes/class-projects-taxonomy.php:89
+#: ../library/classes/class-projects-taxonomy.php:133
 #: ../library/classes/class-projects-type.php:83
 #, php-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: ../library/classes/class-projects-taxonomy.php:90
+#: ../library/classes/class-projects-taxonomy.php:134
 #, php-format
 msgid "Update %s"
 msgstr "%s aktualisieren"
 
-#: ../library/classes/class-projects-taxonomy.php:91
+#: ../library/classes/class-projects-taxonomy.php:135
 #: ../library/classes/class-projects-type.php:82
 #, php-format
 msgid "Add New %s"
 msgstr "%s neu erstellen"
 
-#: ../library/classes/class-projects-taxonomy.php:92
+#: ../library/classes/class-projects-taxonomy.php:136
 #, php-format
 msgid "New %s Name"
 msgstr "Neuer Name %s"
 
-#: ../library/classes/class-projects-taxonomy.php:93
+#: ../library/classes/class-projects-taxonomy.php:137
 #, php-format
 msgid "Separate %s with commas"
 msgstr "%s mit Komma trennen"
 
-#: ../library/classes/class-projects-taxonomy.php:94
+#: ../library/classes/class-projects-taxonomy.php:138
 #, php-format
 msgid "Add or remove %s"
 msgstr "%s erstellen oder entfernen"
 
-#: ../library/classes/class-projects-taxonomy.php:95
+#: ../library/classes/class-projects-taxonomy.php:139
 #, php-format
 msgid "Choose from the most used %s"
 msgstr "Aus den meist genutzen %s auswählen"
+
+#: ../library/classes/class-projects-taxonomy.php:213
+#: ../library/classes/class-projects-taxonomy.php:229
+#: ../library/classes/class-projects-writepanel.php:301
+msgid "Website"
+msgstr "Webseite"
+
+#: ../library/classes/class-projects-taxonomy.php:215
+#: ../library/classes/class-projects-taxonomy.php:232
+msgid "The Website URL is optional. Type in a complete URL like <code>http://www.example.com</code>."
+msgstr "Die Website URL ist optional. Eine vollständige URL eingeben, zum Beispiel <code>http://www.example.com</code>."
 
 #: ../library/classes/class-projects-type.php:69
 msgid "Projects"
@@ -317,90 +303,121 @@ msgstr "Keine %s im Papierkorb gefunden"
 msgid "Thumbnail"
 msgstr "Vorschau"
 
+#: ../library/classes/class-projects-type.php:148
+msgid "Title"
+msgstr "Titel"
+
 #: ../library/classes/class-projects-type.php:159
-#: ../library/classes/class-projects-writepanel.php:245
+#: ../library/classes/class-projects-writepanel.php:248
 msgid "Date"
 msgstr "Datum"
 
-#: ../library/classes/class-projects-type.php:241
-#: ../library/classes/class-projects-writepanel.php:197
+#: ../library/classes/class-projects-type.php:235
+#: ../library/classes/class-projects-writepanel.php:200
 #, php-format
 msgid "No %s"
 msgstr "Keine %s"
 
-#: ../library/classes/class-projects-writepanel.php:40
+#: ../library/classes/class-projects-writepanel.php:43
 msgid "General"
 msgstr "Allgemein"
 
-#: ../library/classes/class-projects-writepanel.php:42
+#: ../library/classes/class-projects-writepanel.php:45
 msgid "Color"
 msgstr "Farbe"
 
-#: ../library/classes/class-projects-writepanel.php:76
+#: ../library/classes/class-projects-writepanel.php:79
 msgid "View on Google Maps"
 msgstr "Auf Google Maps anzeigen"
 
-#: ../library/classes/class-projects-writepanel.php:82
+#: ../library/classes/class-projects-writepanel.php:85
 msgid "First name"
 msgstr "Vorname"
 
-#: ../library/classes/class-projects-writepanel.php:83
+#: ../library/classes/class-projects-writepanel.php:86
 msgid "Last name"
 msgstr "Nachname"
 
-#: ../library/classes/class-projects-writepanel.php:84
+#: ../library/classes/class-projects-writepanel.php:87
 msgid "Company"
 msgstr "Firma"
 
-#: ../library/classes/class-projects-writepanel.php:85
-#: ../library/classes/class-projects-writepanel.php:293
+#: ../library/classes/class-projects-writepanel.php:88
+#: ../library/classes/class-projects-writepanel.php:301
 msgid "Address"
 msgstr "Adresse"
 
-#: ../library/classes/class-projects-writepanel.php:86
+#: ../library/classes/class-projects-writepanel.php:89
 msgid "Postal code"
 msgstr "Postleitzahl"
 
-#: ../library/classes/class-projects-writepanel.php:87
+#: ../library/classes/class-projects-writepanel.php:90
 msgid "City"
 msgstr "Ort"
 
-#: ../library/classes/class-projects-writepanel.php:88
+#: ../library/classes/class-projects-writepanel.php:91
 msgid "Country"
 msgstr "Land"
 
-#: ../library/classes/class-projects-writepanel.php:148
+#: ../library/classes/class-projects-writepanel.php:151
 #, php-format
 msgid "Add %s"
 msgstr "%s hinzufügen"
 
-#: ../library/classes/class-projects-writepanel.php:164
+#: ../library/classes/class-projects-writepanel.php:167
 msgid "Untitled"
 msgstr "Ohne Titel"
 
-#: ../library/classes/class-projects-writepanel.php:183
+#: ../library/classes/class-projects-writepanel.php:186
 msgid "Remove"
 msgstr "Entfernen"
 
-#: ../library/classes/class-projects-writepanel.php:231
+#: ../library/classes/class-projects-writepanel.php:234
 msgid "Background"
 msgstr "Hintergrund"
 
-#: ../library/classes/class-projects-writepanel.php:232
+#: ../library/classes/class-projects-writepanel.php:235
 msgid "Text"
 msgstr "Text"
 
-#: ../library/classes/class-projects-writepanel.php:292
+#: ../library/classes/class-projects-writepanel.php:300
 msgid "Reference Nr."
 msgstr "Referenz-Nr."
 
-#: ../library/classes/class-projects-writepanel.php:292
+#: ../library/classes/class-projects-writepanel.php:300
 msgid "Reference No."
 msgstr "Referenz-Nr."
 
-#: ../library/classes/class-projects-writepanel.php:293
-msgid "Website"
-msgstr "Webseite"
+#: ../library/classes/class-projects-writepanel.php:315
+msgid "Manage media"
+msgstr "Medien verwalten"
+
+#~ msgid "Featured"
+#~ msgstr "Featured"
+
+#~ msgid "From URL"
+#~ msgstr "URL einbetten"
+
+#~ msgid "Project Media"
+#~ msgstr "Projektmedien"
+
+#~ msgid "Add media from another website"
+#~ msgstr "Medien von einer anderen Webseite hinzufügen"
+
+#~ msgid "URL"
+#~ msgstr "URL"
+
+#~ msgid "Enter an URL from YouTube, Vimeo or Flickr."
+#~ msgstr "Eine URL von YouTube, Vimeo oder Flickr hinzufügen."
+
+#~ msgid "Use as featured"
+#~ msgstr "Als featured markieren"
+
+#~ msgid "Default Size"
+#~ msgstr "Grösse"
+
+#~ msgid "Embed Type"
+#~ msgstr "Eingebetteter Typ"
 
 #~ msgid "Add featured media"
 #~ msgstr "Featured Medien hinzufügen"
