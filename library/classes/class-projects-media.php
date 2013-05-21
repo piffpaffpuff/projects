@@ -247,19 +247,21 @@ class Projects_Media {
 		// get all the attachments
 		$attachments = get_posts($args);
 		
+		// set custom meta in the attachment object
+		foreach($attachments as $attachment) {			
+			$attachment->default_size = $projects->get_project_meta('default_image_size', $attachment->ID);
+			$attachment->embed_url = $projects->get_project_meta('embed_url', $attachment->ID);
+			$attachment->embed_html = $projects->get_project_meta('embed_html', $attachment->ID);
+		}
+			
 		// sort the attachments by the array ids
 		if(!empty($attachment_ids)) {
 			$hash = array();
 			$sorted = array();
 			
-			// create hash table and add custom meta
+			// create hash table 
 			foreach($attachments as $attachment) {
 				$hash[$attachment->ID] = $attachment;
-				
-				// set custom meta in the attachment object
-				$attachment->default_size = $projects->get_project_meta('default_image_size', $attachment->ID);
-				$attachment->embed_url = $projects->get_project_meta('embed_url', $attachment->ID);
-				$attachment->embed_html = $projects->get_project_meta('embed_html', $attachment->ID);
 			}
 			
 			// fill sorted array
@@ -269,7 +271,7 @@ class Projects_Media {
 			
 			$attachments = $sorted;
 		}
-		
+
 		return $attachments;
 	}
 	

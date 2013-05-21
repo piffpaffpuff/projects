@@ -463,32 +463,41 @@ function project_content_media($size = 'large', $post_id = null, $mime = null) {
 	global $projects;
 
 	$attachments = get_project_content_media($post_id, $mime);
-	
 	?>
 	<ul class="project-content-media">
-		<?php foreach($attachments as $attachment) : ?><?php if($projects->media->is_web_image($attachment->post_mime_type)) : ?><li>
-				<?php 				
-				// overwrite the size when the attachment has set a custom one
-				if(!empty($attachment->default_size)) {
-					$media_size = $attachment->default_size;
-				} else {
-					$media_size = $size;
-				}
-				?>
-				<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
-				<img src="<?php echo $attachment_src[0]; ?>" />
-				<?php if(!empty($attachment->embed_html)) : ?>
-					<?php echo $attachment->embed_html; ?>
+		<?php foreach($attachments as $attachment) : ?>
+			<?php if($projects->media->is_web_image($attachment->post_mime_type)) : ?>
+				<?php $class = ''; ?>
+				<?php if(!empty($attachment->default_size)) : ?> 
+					<?php $class = ' class="' . $attachment->default_size . '"'; ?>
 				<?php endif; ?>
-			</li><?php elseif($projects->media->is_mime_type($attachment->post_mime_type, 'video|m4v|mp4|ogv|webm')) : ?>
-			<li>
-				<video src="<?php echo wp_get_attachment_url($attachment->ID); ?>" controls></video>
-			</li><?php elseif($projects->media->is_mime_type($attachment->post_mime_type, 'audio|m4a|mp3|oga|wav')) : ?>
-			<li>
-				<audio src="<?php echo wp_get_attachment_url($attachment->ID); ?>" controls></audio>
-			</li><?php else : ?>
+				<li<?php echo $class; ?>>
+					<?php 
+					// overwrite the size when the attachment has set a custom one
+					if(!empty($attachment->default_size)) {
+						$media_size = $attachment->default_size;
+					} else {
+						$media_size = $size;
+					}
+					?>
+					<?php $attachment_src = wp_get_attachment_image_src($attachment->ID, $media_size); ?>
+					<img src="<?php echo $attachment_src[0]; ?>" />
+					<?php if(!empty($attachment->embed_html)) : ?>
+						<?php echo $attachment->embed_html; ?>
+					<?php endif; ?>
+				</li>
+			<?php elseif($projects->media->is_mime_type($attachment->post_mime_type, 'video|m4v|mp4|ogv|webm')) : ?>
+				<li<?php echo $class; ?>>
+					<video src="<?php echo wp_get_attachment_url($attachment->ID); ?>" controls></video>
+				</li>
+			<?php elseif($projects->media->is_mime_type($attachment->post_mime_type, 'audio|m4a|mp3|oga|wav')) : ?>
+				<li<?php echo $class; ?>>
+					<audio src="<?php echo wp_get_attachment_url($attachment->ID); ?>" controls></audio>
+				</li>
+			<?php else : ?>
 				<?php // no support for other media types yet ?>
-		<?php endif; ?><?php endforeach; ?>
+			<?php endif; ?>
+		<?php endforeach; ?>
 	</ul>
 	<?php
 }
