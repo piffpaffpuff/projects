@@ -42,9 +42,17 @@ jQuery(document).ready(function($) {
 		file_frame.on('update', function() {
 			var controller = file_frame.state('gallery-edit');
 			var library = controller.get('library');
-			console.log(library);
+			
 			// Get all the attachment ids 
-			var ids = library.pluck('id');
+			var ids = new Array();
+
+			// Check if it is an image
+			var models = library.models;
+			for(var i = 0; i < models.length; i++) {
+				if(models[i].attributes.type == 'image') {
+					ids.push(models[i].attributes.id);
+				}
+			}
 			
 			// Save all
 			saveMediaList(ids);
