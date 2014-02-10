@@ -4,7 +4,6 @@ jQuery(document).ready(function($) {
 	 * Writepanel
 	 * ------------------------- */
 	
-	
 	// color picker
 	$('input.minicolors').miniColors();
 	
