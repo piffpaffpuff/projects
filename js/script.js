@@ -5,7 +5,7 @@ jQuery(document).ready(function($) {
 	 * ------------------------- */
 	
 	// color picker
-	$('input.minicolors').miniColors();
+	$('input.minicolors').minicolors();
 	
 	// media manage buttons 
 	$('.media-manage').live('click', function(event) {

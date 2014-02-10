@@ -70,8 +70,8 @@ class Projects_Writepanel {
   		wp_nonce_field(Projects::$plugin_basename, 'projects_nonce');
 		?>
 		<?php 
-			$lat = $projects->get_project_meta('lat');
-			$lng = $projects->get_project_meta('lng');
+			$lat = $projects->get_project_meta('latitude');
+			$lng = $projects->get_project_meta('longitude');
 			$zoom = 15;
 		?>
 		<?php if(!empty($lat) && !empty($lng)) : ?>
@@ -90,11 +90,11 @@ class Projects_Writepanel {
 			<p class="form-fieldset"><label><span><?php _e('City', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo $projects->get_project_meta('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('Country', 'projects'); ?></span></label><select name="projects[country]">
 				<?php 
-				$countries = new Projects_Countries();
-				$meta = $projects->get_project_meta('country');
-				if(empty($meta)) {
-					$meta = get_option('projects_selected_country'); 
-				}
+					$countries = new Projects_Countries();
+					$meta = $projects->get_project_meta('country');
+					if(empty($meta)) {
+						$meta = get_option('projects_selected_country'); 
+					}
 				?>
 				<?php foreach($countries->world as $code => $name) : ?>
 					<option value="<?php echo $code; ?>" <?php selected($code, $meta); ?>><?php echo $name; ?></option>

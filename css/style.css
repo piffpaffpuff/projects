@@ -35,74 +35,44 @@ table.wp-list-table .column-title {
 }
 
 /*
-   Location Meta Box
+   Forms Meta Box
 */
 
-#projects-location-box {
-	overflow: hidden;
-}
 .form-fieldset {
-	display: block;
 	margin: 0px;
 	font-size: 12px;
 	padding-top: 3px;
 	padding-bottom: 3px;
 	line-height: 24px;
-	clear: both;
-	overflow: hidden;
-	position: relative;
 }
 .form-fieldset label {
-	float: left;
-	width: 33%;
+/* 	float: left; */
+	display: block;
+	text-align: left;
 	padding: 0;
 	vertical-align: middle;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-.form-fieldset > input,
-.form-fieldset > select,
+.form-fieldset input,
+.form-fieldset select,
 .form-fieldset .input-group {
-	float: right;
-	width: 166px;
+/* 	float: right; */
+	display: inline-block;
+	width: 100%;
 }
-.form-fieldset .input-group {
-	position: relative;
-	display: block;
+.form-fieldset .input-group input,
+.form-fieldset .input-group select{
+	width: 100%;
 }
 .form-fieldset .input-group .select-date {
 	width: 49%;
 	margin: 0;
 	padding: 0;
 }
-.form-fieldset .input-group .miniColors {
-}
-.form-fieldset .input-group .miniColors-trigger {
-	margin: 0;
-	position: absolute;
-	right: 3px;
-	top: 5px;
-	background-image: none;
-	width: 15px;
-	height: 15px;
-	-webkit-border-radius: 2px;
-	-moz-border-radius: 2px;
-	-ms-border-radius: 2px;
-	-o-border-radius: 2px;
-	border-radius: 2px;
-}
-#normal-sortables .form-fieldset input,
-#normal-sortables .form-fieldset select,
-#normal-sortables .form-fieldset .input-group,
-#normal-sortables .form-fieldset .input-group .miniColors {
-	width: 65%;
-}
-#normal-sortables .form-fieldset .input-group .select-date  {
-	width: 50%;
-}
-#normal-sortables .form-fieldset label {
-	width: 30%;
+.form-fieldset .input-group .select-date:first-child {
+	text-align: left;
 }
 .map {
 	border: 1px solid #DFDFDF;
@@ -125,13 +95,12 @@ table.wp-list-table .column-title {
 	margin-top: -160px;
 	margin-left: -160px;
 }
+
 #normal-sortables .map {
 	float: left;
-	width: 240px;
-	height: 240px;
-}
-#normal-sortables .location {
-	float: left;
+	width: 100px;
+	height: 100px;
+	display: none;
 }
 .external {
 	width: 18px;
@@ -183,13 +152,40 @@ table.wp-list-table .column-title {
 	width: 60%;
 	float: left;
 	color: #333;
-	font-weight: bold;
+	font-weight: normal;
+	font-size: 13px;
 }
 .taxonomy-group-list .preset-options a {
 	float: right;
 }
 #normal-sortables .taxonomy-group-list select {
 	width: 24.1%;
+}
+
+/*
+   Colours Meta Box
+*/
+
+.minicolors-swatch {
+	background-image: url("../images/jquery.minicolors.png");
+}
+.minicolors .minicolors-grid {
+	background-image: url("../images/jquery.minicolors.png");
+}
+.minicolors-slider-saturation .minicolors-grid-inner {
+	background-image: url("../images/jquery.minicolors.png");
+}
+.minicolors-slider,
+.minicolors-opacity-slider {
+	background-image: url("../images/jquery.minicolors.png");
+}
+.minicolors-theme-default .minicolors-input {
+	height: auto;
+	display: inherit;
+	padding-left: 30px;
+}
+.minicolors-theme-default.minicolors {
+	width: 100%;
 }
 
 /*
