@@ -61,7 +61,7 @@ class Projects_Writepanel {
 	}
 	
 	/**
-	 * Create the box content
+	 * Create the box location
 	 */
 	public function create_box_location($post, $metabox) {
 		$projects = new Projects();
@@ -107,7 +107,7 @@ class Projects_Writepanel {
 	}
 
 	/**
-	 * Create the box content
+	 * Create the box taxonomy group
 	 */
 	public function create_box_taxonomy_group($post, $metabox) {
 		$projects = new Projects();
@@ -130,11 +130,6 @@ class Projects_Writepanel {
 				}
 			}
 		}
-		/*
-		echo('<pre>');
-		print_r($presets);
-		echo('</pre>');
-		*/
 		?>
 		<input type="hidden" class="taxonomy-group-name" value="<?php echo $taxonomy_group->name; ?>">
 		<?php // reset the metadata when no presets were created ?>
@@ -237,7 +232,7 @@ class Projects_Writepanel {
 	}
 	
 	/**
-	 * Create the box content
+	 * Create the box general
 	 */
 	public function create_box_general($post, $metabox) {
 		$projects = new Projects();
@@ -303,7 +298,7 @@ class Projects_Writepanel {
 	}
 	
 	/**
-	 * Create the box content
+	 * Create the box media
 	 */
 	public function create_box_media($post, $metabox) {		
 		// Use nonce for verification
@@ -317,7 +312,7 @@ class Projects_Writepanel {
 	}
 	
 	/**
-	 * Create the media list
+	 * Create the box media list
 	 */
 	public function create_media_list($post_id = null) {
 		if(empty($post_id)) {
