@@ -90,13 +90,14 @@ class Projects_Writepanel {
 			<p class="form-fieldset"><label><span><?php _e('City', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo $projects->get_project_meta('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('Country', 'projects'); ?></span></label><select name="projects[country]">
 				<?php 
-					$countries = new Projects_Countries();
+					$projects_countries = new Projects_Countries();
+					$projects_settings = new Projects_Settings();
 					$meta = $projects->get_project_meta('country');
 					if(empty($meta)) {
-						$meta = get_option('projects_selected_country'); 
+						$meta = $projects_settings->get_setting('country'); 
 					}
 				?>
-				<?php foreach($countries->world as $code => $name) : ?>
+				<?php foreach($projects_countries->world as $code => $name) : ?>
 					<option value="<?php echo $code; ?>" <?php selected($code, $meta); ?>><?php echo $name; ?></option>
 				<?php endforeach; ?>
 			</select></p>

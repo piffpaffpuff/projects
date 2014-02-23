@@ -15,7 +15,8 @@ class Projects_Installation {
 		global $wpdb;
 		
 		// load the basepage to get the slug name
-		$page = get_post(get_option('projects_base_page_id')); 
+		$projects_settings = new Projects_Settings();
+		$page = get_post($projects_settings->get_setting('base_page')); 
 		if(isset($page)) {
 			$this->slug = $page->post_name;
 		}
@@ -24,7 +25,7 @@ class Projects_Installation {
 	/**
 	 * Load the class hooks
 	 */
-	public function load() {		
+	public function load() {
 		register_activation_hook(Projects::$plugin_file_path, array($this, 'add_default_settings'));
 	}
 	
@@ -51,16 +52,17 @@ class Projects_Installation {
 		} 
 		
 		// check if the saved page id exists
-		$page_option_id = get_option('projects_base_page_id');
-		if(isset($page_option_id)) {
-			$saved_page = get_post($page_option_id); 
+		$projects_settings = new Projects_Settings();
+		$base_page_id = $projects_settings->get_setting('base_page');
+		if(isset($base_page_id)) {
+			$saved_page = get_post($base_page_id); 
 			if(!empty($saved_page)) {
 				$page = $saved_page;
 			}
 		}
 		
 		// save the page id
-		update_option('projects_base_page_id', $page->ID);
+		$projects_settings->set_setting('base_page', $page->ID);
 		$this->slug = $page->post_name;
 	}
 }

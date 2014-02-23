@@ -145,7 +145,7 @@ class Projects {
 		add_filter('admin_body_class', array($this, 'add_admin_body_classes'));
 
 		// Enqueue script on settings page
-		if(isset($_GET['page']) && $_GET['page'] == 'projects-settings') {
+		if(isset($_GET['page']) && $_GET['page'] == $this->settings->slug) {
 			$hook = get_plugin_page_hookname($_GET['page'], 'options-general.php');
 			add_action('admin_print_scripts-' . $hook, array($this, 'add_scripts'));
 		}
@@ -174,10 +174,11 @@ class Projects {
 	 */
 	public function add_admin_body_classes($classes) {
 		global $post;
-		
-		$post_type = get_post_type($post->ID);
-		if(is_admin() && $post_type == self::$post_type) {
-			$classes .= 'post-type-' . $post_type;
+		if($post) {
+			$post_type = get_post_type($post->ID);
+			if(is_admin() && $post_type == self::$post_type) {
+				$classes .= 'post-type-' . $post_type;
+			}
 		}
 		return $classes;
 	}
@@ -346,9 +347,9 @@ class Projects {
 	 * Is projects main page
 	 */
 	public function is_projects_page() {
-		global $wp_query;
+		global $wp_query, $projects;
 		$page_id = $wp_query->get('page_id');
- 		if((isset($page_id) && $page_id == get_option('projects_base_page_id')) || is_post_type_archive(self::$post_type)) {
+ 		if((isset($page_id) && $page_id == $projects->settings->get_setting('base_page')) || is_post_type_archive(self::$post_type)) {
 			return true;
 		}
 		return false;
@@ -653,5 +654,25 @@ function is_projects_tax() {
 	global $projects;
 	return $projects->is_projects_tax();
 }
+
+/**
+ * Get projects setting
+ */
+/*
+function get_projects_setting($key) {
+	global $projects;
+	return $projects->settings->get_setting($key);
+}
+*/
+
+/**
+ * Get projects setting
+ */
+/*
+function set_projects_setting($key, $value) {
+	global $projects;
+	return $projects->settings->set_setting($key, $value);
+}
+*/
 
 ?>

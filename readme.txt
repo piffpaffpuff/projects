@@ -1,0 +1,24 @@
+-=== Plugin Name ===
+ -Contributors: piffpaffpuff
+ -Tags: manage, projects, portfolio, design, architecture
+ -Requires at least: 3.8
+ -Tested up to: 3.9
+ -Stable tag: trunk
+ -License: GPLv3 or later
+ -License URI: http://www.opensource.org/licenses/gpl-license.php
+ -
+ -A portfolio plugin for creative people to manage and present their projects.
+ -
+ -== Description ==
+ -
+ -== Installation ==
+ -
+ -1. Upload the `projects` folder to the `/wp-content/plugins/` directory
+ -2. Activate the plugin through the 'Plugins' menu in WordPress
+ -
+ -== Frequently Asked Questions ==
+ -
+ -== Screenshots ==
+ -
+ -== Changelog ==
+ -

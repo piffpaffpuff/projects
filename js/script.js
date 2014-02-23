@@ -126,5 +126,42 @@ jQuery(document).ready(function($) {
 		});
 	}
 	
+	/* -------------------------
+	 * Settings
+	 * ------------------------- */
+	
+	// add a new meta field row
+	$('.add-meta-field').on('click', function(event) {
+		addMetaField();
+		event.preventDefault();
+	});
+	
+	// remove a new meta field row	
+	$('.remove-meta-field').live('click', function(event) {
+		$(this).closest('.meta-field-item').remove();
+		event.preventDefault();
+	});
+	
+	// sort meta fields list
+	$('.meta-field-item-list').sortable({
+		axis: 'y'
+	});
+	
+	/**
+	 * add new meta field item
+	 */
+	function addMetaField() {
+		var data = {
+			action: 'add_meta_field',
+			nonce: $('#projects_nonce').val()
+		};
+		console.log(data);
+		// send the request
+		$.post(ajaxurl, data, function(response) {
+			$('.meta-field-item-list').append(response);
+		});
+	}
+
+	
 });
 

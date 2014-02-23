@@ -91,6 +91,7 @@ class Projects_Geocode {
 	 */
 	public function generate_georss() {
 		$projects = new Projects();
+		$projects_settings = new Projects_Settings();
 		?>
 		<?php echo '<?xml version="1.0" encoding="' . get_option('blog_charset') . '">'; ?>
 		<feed xmlns="http://www.w3.org/2005/Atom"
@@ -101,7 +102,7 @@ class Projects_Geocode {
 		      xmlns:flickr="urn:flickr:user"
 		      xmlns:media="http://search.yahoo.com/mrss/">
 		    
-		    <title><?php echo get_post(get_option('projects_base_page_id'))->post_title; echo ' - '; bloginfo_rss('name'); ?></title>
+		    <title><?php echo get_post($projects_settings->get_setting('base_page'))->post_title; echo ' - '; bloginfo_rss('name'); ?></title>
 			<subtitle><?php the_category_rss(); ?></subtitle>
 			<link rel="alternate" type="text/html" href="<?php echo $this->feed_url; ?>" />
 			<updated><?php echo mysql2date('D, d M Y H:i:s +0000', get_lastpostmodified('GMT'), false); ?></updated>
