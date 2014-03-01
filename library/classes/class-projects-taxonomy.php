@@ -100,7 +100,6 @@ class Projects_Taxonomy {
 	 */
 	public function register_taxonomies() {		
 		$this->add_taxonomy(__('Types', 'projects'), __('Type', 'projects'), 'type');
-		$this->add_taxonomy(__('Techniques', 'projects'), __('Technique', 'projects'), 'technique');
 		$this->add_taxonomy(__('Tasks', 'projects'), __('Task', 'projects'), 'task');
 		$this->add_taxonomy(__('Agencies', 'projects'), __('Agency', 'projects'), 'agency', array('website' => true));
 		$this->add_taxonomy(__('Clients', 'projects'), __('Client', 'projects'), 'client', array('website' => true));
