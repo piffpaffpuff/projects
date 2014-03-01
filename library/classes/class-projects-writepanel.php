@@ -6,10 +6,13 @@
 if (!class_exists('Projects_Writepanel')) {
 class Projects_Writepanel {
 	
+	public $fields;
+	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
+		$this->fields = array();
 	}
 
 	/**
@@ -61,6 +64,34 @@ class Projects_Writepanel {
 	}
 	
 	/**
+	 * Add a new meta field that should be visible in the boxes
+	 */
+	public function add_field($name, $key = null, $default = '') {
+		$projects = new Projects();
+		
+		// set a default key
+		if(empty($key)) {
+			$key = sanitize_title(sanitize_text_field($name));
+		}
+		
+		// create a field object and add it to the list
+		$field = new stdClass;
+		$field->key = $key;
+		$field->name = $name;
+		$field->default = $default;
+		$this->fields[$key] = $field;
+	}
+	
+	/**
+	 * Remove a field from the boxes
+	 */
+	public function remove_field($key) {
+		if(isset($this->fields[$key])) {
+			unset($this->fields[$key]);
+		}
+	}
+	
+	/**
 	 * Create the box location
 	 */
 	public function create_box_location($post, $metabox) {
@@ -76,18 +107,18 @@ class Projects_Writepanel {
 		?>
 		<?php if(!empty($lat) && !empty($lng)) : ?>
 		<div class="map">
-			<a href="http://maps.google.com/maps?hl=de&z=<?php echo $zoom; ?>&q=<?php echo $lat; ?>,<?php echo $lng; ?>&sll=<?php echo $lat; ?>,<?php echo $lng; ?>" target="_blank" title="<?php _e('View on Google Maps', 'toolbox-vernissage'); ?>">
+			<a href="http://maps.google.com/maps?hl=de&z=<?php echo $zoom; ?>&q=<?php echo $lat; ?>,<?php echo $lng; ?>&sll=<?php echo $lat; ?>,<?php echo $lng; ?>" target="_blank">
 				<img src="http://maps.google.com/maps/api/staticmap?sensor=false&size=320x320&zoom=<?php echo $zoom; ?>&markers=<?php echo $lat; ?>,<?php echo $lng; ?>" />
 			</a>
 		</div>
 		<?php endif; ?>
 		<div class="location">
-			<p class="form-fieldset"><label><span><?php _e('First name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo $projects->get_project_meta('first_name'); ?>" title="<?php _e('First name', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Last name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo $projects->get_project_meta('last_name'); ?>" title="<?php _e('Last name', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Company', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[company_name]" value="<?php echo $projects->get_project_meta('company_name'); ?>" title="<?php _e('Company', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Address', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo $projects->get_project_meta('address'); ?>" title="<?php _e('Address', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('Postal code', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo $projects->get_project_meta('postal_code'); ?>" title="<?php _e('Postal code', 'projects'); ?>"></p>
-			<p class="form-fieldset"><label><span><?php _e('City', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo $projects->get_project_meta('city'); ?>" title="<?php _e('City', 'projects'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('First name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[first_name]" value="<?php echo $projects->get_project_meta('first_name'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Last name', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[last_name]" value="<?php echo $projects->get_project_meta('last_name'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Company', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[company_name]" value="<?php echo $projects->get_project_meta('company_name'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Address', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[address]" value="<?php echo $projects->get_project_meta('address'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('Postal code', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[postal_code]" value="<?php echo $projects->get_project_meta('postal_code'); ?>"></p>
+			<p class="form-fieldset"><label><span><?php _e('City', 'projects'); ?></span></label><input type="text" class="regular-text" name="projects[city]" value="<?php echo $projects->get_project_meta('city'); ?>"></p>
 			<p class="form-fieldset"><label><span><?php _e('Country', 'projects'); ?></span></label><select name="projects[country]">
 				<?php 
 					$projects_countries = new Projects_Countries();
@@ -227,8 +258,8 @@ class Projects_Writepanel {
 		$projects = new Projects();
 		
 		?>
-		<p class="form-fieldset"><label><span><?php _e('Background', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo $projects->get_project_meta('background_color'); ?>" title="<?php _e('Background', 'projects'); ?>"></span></p>
-		<p class="form-fieldset"><label><span><?php _e('Text', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo $projects->get_project_meta('text_color'); ?>" title="<?php _e('Text', 'projects'); ?>"></span></p>
+		<p class="form-fieldset"><label><span><?php _e('Background', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo $projects->get_project_meta('background_color'); ?>"></span></p>
+		<p class="form-fieldset"><label><span><?php _e('Text', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo $projects->get_project_meta('text_color'); ?>"></span></p>
 		<?php
 	}
 	
@@ -293,8 +324,17 @@ class Projects_Writepanel {
 			<?php endforeach; ?>
 		</select></p>
 		<?php $website = $projects->get_project_meta('website'); ?>
-		<p class="form-fieldset"><label><span><?php _e('Reference Nr.', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[reference]" value="<?php echo $projects->get_project_meta('reference'); ?>" title="<?php _e('Reference No.', 'projects'); ?>"></p>
-		<p class="form-fieldset"><label><span><?php _e('Website', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo $website; ?>" placeholder="http://" title="<?php _e('Address', 'projects'); ?>"><?php if(!empty($website)) : ?><a href="<?php echo $website; ?>" target="_blank" class="external"></a><?php endif; ?></p>
+		<p class="form-fieldset"><label><span><?php _e('Website', 'projects'); ?></span></label><input type="text" class="regular-text code" name="projects[website]" value="<?php echo $website; ?>" placeholder="http://"><?php if(!empty($website)) : ?><a href="<?php echo $website; ?>" target="_blank" class="external"></a><?php endif; ?></p>
+		<?php // add additional fields ?>
+		<?php foreach($this->fields as $field) : ?>
+			<?php 
+				$meta = $projects->get_project_meta($field->key); 
+				if(empty($meta)) {
+					$meta = $field->default;
+				}
+			?>
+			<p class="form-fieldset"><label><span><?php echo $field->name; ?></span></label><input type="text" class="regular-text code" name="projects[<?php echo $field->key; ?>]" value="<?php echo $meta; ?>"></p>
+		<?php endforeach; ?>
 		<?php
 	}
 	

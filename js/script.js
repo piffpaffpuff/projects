@@ -130,6 +130,7 @@ jQuery(document).ready(function($) {
 	 * Settings
 	 * ------------------------- */
 	
+/*
 	// add a new meta field row
 	$('.add-meta-field').on('click', function(event) {
 		addMetaField();
@@ -161,6 +162,7 @@ jQuery(document).ready(function($) {
 			$('.meta-field-item-list').append(response);
 		});
 	}
+*/
 
 	
 });

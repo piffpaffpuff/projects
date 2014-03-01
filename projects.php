@@ -78,6 +78,7 @@ class Projects {
 		require_once('library/classes/class-projects-walkers.php');
 		require_once('library/classes/class-projects-writepanel.php');	
 		require_once('library/classes/class-projects-media.php');	
+		require_once('library/external/class-wordpress-settings-page.php');
 		require_once('library/classes/class-projects-settings.php');
 	}
 	
@@ -540,11 +541,26 @@ function project_taxonomy($key, $args = null) {
 }
 
 /**
+ * Add an extra field to the writepanel
+ */
+function add_project_field($name, $key = null, $default = '') {
+	global $projects;
+	$projects->writepanel->add_field($name, $key, $default);
+}
+
+/**
  * Get project meta
  */
 function get_project_meta($key) {
 	global $projects;
 	return $projects->get_project_meta($key);
+}
+
+/**
+ * Show project meta
+ */
+function project_meta($key) {
+	echo get_project_meta($key);
 }
 
 /**
@@ -654,25 +670,5 @@ function is_projects_tax() {
 	global $projects;
 	return $projects->is_projects_tax();
 }
-
-/**
- * Get projects setting
- */
-/*
-function get_projects_setting($key) {
-	global $projects;
-	return $projects->settings->get_setting($key);
-}
-*/
-
-/**
- * Get projects setting
- */
-/*
-function set_projects_setting($key, $value) {
-	global $projects;
-	return $projects->settings->set_setting($key, $value);
-}
-*/
 
 ?>
