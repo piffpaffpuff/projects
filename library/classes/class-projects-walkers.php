@@ -44,7 +44,7 @@ class Projects_Project_Taxonomy_Walker extends Walker_Category {
  		
  		// call the extended class method
 		if($display) {
-			parent::display_element($element, &$children_elements, $max_depth, $depth, $args, &$output);
+			parent::display_element($element, $children_elements, $max_depth, $depth, $args, $output);
 		}
 	}
 }
