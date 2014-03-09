@@ -27,6 +27,7 @@ class Projects_Installation {
 	 */
 	public function load() {
 		register_activation_hook(Projects::$plugin_file_path, array($this, 'add_default_settings'));
+		add_filter('site_transient_update_plugins', array($this, 'disable_plugin_updates'));
 	}
 	
 	/**
@@ -64,6 +65,16 @@ class Projects_Installation {
 		// save the page id
 		$projects_settings->set_setting('base_page', $page->ID);
 		$this->slug = $page->post_name;
+	}
+	
+	/**
+	 * Deactivate the plugins update message, because there is a
+	 * similar named plugin in the WordPress SVN. Eventhough
+	 * both do pretty much the same, they have no code in common.
+	 */
+	public function disable_plugin_updates($value) {
+    	unset($value->response[Projects::$plugin_basename]);
+		return $value;
 	}
 }
 }

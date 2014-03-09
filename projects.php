@@ -4,7 +4,7 @@
  * Plugin Name: Projects
  * Plugin URI: https://github.com/piffpaffpuff/projects
  * Description: A portfolio plugin for creative people to manage and present their projects.
- * Version: 1.0
+ * Version: 2.0
  * Author: piffpaffpuff
  * Author URI: https://github.com/piffpaffpuff
  * License: GPL3
