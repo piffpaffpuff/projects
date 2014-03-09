@@ -73,7 +73,9 @@ class Projects_Installation {
 	 * both do pretty much the same, they have no code in common.
 	 */
 	public function disable_plugin_updates($value) {
-    	unset($value->response[Projects::$plugin_basename]);
+		if(isset($value->response[Projects::$plugin_basename])) {
+    		unset($value->response[Projects::$plugin_basename]);
+    	}
 		return $value;
 	}
 }
