@@ -541,14 +541,6 @@ function project_taxonomy($key, $args = null) {
 }
 
 /**
- * Add an extra field to the writepanel
- */
-function add_project_field($name, $key = null, $default = '') {
-	global $projects;
-	$projects->writepanel->add_field($name, $key, $default);
-}
-
-/**
  * Get project meta
  */
 function get_project_meta($key) {
@@ -605,6 +597,14 @@ function get_project_geocode() {
 function get_projects_georss_feed_url() {
 	global $projects;
 	return $projects->geocode->feed_url; 
+}
+
+/**
+ * Add an extra field to the writepanel
+ */
+function add_project_field($name, $key = null, $default = '') {
+	global $projects;
+	$projects->writepanel->add_field($name, $key, $default);
 }
 
 /**
