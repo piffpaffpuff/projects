@@ -293,12 +293,13 @@ class Projects_Writepanel {
 					$year = date_i18n('Y');
 					$year_start = $year + 1;
 					$year_meta = $projects->get_project_meta('year');
+					$year_total = apply_filters('projects_date_total_years', 10);
 					
 					if(empty($year_meta)) {
 						$year_meta = $year;
 					}
 					?>
-					<?php while($count <= 50) : ?>
+					<?php while($count <= $year_total) : ?>
 						<option value="<?php echo $year_start - $count; ?>" <?php selected($year_start - $count, $year_meta); ?>><?php echo $year_start - $count; ?></option>						
 						<?php $count++; ?>
 					<?php endwhile; ?>

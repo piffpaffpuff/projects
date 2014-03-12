@@ -39,14 +39,14 @@ class Projects_Settings {
 		// add the page to the settings menu
 		$this->page = new Wordpress_Settings_Page(array(
 			'slug' => $this->slug,
-			'menu_title' => 'Projects',
-			'page_title' => 'Projects Settings'
+			'menu_title' => __('Projects', 'projects'),
+			'page_title' => __('Projects Settings', 'projects')
 		));
 
 		// add page section
 		$this->page->add_section(array(
 			'slug' => 'page',
-			'title' => 'Page options',
+			'title' => __('Page options', 'projects'),
 			'settings_page' => $this->slug
 		));
 		
@@ -60,7 +60,7 @@ class Projects_Settings {
 		// add page select field
 		$this->page->get_section('page')->add_field(array(
 			'slug' => $this->option_prefix . 'base_page',
-			'title' => 'Base page',
+			'title' => __('Base page', 'projects'),
 			'value' => '',
 			'type' => 'select',
 			'options' => $options,
@@ -68,21 +68,14 @@ class Projects_Settings {
 			'description' => __('On this page the projects are displayed.', 'projects')
 		));
 		
-		// add edit screen section
-		$this->page->add_section(array(
-			'slug' => 'edit_screen',
-			'title' => 'Edit Screen Content',
-			'settings_page' => $this->slug,
-		));
-		
 		// build the options list for the select field
 		$projects_countries = new Projects_Countries();
 		$locale = strtoupper(substr(get_locale(), 3));
 		
 		// add country select field
-		$this->page->get_section('edit_screen')->add_field(array(
+		$this->page->get_section('page')->add_field(array(
 			'slug' => $this->option_prefix . 'country',
-			'title' => 'Location Country',
+			'title' => __('Country', 'projects'),
 			'value' => $locale,
 			'type' => 'select',
 			'options' => $projects_countries->world,
