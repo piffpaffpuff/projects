@@ -572,7 +572,7 @@ function project_website($name = null, $target = '_blank') {
 	
 	if(!empty($url)) {
 		if(empty($name)) {
-			$name = preg_replace('/(?<!href=["\'])http:\/\//', '', $url);
+			$name = preg_replace('(^https?://)', '', $url );
 		}
 		if(empty($target)) {
 			$url_target = '';
