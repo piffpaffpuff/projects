@@ -2,7 +2,7 @@
  -Contributors: piffpaffpuff
  -Tags: manage, projects, portfolio, design, architecture
  -Requires at least: 3.8
- -Tested up to: 3.9
+ -Tested up to: 4.0
  -Stable tag: trunk
  -License: GPLv3 or later
  -License URI: http://www.opensource.org/licenses/gpl-license.php

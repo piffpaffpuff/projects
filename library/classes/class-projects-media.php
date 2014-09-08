@@ -38,9 +38,13 @@ class Projects_Media {
 		add_action('admin_head-post.php', array($this, 'remove_insert_media_buttons'));
 		add_action('admin_head-post-new.php', array($this, 'remove_insert_media_buttons'));
 		
-		add_filter('media_view_strings', array($this, 'rename_media_manager_strings'), 10, 2);
-		add_filter('attachment_fields_to_edit', array($this, 'edit_media_options'), 20, 2);
-		add_filter('attachment_fields_to_save', array($this, 'save_media_options'), 20, 2);
+		// Add options not to the media manager main navigation page
+		global $pagenow;
+		if($pagenow != 'upload.php') {
+			add_filter('media_view_strings', array($this, 'rename_media_manager_strings'), 10, 2);
+			add_filter('attachment_fields_to_edit', array($this, 'edit_media_options'), 20, 2);
+			add_filter('attachment_fields_to_save', array($this, 'save_media_options'), 20, 2);
+		}
 	}
 	
 	/**
