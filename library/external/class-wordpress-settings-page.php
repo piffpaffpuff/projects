@@ -235,7 +235,7 @@ class WordPress_Settings_Field {
 		
 		// Overwrite the default args
 		$args = wp_parse_args($args, $defaults);
-		
+
 		// Save the args as vars
 		$this->slug = $args['slug'];
 		$this->title = $args['title'];
@@ -250,7 +250,7 @@ class WordPress_Settings_Field {
 
 		// Preload the value of this field
 		$option = get_option($this->slug);
-		if(!empty($option[$this->slug])) {
+		if(!empty($option)) {
 			$this->value = $option;
 		} 
 		
@@ -316,7 +316,7 @@ class WordPress_Settings_Field {
 	/**
 	 * Render a select
 	 */
-	public function render_select() {
+	public function render_select() {	
 		?>
 	    <select name="<?php echo $this->slug; ?>">
 			<?php if(is_array($this->options)) : ?>
