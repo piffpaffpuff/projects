@@ -126,6 +126,9 @@ class Projects {
 	 * Load the main hooks
 	 */
 	public function hooks_init() {
+		// create a custom ordering for the single page
+		// next/previous post links. they are still not
+		// fixed in 4.0 to repsect the main query order.
 		add_filter('get_previous_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_next_post_join', array($this, 'adjacent_post_join'));
 		add_filter('get_previous_post_sort', array($this, 'adjacent_post_previous_sort'));
@@ -133,6 +136,8 @@ class Projects {
 		add_filter('get_previous_post_where', array($this, 'adjacent_post_previous_where'));
 		add_filter('get_next_post_where', array($this, 'adjacent_post_next_where'));
    		
+   		// modify the main query to get projects
+   		// and order them by a custom order.
    		add_action('pre_get_posts', array($this, 'projects_page_query'));		
 	}
 	
@@ -203,14 +208,14 @@ class Projects {
 		    $paged = 1;
 		}
 		
-		// set the default args. posts with the date 
-		// are ordered by title DESC because wordpress 
-		// doesn't support multiple ordering yet.
+		// set the default args. posts are ordered by 
+		// date in deccending and then by post name in 
+		// ascending order. multiple sort orders are
+		// only supported in wordpress 4.0.
 		$default_args = array(
 			'post_type' => self::$post_type,
 			'meta_key' => $this->order_sort_key,
-			'orderby' => 'meta_value_num',
-			'order' => 'DESC',
+			'orderby' => array( 'meta_value_num' => 'DESC', 'post_title' => 'ASC' ),
 			'paged' => $paged
 		);
 		
@@ -240,7 +245,7 @@ class Projects {
         	$wp_query->is_archive = 1;		
         	$wp_query->is_post_type_archive = 1;
 		}
-    	return $wp_query;
+		return $wp_query;
 	}
 	
 	/**
@@ -251,14 +256,6 @@ class Projects {
 		return query_posts($args);
 	}
 	
-	/**
-	 * Get projects
-	 */
-	public function get_projects($args = null) {
-		$args = $this->build_query_args($args);
-		return new WP_Query($args);
-	}
-		
 	/**
 	 * Adjacents JOIN query part
 	 */
@@ -280,9 +277,8 @@ class Projects {
 		global $wp_query, $wpdb;
 		
 		if($wp_query->get('post_type') == self::$post_type) {
-			// sort both by the same order because $wp_query
-			// doesn't support multiple different orders.
-			$sort = "ORDER BY m.meta_value+0 DESC, p.post_name DESC LIMIT 1";
+			// sort by date first and then by post title.
+			$sort = "ORDER BY m.meta_value+0 DESC, p.post_title ASC LIMIT 1";
 		}
 		
 		return $sort;
@@ -295,9 +291,9 @@ class Projects {
 		global $wp_query, $wpdb;
 		
 		if($wp_query->get('post_type') == self::$post_type) {
-			// sort both by the same order because $wp_query
-			// doesn't support multiple different orders.
-			$sort = "ORDER BY m.meta_value+0 ASC, p.post_name ASC LIMIT 1";
+			// sort by date first and then by post title
+			// in reverse order for the back links.
+			$sort = "ORDER BY m.meta_value+0 ASC, p.post_title DESC LIMIT 1";
 		}
 		
 		return $sort;
@@ -310,9 +306,8 @@ class Projects {
 		global $wp_query, $wpdb, $post;
 
 		if($wp_query->get('post_type') == self::$post_type) {
-			$operator = '<';
 			$meta = $this->get_project_meta('date');
-			$where = $wpdb->prepare(" WHERE (m.meta_value+0 $operator %d OR (m.meta_value+0 = '%d' AND p.post_name $operator %s)) AND p.post_type IN (%s) AND p.post_status = 'publish' ", $meta, $meta, $post->post_name, self::$post_type);
+			$where = $wpdb->prepare(" WHERE (m.meta_value+0 < %d OR (m.meta_value+0 = '%d' AND p.post_title > %s)) AND p.post_type IN (%s) AND p.post_status = 'publish' ", $meta, $meta, $post->post_title, self::$post_type);
 		}
 		
 		return $where;
@@ -325,9 +320,8 @@ class Projects {
 		global $wp_query, $wpdb, $post;
 
 		if($wp_query->get('post_type') == self::$post_type) {
-			$operator = '>';
 			$meta = $this->get_project_meta('date');
-			$where = $wpdb->prepare(" WHERE (m.meta_value+0 $operator %d OR (m.meta_value+0 = '%d' AND p.post_name $operator %s)) AND p.post_type IN (%s) AND p.post_status = 'publish' ", $meta, $meta, $post->post_name, self::$post_type);
+			$where = $wpdb->prepare(" WHERE (m.meta_value+0 > %d OR (m.meta_value+0 = '%d' AND p.post_title < %s)) AND p.post_type IN (%s) AND p.post_status = 'publish' ", $meta, $meta, $post->post_title, self::$post_type);
 		}
 		
 		return $where;
@@ -432,14 +426,6 @@ $projects->load();
 function query_projects($args = null) {
 	global $projects;
 	return $projects->query_projects($args);
-}
-
-/**
- * Get projects
- */
-function get_projects($args = null) {
-	global $projects;
-	return $projects->get_projects($args);
 }
 
 /**
