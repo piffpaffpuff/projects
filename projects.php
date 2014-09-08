@@ -161,7 +161,7 @@ class Projects {
 	 * Add the styles
 	 */
 	public function add_styles() {
-		wp_enqueue_style('colors', self::$plugin_directory_url . 'css/jquery.colors.css');
+		wp_enqueue_style('minicolors', self::$plugin_directory_url . 'css/jquery.minicolors.css');
 		wp_enqueue_style('projects', self::$plugin_directory_url . 'css/style.css');
 	}
 	
@@ -171,8 +171,8 @@ class Projects {
 	public function add_scripts() {
 		wp_enqueue_script('jquery-ui-core');
 		wp_enqueue_script('jquery-ui-sortable');
-        wp_enqueue_script('colors', self::$plugin_directory_url . 'js/jquery.colors.min.js', array('jquery'));
-		wp_enqueue_script('projects', self::$plugin_directory_url . 'js/script.js', array('jquery', 'jquery-ui-core', 'jquery-ui-sortable', 'colors'));
+        wp_enqueue_script('minicolors', self::$plugin_directory_url . 'js/jquery.minicolors.min.js', array('jquery'));
+		wp_enqueue_script('projects', self::$plugin_directory_url . 'js/script.js', array('jquery', 'jquery-ui-core', 'jquery-ui-sortable', 'minicolors'));
 	}
 	
 	/**
