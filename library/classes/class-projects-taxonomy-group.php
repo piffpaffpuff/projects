@@ -77,10 +77,9 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 		?>
 		<?php if(isset($taxonomy_group)) : ?>
 			<?php $taxonomies = $this->get_added_taxonomies_by_group($taxonomy_group->name); ?>
-			<div id="icon-edit" class="icon32 icon32-posts-<?php echo Projects::$post_type; ?>"><br></div>
 			<h2 class="nav-tab-wrapper">
 			<?php foreach($taxonomies as $taxonomy) : ?>
-				<a href="<?php echo 'edit-tags.php?post_type=' . Projects::$post_type . '&taxonomy=' . $taxonomy->name; ?>" class="nav-tab<?php $this->menu_tab_selected($taxonomy->name); ?>"><?php echo $taxonomy->singular_label; ?></a>
+				<a href="<?php echo 'edit-tags.php?post_type=' . Projects::$post_type . '&taxonomy=' . $taxonomy->name; ?>" class="nav-tab nav-tab-<?php $this->menu_tab_selected($taxonomy->name); ?>"><?php echo $taxonomy->singular_label; ?></a>
 			<?php endforeach; ?>
 			</h2>
 		<?php endif; ?>
@@ -107,7 +106,6 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 			$taxonomy_group = $this->get_added_taxonomy_group_by_taxonomy($_GET['taxonomy']);			
 			if(isset($taxonomy_group)) {
 				return true;
-				// && isset($taxonomy_group->taxonomies[$_GET['taxonomy']])
 			}
 			return false;
 		}

@@ -27,6 +27,14 @@ table.wp-list-table .column-title {
 }
 
 /*
+   Admin Taxonomy Group selected item
+*/
+body.taxonomy-group .wp-submenu span.current {
+	font-weight: 600;
+	color: #fff;
+}
+
+/*
    Publish Meta Box
 */
 
@@ -244,27 +252,3 @@ table.wp-list-table .column-title {
 .post-type-project .compat-attachment-fields select {
 	width: 100%;
 }
-
-/*
-   Settings
-*/
-
-/*
-#projects-settings-table .meta-field-item-list {
-	background-color: #fff;
-	border: 1px solid #c2c2c2;
-}
-
-#projects-settings-table .meta-field-item label {
-	display: block;
-}
-
-#projects-settings-table .meta-field-item fieldset {
-	float: left;
-	width: 50%;
-}
-
-#projects-settings-table .meta-field-item input {
-	width: 100%;
-}
-*/
