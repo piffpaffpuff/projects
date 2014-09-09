@@ -29,7 +29,7 @@ table.wp-list-table .column-title {
 /*
    Admin Taxonomy Group selected item
 */
-body.taxonomy-group .wp-submenu span.current {
+body.taxonomy-group .wp-submenu li span.current {
 	font-weight: 600;
 	color: #fff;
 }
