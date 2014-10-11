@@ -46,14 +46,7 @@ class Projects_Media {
 			add_filter('attachment_fields_to_save', array($this, 'save_media_options'), 20, 2);
 		}
 	}
-	
-	/**
-	 * Add the meta boxes
-	 */
-	public function add_boxes() {						
-		add_meta_box('projects-gallery-media-box', __('Media', 'projects'), array($this, 'create_box_gallery_media'), Projects::$post_type, 'normal', 'default');
-	}
-	
+
 	/**
 	 * Remove the media buttons
 	 */

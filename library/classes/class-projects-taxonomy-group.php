@@ -526,7 +526,7 @@ class Projects_Taxonomy_Group extends Projects_Taxonomy {
 			foreach($preset['taxonomies'] as $taxonomy => $term) {
 				$taxonomy_slugs[$taxonomy] = $term['slug'];
 			}
-			return get_site_url() . '?' . http_build_query($taxonomy_slugs);
+			return get_site_url() . '?' . urlencode(http_build_query($taxonomy_slugs));
 		} else {
 			return get_permalink($preset['post_id'][0]);
 		}
