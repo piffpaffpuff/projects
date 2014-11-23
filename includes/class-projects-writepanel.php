@@ -258,8 +258,9 @@ class Projects_Writepanel {
 		$projects = new Projects();
 		
 		?>
-		<p class="form-fieldset"><label><span><?php _e('Background', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[background_color]" value="<?php echo $projects->get_project_meta('background_color'); ?>"></span></p>
-		<p class="form-fieldset"><label><span><?php _e('Text', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[text_color]" value="<?php echo $projects->get_project_meta('text_color'); ?>"></span></p>
+		<p class="form-fieldset"><label><span><?php _e('Color 1', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[color_1]" value="<?php echo $projects->get_project_meta('color_1'); ?>"></span></p>
+		<p class="form-fieldset"><label><span><?php _e('Color 2', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[color_2]" value="<?php echo $projects->get_project_meta('color_2'); ?>"></span></p>
+		<p class="form-fieldset"><label><span><?php _e('Color 3', 'projects'); ?></span></label><span class="input-group"><input type="text" class="regular-text minicolors code" name="projects[color_3]" value="<?php echo $projects->get_project_meta('color_3'); ?>"></span></p>
 		<?php
 	}
 	

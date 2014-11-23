@@ -69,17 +69,17 @@ class Projects {
 	 */
 	public function includes() {
 		require_once(ABSPATH . WPINC . '/class-oembed.php');
-		require_once('library/classes/class-projects-countries.php');	
-		require_once('library/classes/class-projects-installation.php');	
-		require_once('library/classes/class-projects-type.php');	
-		require_once('library/classes/class-projects-geocode.php');	
-		require_once('library/classes/class-projects-taxonomy.php');	
-		require_once('library/classes/class-projects-taxonomy-group.php');	
-		require_once('library/classes/class-projects-walkers.php');
-		require_once('library/classes/class-projects-writepanel.php');	
-		require_once('library/classes/class-projects-media.php');	
-		require_once('library/external/class-wordpress-settings-page.php');
-		require_once('library/classes/class-projects-settings.php');
+		require_once('includes/class-projects-countries.php');	
+		require_once('includes/class-projects-installation.php');	
+		require_once('includes/class-projects-type.php');	
+		require_once('includes/class-projects-geocode.php');	
+		require_once('includes/class-projects-taxonomy.php');	
+		require_once('includes/class-projects-taxonomy-group.php');	
+		require_once('includes/class-projects-walkers.php');
+		require_once('includes/class-projects-writepanel.php');	
+		require_once('includes/class-projects-media.php');	
+		require_once('includes/libraries/class-wordpress-settings-page.php');
+		require_once('includes/class-projects-settings.php');
 	}
 	
 	/**
@@ -161,7 +161,7 @@ class Projects {
 	 * Add the styles
 	 */
 	public function add_styles() {
-		wp_enqueue_style('colors', self::$plugin_directory_url . 'css/jquery.colors.css');
+		wp_enqueue_style('minicolors', self::$plugin_directory_url . 'css/jquery.minicolors.css');
 		wp_enqueue_style('projects', self::$plugin_directory_url . 'css/style.css');
 	}
 	
@@ -171,8 +171,8 @@ class Projects {
 	public function add_scripts() {
 		wp_enqueue_script('jquery-ui-core');
 		wp_enqueue_script('jquery-ui-sortable');
-        wp_enqueue_script('colors', self::$plugin_directory_url . 'js/jquery.colors.min.js', array('jquery'));
-		wp_enqueue_script('projects', self::$plugin_directory_url . 'js/script.js', array('jquery', 'jquery-ui-core', 'jquery-ui-sortable', 'colors'));
+        wp_enqueue_script('minicolors', self::$plugin_directory_url . 'js/jquery.minicolors.min.js', array('jquery'));
+		wp_enqueue_script('projects', self::$plugin_directory_url . 'js/script.js', array('jquery', 'jquery-ui-core', 'jquery-ui-sortable', 'minicolors'));
 	}
 	
 	/**

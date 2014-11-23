@@ -174,18 +174,10 @@ body.taxonomy-group .wp-submenu li span.current {
    Colours Meta Box
 */
 
-.minicolors-swatch {
-	background-image: url("../images/jquery.minicolors.png");
-}
-.minicolors .minicolors-grid {
-	background-image: url("../images/jquery.minicolors.png");
-}
-.minicolors-slider-saturation .minicolors-grid-inner {
-	background-image: url("../images/jquery.minicolors.png");
-}
-.minicolors-slider,
-.minicolors-opacity-slider {
-	background-image: url("../images/jquery.minicolors.png");
+.minicolors-theme-default .minicolors-swatch {
+	top: 7px;
+	left: 7px;
+	border-color: #eeeeee;
 }
 .minicolors-theme-default .minicolors-input {
 	height: auto;
@@ -195,6 +187,7 @@ body.taxonomy-group .wp-submenu li span.current {
 .minicolors-theme-default.minicolors {
 	width: 100%;
 }
+
 
 /*
    Attachments Meta Box
