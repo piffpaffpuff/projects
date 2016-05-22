@@ -44,8 +44,8 @@ class Projects_Writepanel {
 	public function add_boxes() {			
 		add_meta_box('projects-media-box', __('Media', 'projects'), array($this, 'create_box_media'), Projects::$post_type, 'normal', 'default');
 		add_meta_box('projects-general-box', __('General', 'projects'), array($this, 'create_box_general'), Projects::$post_type, 'side', 'default');
-		add_meta_box('projects-location-box', __('Location', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
-		add_meta_box('projects-color-box', __('Color', 'projects'), array($this, 'create_box_color'), Projects::$post_type, 'side', 'default');
+		//add_meta_box('projects-location-box', __('Location', 'projects'), array($this, 'create_box_location'), Projects::$post_type, 'side', 'default');
+		//add_meta_box('projects-color-box', __('Color', 'projects'), array($this, 'create_box_color'), Projects::$post_type, 'side', 'default');
 		
 		// create the meta boxes for the taxonomy groups
 		$projects_taxonomy_group = new Projects_Taxonomy_Group();
