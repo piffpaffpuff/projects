@@ -3,7 +3,7 @@
    http://melchoyce.github.io/dashicons/
 */
 
-#adminmenu #menu-posts-project .wp-menu-image:before { 
+#adminmenu #menu-posts-project .wp-menu-image:before {
 	content: "\f322";
 }
 
@@ -54,13 +54,12 @@ body.taxonomy-group .wp-submenu li span.current {
 	line-height: 24px;
 }
 .form-fieldset label {
-/* 	float: left; */
 	display: block;
 	text-align: left;
 	padding: 0;
 	vertical-align: middle;
 	white-space: nowrap;
-	overflow: hidden;
+	/* overflow: hidden; */
 	text-overflow: ellipsis;
 }
 .form-fieldset input,
@@ -73,6 +72,18 @@ body.taxonomy-group .wp-submenu li span.current {
 .form-fieldset .input-group input,
 .form-fieldset .input-group select{
 	width: 100%;
+}
+.form-fieldset input[type="checkbox"],
+.form-fieldset input[type="radio"] {
+	height: 16px;
+	width: 16px;
+}
+@media screen and (max-width: 782px) {
+	.form-fieldset input[type="checkbox"],
+	.form-fieldset input[type="radio"] {
+		height: 25px;
+		width: 25px;
+	}
 }
 .form-fieldset .input-group .select-date {
 	width: 49%;
@@ -120,7 +131,7 @@ body.taxonomy-group .wp-submenu li span.current {
 	position: absolute;
 	left: 235px;
 	top: 6px;
-	background-color: #fff;	
+	background-color: #fff;
 }
 
 /*
@@ -193,9 +204,9 @@ body.taxonomy-group .wp-submenu li span.current {
    Attachments Meta Box
 */
 
-#projects-media-list { 
-	list-style-type: none; 
-	margin: 0; 
+#projects-media-list {
+	list-style-type: none;
+	margin: 0;
 	padding: 0;
 	overflow: hidden;
 }
@@ -207,7 +218,7 @@ body.taxonomy-group .wp-submenu li span.current {
 }
 #projects-media-list li .media-content  {
 	line-height: 200px;
-	width: 200px; 
+	width: 200px;
 	height: 200px;
 	display: block;
 }
