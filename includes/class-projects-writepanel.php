@@ -294,7 +294,7 @@ class Projects_Writepanel {
 					$year = date_i18n('Y');
 					$year_start = $year + 1;
 					$year_meta = $projects->get_project_meta('year');
-					$year_total = apply_filters('projects_date_total_years', 10);
+					$year_total = apply_filters('projects_date_total_years', 50);
 
 					if(empty($year_meta)) {
 						$year_meta = $year;
