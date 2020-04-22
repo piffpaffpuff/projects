@@ -68,7 +68,7 @@ class Projects {
 	 * Include the classes
 	 */
 	public function includes() {
-		require_once(ABSPATH . WPINC . '/class-oembed.php');
+		require_once(ABSPATH . WPINC . '/class-wp-oembed.php');
 		require_once('includes/class-projects-countries.php');	
 		require_once('includes/class-projects-installation.php');	
 		require_once('includes/class-projects-type.php');	
@@ -565,7 +565,7 @@ function project_website($name = null, $target = '_blank') {
 		}
 		?>
 		<a href="<?php echo $url; ?>" title="<?php esc_attr($name); ?>" <?php echo $url_target; ?>><?php echo $name; ?></a>
-		<?
+		<?php
 	}
 }
 
